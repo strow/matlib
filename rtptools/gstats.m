@@ -785,11 +785,14 @@ function gs = gstats(gtops,outfile);
     say('  Processing...')
 
     % define the frequency and channel selection (if not already defined)
-    if ~exist('iok','var')
+    if ~isfield(gtops,'iok')
       iok = trim(1:length(head.vchan));
-      gs.gtops.iok = iok;
+    else
+      iok = gtops.iok;
     end
+    gs.gtops.iok = iok;
     niok = length(iok);
+
     if ~exist('freq','var'); freq = head.vchan(iok); end  % load the frequencies from the head structure
     if ~isfield(gs.gtops,'freq'); gs.gtops.freq = (freq); end  % store the frequencies in the gtops structure
     if ~isfield(gtops,'skip_calc') & ~isfield(prof,'rcalc'); error('  Stats Error: rcalc missing!'); end
