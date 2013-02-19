@@ -22,6 +22,5 @@ rtptools - RTP I/O specific code
 
 science - Utilities that relate to science, mathematics, etc.
 science - generic physics/atmosphere/radiance codes - Not realated to processing/products/RTP
-=======
 
 
