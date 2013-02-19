@@ -19,3 +19,6 @@ opendap - Tools for querying and mapping data from an OpenDAP server
 rtptools - Tools dedicated directly to the exclusive use and changing of RTP files
 
 science - Utilities that relate to science, mathematics, etc.
+
+
+Updated: 19 Feb 2013 - Paul Schou
