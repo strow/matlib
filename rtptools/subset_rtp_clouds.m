@@ -1,8 +1,5 @@
 function [head, prof]=subset_rtp_clds(headin, profin, glist, clist, plist);
 
-%% >> copied from /asl/matlab/rtptools/subset_rtp.m
-%% >> with ciwc, clwc, cc added in
-
 % function [head, prof]=subset_rtp(headin, profin, glist, clist, plist);
 %
 % Subsets an RTP head & prof structure.
@@ -23,6 +20,9 @@ function [head, prof]=subset_rtp_clds(headin, profin, glist, clist, plist);
 % Warning: does not subset non-standard RTP variables! (not even gamnt)
 % Note: assumes all profin fields are dimensioned [<whatever> x nprof]
 %
+% Copied from /asl/matlab/rtptools/subset_rtp.m
+% with ciwc, clwc, cc added in
+
 
 % Created: 13 September 2001, Scott Hannon
 % Last update: 1 February 2002, Scott Hannon - add new rtpV103 vars
