@@ -5,7 +5,7 @@
 
 ## PCRTM : uses PCRTM cloudy code
 
-Main driver file usage
+Main driver file usage   
      p1ALL = driver_pcrtm_cloud_rtp(h,ha,p0,pa)     
 where p0 has the ERA/ECMWF **levels** atmospheric (gas,temperature, stemp) profiles **and** cloud profiles  
 
