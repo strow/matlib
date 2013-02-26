@@ -6,10 +6,11 @@
 ## PCRTM : uses PCRTM cloudy code
 
 Main driver file usage
-    p1ALL = driver_pcrtm_cloud_rtp(h,ha,p0,pa)     
+     p1ALL = driver_pcrtm_cloud_rtp(h,ha,p0,pa)     
 where p0 has the ERA/ECMWF **levels** atmospheric (gas,temperature, stemp) profiles **and** cloud profiles  
 
 #### input  
+     (h,ha,p0,pa) are the usual structures read in using rtpread
 |field name | Description                          |
 | :-  | :- |  
 |h    | usual input structure with eg channel info |  
@@ -17,7 +18,7 @@ where p0 has the ERA/ECMWF **levels** atmospheric (gas,temperature, stemp) profi
 |ha,pa| usual attributes from rtpread              |  
 
 #### output
-          p1 : output structure with cloudy calcs and extra fields containing average cloud fields etc   
+     p1 : output structure with cloudy calcs and extra fields containing average cloud fields etc   
 Examples of extra fields     
   
 |name         | size              | Description                                              |   
