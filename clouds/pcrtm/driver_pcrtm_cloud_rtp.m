@@ -154,8 +154,9 @@ for iInd = 1 : iIndMax;
 
   ix = inds(1);
   yymmddhhstr = [num2str(yy(ix)) '.' num2str(mm(ix),'%02d') '.' num2str(dd(ix),'%02d') '.' num2str(hh(ix))];
-  parname = ['/strowdata1/s1/sergio/PCRTM_XIANGLEI/NEWVERS/PCRTM2AIRS_spec/JUNK/pcrtm' yymmddhhstr '.tmp'];
-  parname = ['/strowdata1/s1/sergio/PCRTM_XIANGLEI/CLEANCOPY/JUNK/pcrtm' yymmddhhstr '.tmp'];
+
+  %parname = ['/strowdata1/s1/sergio/PCRTM_XIANGLEI/CLEANCOPY/JUNK/pcrtm' yymmddhhstr '.tmp'];
+  parname = mktemp(['pcrtm' yymmddhhstr]);
 
   ppath = '/strowdata1/s1/sergio/PCRTM_XIANGLEI/NEWVERS/PCRTM_V2.1_for_AIRS/code_changed/Run/';
   parnameout = [parname '.out'];
