@@ -19,6 +19,20 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa)
 % see below for fixed definitions related to ncol0, overlap
 %
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+base_dir = fileparts(mfilename('fullpath')); % current directory
+base_dir1 = fileparts(base_dir);  % dir:  ../
+base_dir2 = fileparts(base_dir1); % dir:  ../../
+
+% Airs Matlab utility box
+addpath([base_dir2 '/gribtools'])
+addpath([base_dir2 '/rtptools'])
+addpath([base_dir2 '/aslutil'])
+addpath([base_dir2 '/science'])
+addpath([base_dir2 '/h4tools'])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %{
 % testing the code
   [h,ha,p,pa] = oldrtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
@@ -64,15 +78,6 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa)
     end
     pcolor(h.vchan,dBT,nn'); shading flat; xlabel('freq cm-1'); ylabel('bias K'); colorbar
 %}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% addpath /strowdata1/shared/schou/prod_mat/gribtools  %(git repository)
-addpath /asl/matlib/gribtools
-addpath /asl/matlib/rtptools
-addpath /asl/matlib/aslutil/
-addpath /asl/matlib/science/
-addpath /asl/matlib/h4tools/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

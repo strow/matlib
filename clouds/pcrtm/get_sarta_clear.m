@@ -1,4 +1,5 @@
-addpath /asl/matlab/aslutil/
+%% these are required but user needs to add them before using this code
+%% addpath /asl/matlib/aslutil/
 
 klayers = '/asl/packages/klayers/Bin/klayers_airs';
 sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
@@ -21,7 +22,6 @@ sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh];
 [headRX hattrR profRX pattrR] = oldrtpread(frp);
 rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh]; eval(rmer);
 
-addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 [ppmvLAY,ppmvAVG,ppmvMAX,pavgLAY,tavgLAY] = layers2ppmv(headRX,profRX,1:length(profRX.stemp),2);
 
 figure(1);
