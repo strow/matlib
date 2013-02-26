@@ -11,7 +11,7 @@ where p0 has the ERA/ECMWF **levels** atmospheric (gas,temperature, stemp) profi
 
 #### input  
   |field name | Description                          |
-  |:----|:-------------------------------------------|  
+  | :---| :----------------------------------------- |  
   |h    | usual input structure with eg channel info |  
   |p0   | usual input from ECMWF or ERA levels       |  
   |ha,pa| usual attributes from rtpread              |  
@@ -22,7 +22,7 @@ Examples of extra fields
   
           
           |name         | size              | Description                                              |
-          |:------------|:------------------|:--------------------------------------------------------:|  
+          | :-          | :-                | :-:                                                      |  
           | sarta_clear | [41x2700 single]  |     sarta-clr calcs                                      |  
           |  rad_allsky | [41x2700 double]  |     pcrtm-cld calcs                                      |  
           |  rad_clrsky | [41x2700 double]  |     pcrtm - clr                                          |  
