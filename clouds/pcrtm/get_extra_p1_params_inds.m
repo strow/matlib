@@ -1,10 +1,19 @@
 p1ALL.robs1(:,inds)       = profRX.robs1;
-p1ALL.sarta_clear(:,inds) = profRX.rcalc;
+
+if run_sarta.clear > 0
+  p1ALL.sarta_clear(:,inds) = profRX.rcalc;
+  p1ALL.sarta_clr_co2_used(inds)  = ppmvLAY(40,:);
+end
+
+if run_sarta.cloud > 0
+  p1ALL.sarta_cloud(:,inds) = profRX2.rcalc;
+  p1ALL.sarta_cld_co2_used(inds)  = ppmvLAY2(40,:);
+end
+
 p1ALL.rad_allsky(:,inds)  = rad_allsky(h.ichan,:)*1000;
 p1ALL.rad_clrsky(:,inds)  = rad_clrsky(h.ichan,:)*1000;
 
 p1ALL.ncol(inds)                = ones(size(p0ALL.cpsize(inds)))*ncol0;
-p1ALL.sarta_clr_co2_used(inds)  = ppmvLAY(40,:);
 p1ALL.pcrtm_co2_used(inds)      = co2;
 p1ALL.overlap(inds)             = ones(size(p0ALL.cpsize(inds)))*overlap;
 

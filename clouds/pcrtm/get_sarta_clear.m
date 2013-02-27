@@ -1,8 +1,15 @@
 %% these are required but user needs to add them before using this code
 %% addpath /asl/matlib/aslutil/
 
-klayers = '/asl/packages/klayers/Bin/klayers_airs';
-sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
+klayers = run_sarta.klayers_code;
+sarta   = run_sarta.sartaclear_code;
+
+if ~exist(klayers,'file')
+  error('klayers exec done not exist')
+end
+if ~exist(sarta,'file')
+  error('sarta clear exec done not exist')
+end
 
 fip = mktemp('temp.ip.rtp');
 fop = mktemp('temp.op.rtp');

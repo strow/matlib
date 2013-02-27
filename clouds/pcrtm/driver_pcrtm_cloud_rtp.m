@@ -1,13 +1,17 @@
-function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa)
+function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa,run_sarta)
 
 %     [this is based on xdriver_PCRTM_compute_for_AIRS_spectra_ERAorECMWF.m]
 %     [takes about 800 secs for 41 chans/2700 profiles]
-%     [or about 53000  secs for 2378 chans/2700 profiles]
-%     [or about 240000 secs for 2378 chans/12150 profiles, compared to 1200 secs for SARTA]
-%     [           4000 mins                                              12 mins          ]
 
 % takes an input [h ha p0ALL pa] which incudes cloud structure from (ERA/ECMWF) and
 % then runs the PCRTM code
+%
+% run_sarta = optional structure argument that says
+%   run_sarta.clear = +/-1 for yes/no
+%   run_sarta.cloud = +/-1 for yes/no
+%   run_sarta.klayers_code = string to klayers
+%   run_sarta.sartaclear_code = string to sarta clear executable
+%   run_sarta.sartacloud_code = string to sarta cloud executable
 %
 % Requirements : 
 %   p0ALL must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -35,10 +39,12 @@ addpath([base_dir2 '/h4tools'])
 
 %{
 % testing the code
+  run_sarta.clear = +1;
+  run_sarta.cloud = +1;
   [h,ha,p,pa] = oldrtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
   [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
   tic
-  p1 = driver_pcrtm_cloud_rtp(h,ha,p,pa);
+  p1 = driver_pcrtm_cloud_rtp(h,ha,p,pa,run_sarta);
   toc
   rtpwrite('/asl/data/rtprod_airs/2012/05/01/pcrtm_cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp',h,ha,p1,pa);
 
@@ -80,6 +86,7 @@ addpath([base_dir2 '/h4tools'])
 %}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% defaults
 
 ncol0   = 50;  %% number of random overlap clouds
 
@@ -87,6 +94,28 @@ overlap = 1;   %% switch for maximum overlap
 overlap = 3;   %% switch for maximum random overlap
 
 iChunk = 100;  %% speed up the code  by breaking input profiles into chunks
+
+if nargin == 4
+  run_sarta.clear = -1;
+  run_sarta.cloud = -1;
+elseif nargin == 5
+  if ~isfield(run_sarta,'clear')
+    run_sarta.clear = -1;
+  end
+  if ~isfield(run_sarta,'cloud')
+    run_sarta.cloud = -1;
+   end
+  if ~isfield(run_sarta,'klayers_code')
+    run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
+  end   
+  if ~isfield(run_sarta,'sartaclear_code')
+    run_sarta.sartaclear_code = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
+  end
+  if ~isfield(run_sarta,'sartacloud_code')
+    run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
+  end
+
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -173,11 +202,26 @@ for iInd = 1 : iIndMax;
 %                                                           sfctype,efreq,emis, ...
 %                                                           zen_ang,co2, parname,ppath);
 
-  get_sarta_clear
+  if run_sarta.clear > 0
+    get_sarta_clear
+  end
+
+  if run_sarta.cloud > 0
+    get_sarta_cloud2
+  end
+
   get_extra_p1_params_inds
+
   rmer = ['!/bin/rm ' parname ' ' parnameout];
   eval(rmer);
 
+end
+
+if run_sarta.cloud > 0
+  disp('added on sarta cloud calcs');
+end
+if run_sarta.clear > 0
+  disp('added on sarta clear calcs');
 end
 
 %rtpwrite(thefilenameOUT,h,ha,p0ALL,pa);

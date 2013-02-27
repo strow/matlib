@@ -3,11 +3,36 @@
 
 ## SARTA : uses sarta cloudy code
 
+Main driver file usage   
+     p1 = driver_sarta_cloud_rtp(h,ha,p0,pa,~~run_sarta~~)     
+where p0 has the ERA/ECMWF **levels** atmospheric (gas,temperature, stemp) profiles **and** cloud profiles  
+and ~~run_sarta~~ is an optional arument that has the following fields   
+ run_sarta.cloud = +/-1 for yes/no    
+ run_sarta.klayers_code = string to klayers   
+ run_sarta.sartacloud_code = string to sarta cloud executable   
+
+#### input  
+     (h,ha,p0,pa) are the usual structures read in using rtpread
+|field name | Description                          |
+| :-  | :- |  
+|h    | usual input structure with eg channel info |  
+|p0   | usual input from ECMWF or ERA levels       |  
+|ha,pa| usual attributes from rtpread              |  
+
+#### output
+     p1 : output structure; if run_sarta.cloud = +1 then sarta-cloudy is run, and rcalcs used
+
 ## PCRTM : uses PCRTM cloudy code
 
 Main driver file usage   
-     p1ALL = driver_pcrtm_cloud_rtp(h,ha,p0,pa)     
+     p1 = driver_pcrtm_cloud_rtp(h,ha,p0,pa,~~run_sarta~~)     
 where p0 has the ERA/ECMWF **levels** atmospheric (gas,temperature, stemp) profiles **and** cloud profiles  
+and ~~run_sarta~~ is an optional arument that has the following fields   
+ run_sarta.clear = +/-1 for yes/no    
+ run_sarta.cloud = +/-1 for yes/no    
+ run_sarta.klayers_code = string to klayers   
+ run_sarta.sartaclear_code = string to sarta clear executable   
+ run_sarta.sartacloud_code = string to sarta cloud executable   
 
 #### input  
      (h,ha,p0,pa) are the usual structures read in using rtpread
