@@ -79,7 +79,6 @@ cfrac12= zeros(1,n);
 % Seed random number generater
 rand('state',sum(100*clock));
 
-
 % Determine which of siz possible cases apply for each index in n
 % case1 = no clouds
 % case2 = one water cloud
@@ -88,7 +87,8 @@ rand('state',sum(100*clock));
 % case5 = two ice clouds
 % case6 = one water and one ice clouds
 % note: case1 is default with zero cloud fractions
-ic1 = find(ctype1+ctype2 < 0 | tcc < cfracmin);
+
+c1 = find(ctype1+ctype2 < 0 | tcc < cfracmin);
 ic21 = find(ctype1 == 101 & ctype2 < 0 & tcc >= cfracmin);
 ic22 = find(ctype2 == 101 & ctype1 < 0 & tcc >= cfracmin);
 ic31 = find(ctype1 == 201 & ctype2 < 0 & tcc >= cfracmin);
