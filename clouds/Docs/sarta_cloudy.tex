@@ -5,10 +5,13 @@
 \usepackage{graphicx}
 \usepackage{sidecap}
 %\usepackage{floatrow}
+\usepackage[usenames]{color}
+\usepackage{epstopdf}
 
 \newcommand{\kc}{\textsf{kCARTA}\xspace}
 \newcommand{\sa}{\textsf{SARTA}\xspace}
 \newcommand{\sasc}{\textsf{SARTA-scatter}\xspace}
+\newcommand{\pcrtm}{\textsf{PCRTM}\xspace}
 
 % figure1 figure1-caption figure1-label figure2 figure2-caption figure2-label
 \newcommand{\dfigure}[6]
@@ -62,7 +65,7 @@ the Earth's atmosphere is effectively recast as that of (an) additional absorbin
 the efficient radiative transfer algorithm of the clear sky code. The liens of the code are that model vertical cloud
 fields (from eg ECMWF) need to be reshaped into at most two slab clouds. However, comparisons against packages 
 which uses sophisticated algorithms (eg maximal overlap clouds and scattering trained on DISORT algorithm) shows that
-the $sarta$ $scatter$ code produces accurate radiances.
+the $sarta$ $scatter$ code produces radiances accurate to about 3K (converted to equivalent Brightness Temperature)
 
 \end{abstract}
 
@@ -105,11 +108,9 @@ monochromatic codes, such as \kc as follows.
 
 \begin{SCfigure}
 \centering
-\includegraphics[width=0.5\textwidth]{radiation1.pdf}
-\caption{
-Illustration of contributions to measured Top Of Atmosphere radiance :
- (blue) layer emission, (green) surface, (yellow) solar and (gray) background thermal
-}
+\includegraphics[width=0.5\textwidth]{Figs/radiation1.pdf}
+\caption{Illustration of contributions to measured Top Of Atmosphere radiance :
+ (blue) layer emission, (green) surface, (yellow) solar and (gray) background thermal}
 \end{SCfigure}
 
 \subsection{Surface emission}
@@ -286,11 +287,11 @@ than the parameterized optical depth $k \prime$.
 
 Some points to note are that
 \begin{itemize}
-  \item While absorption spectra due to atmospheric gases has much structure, the large
-        size of cloud and aerosol particles "blurs" out the the lines, resulting 
-        in much smoother absorption and scattering parameters
-  \item Typical aerosol particles range from 0.1 um (smoke) to 4 um (dust) in diameter, which means 
-        the thermal infrared is typically much more sensitive to dust than to smoke
+  \item While absorption spectra due to atmospheric gases has much structure, the crystal
+        bonding, and smoothing over particle size distributions, "blurs" out sharp features, resulting 
+        in smooth absorption and scattering parameters.
+  \item Aerosol particles range in size from 0.1 um (smoke) to 4 um (dust) in diameter, which means 
+        the thermal infrared is typically much more sensitive to dust than to smoke.
   \item Even for dust, non-sphericity of these particles is not a very big issue in the TIR.
         As long as realistic refractive indices are used, the results of Mie codes, integrated over 
         realistic particle size distributions, should suffice to produce scattering parameters that can be
@@ -300,7 +301,7 @@ Some points to note are that
         depend on temperature through the height of the cloud. Since the resulting ice 
         crystals can be quite large, whose shapes can deviate significantly from spherical, Mie codes should
         not be used to produce scattering parameters for use in terrestrial radiative transfer codes. 
-        We use cirrus scattering parameters for ice aggregates or hexagonal plates, provided to us by
+        We use cirrus scattering parameters for ice aggregates or hexagonal plates, provided by
         Anthony Baran of the UKMO.
 \end{itemize}
 
@@ -323,17 +324,19 @@ from which the top-of-Atmosphere radiance for an AIRS channel would be given by
   R_{AIRS}(j) = \int_{\delta \nu_{j}} R_{toa}(\nu) SRF_{j}(\nu) d\nu
 \end{eqnarray*}
 
-Notice that in both the surface term and the atmospheric emission term, we deal with layer to space transmittances, 
-which means we need to take into consideration what is above each layer during the iteration of the radiative transfer
-algorithm. For a monochromatic code, this is not an issue, as Beer's law applies.
+Notice that in both the surface term and the atmospheric emission term, we deal with layer to 
+space transmittances, which means we need to take into consideration what is above each layer during 
+the iteration of the radiative transfer algorithm. For a monochromatic code, this is not an issue, as 
+Beer's law applies.
 
 On a 2.3 GHz machine, a \kc run from 605-2830 \wn would take about 90 seconds, as optical depths have to be 
-generated for about 900000 wavenumber points (spanning the above interval at 0.0025 \wn spacing) for each of the
-100 layers. The spectral convolution for all 2378 channels using Matlab would add on an additional $\sim$ 
-10 seconds to generate one synthetic AIRS clear sky spectrum with the \kc line-by-line code.
+generated for about 900000 wavenumber points (spanning the above interval at 0.0025 \wn spacing) for each 
+of the 100 layers. The spectral convolution for all 2378 channels using Matlab would add on an additional 
+$\sim$ 10 seconds to generate one synthetic AIRS clear sky spectrum with the \kc line-by-line code.
 
-With AIRS providing about 3 million spectra per day, it would clearly be next to impossible to use \kc in its
-current guise, to analyze the data. A fast Stand Alone Radiative Transfer Model (SARTA) was written, which 
+With AIRS providing about 3 million spectra per day, it would clearly be next to impossible to use \kc 
+in its current guise, to analyze the data. A fast Stand Alone Radiative Transfer Model (SARTA) was written,
+which 
 takes a fraction of the above time (about 0.1 seconds) to generate one synthetic spectrum. For each AIRS
 channel, a simplified view of how this this code works is as follows. The atmospheric gas absorption for  
 each layer of the channel in question is parameterized in terms of predictors such as layer temperature, 
@@ -365,15 +368,14 @@ ie
 \mathcal{T}_{airs}^{i \rightarrow i+1}(j) \ne  \mathcal{T}_{airs}^{i}(j) \;\; \mathcal{T}_{airs}^{i+1}(j)
 \end{eqnarray*}
 
-\begin{SCfigure}
+\begin{figure}
 \centering
-\includegraphics[width=0.75\textwidth]{twolayers.pdf}
+\includegraphics[width=1\textwidth,height=0.5\textheight]{Figs/twolayers.pdf}
 \caption{
 Pitfalls when applying Beer's law to finite width channels. Not only does it breakdown going from one layer to 
 another, but in addition you cannot simply multiply in the contributions due to different gases
 }
-\end{SCfigure}
-
+\end{figure}
 
 When accounting for the convolved layer to space transmittance, not only does one have to consider the individual layers,
 but within each layer, the total optical depth is a sum over all contributing gases, further complicating matters. 
@@ -400,8 +402,8 @@ This means that for each layer $i$ and AIRS channel $j$, we have the effective o
 
 \section{SARTA Cloudy/aerosol sky Radiative transfer algorithm}
 
-Remebering from 
-the discussion on monochromatic scattering radiative transfer, the effects of clouds and aerosols was included by simply 
+Recall from the earlier discussion on monochromatic scattering radiative transfer, the effects of clouds and 
+aerosols was included by simply 
 adding in the effective scattering optical depth. For the polychromatic case, we simply add on the effects of the 
 relevant scatterer, where needed, and then perform the radiative transfer using the clear sky algorithm. The only time 
 penalty incurred for each cloud/aerosol contaminated column of air, is reading in and interpolating the relevant 
@@ -450,7 +452,7 @@ for each of these slabs $k=1,2$
 \begin{itemize}
 \item species (water cloud [101], ice (habit) cloud [201], or aerosol (type)[301])
 \item particle effective size (in um)
-\item loading (in g/m2)
+\item loading (in g/m2); roughly for ice 50g/m2 = 1 OD, and for water 2g/m2 = 1 OD
 \item cloud/aerosol top (mb)
 \item cloud/aerosol bottom (mb)
 \item cloud fraction $0 \le c(k) \le 1$
@@ -461,12 +463,12 @@ would then be
 \[
 R_{AIRS}(j) = (1 -  (c(1) + c(2) - C(1,2)) R_{clear}(j) + c(1) R^{(1)}_{cloud}(j) + c(2) R^{(2)}_{cloud}(j)
 \]
-where $R_{clear}(j)$ is the radiance for a clear column of air, and $R^{(k)}_{cloud}$ is the radiance assuming a column 
-of atmosphere completely filled with cloud of type $k=1,2$. Obviously if $c(1) = c(2) = C(1,2) = 0$ we get back a clear 
-sky radiance. Depending on $c(k),k=1,2$ this means at worst, the cloudy sky code is about 3 times slower than the clear 
-sky code.
+where $R_{clear}(j)$ is the radiance for a clear column of air, and $R^{(k)}_{cloud}$ is the radiance assuming 
+a column of atmosphere completely filled with cloud of type $k=1,2$. Obviously if $c(1) = c(2) = C(1,2) = 0$ we get 
+back a clear sky radiance. Depending on $c(k),k=1,2$ this means at worst, the cloudy sky code is about 3 times 
+slower than the clear sky code.
 
-One important point is what temperature the cloud is at, if it spans pressures (p1,p2), 
+One important point is what temperature the cloud is at, if it spans pressures (p1,p2) that is thicker than one AIRS layer, 
 \textcolor{red}{Need to look at the code!}
 
 \subsection{Types of scatterers}
@@ -489,7 +491,7 @@ an arbitrary loading are obtained by a simple multiplication.
     \end{itemize}
   \item water (type 101)
     \begin{itemize}
-      \item effective diameter typically ranges from 5 to 25 um
+      \item effective diameter typically ranges from 15 to 25 um
     \end{itemize}
 \end{itemize}
 
@@ -509,9 +511,8 @@ from ECMWF/ERA
 \end{itemize}
 
 \subsubsection{Smooth the input profiles}
-Looping over each profile, \\
-Normalize cloud profile eg $normalized_{ice} = ice_{profile}(:,ii)/max(ice_{profile}(:,ii))$ \\
-Smooth normalized profile $normalized_{ice} \rightarrow normalized_{ice}^{smoothed}$ \\
+Normalize cloud profile eg \\ \hspace{1in} $normalized_{ice} = ice_{profile}(:,ii)/max(ice_{profile}(:,ii))$ \\
+Smooth normalized profile  \\ \hspace{1in} $normalized_{ice} \rightarrow normalized_{ice}^{smoothed}$ \\
 
 \subsubsection{Turn smoothed profile into slab profiles}
 Find how many peaks are present in this normalized profile, and "width" of peaks. The widths will help 
@@ -522,7 +523,7 @@ Finally, combine so at most we have two slabs\\
 \subsubsection{Determine effective particle sizes, cloud amounts and cloud fractions}
 The cloud amount for each slab is then determined by converting the original ice/water cloud profile (in g/g) to 
 integrated g/m2; the effective particle size for water is set to 20 um $\pm$ random amount, while for cirrus
-the particle size is set accoring to the temperature of the cloudtop (again, $\pm$ a random amount. 
+the particle size is set according to the temperature of the cloudtop (again, $\pm$ a random amount. 
 Cloud fracs for each cloud, and the overlap, are randomly set (using the "cc" field), so that they satisfy 
 \begin{itemize}
   \item c(1) $\le$ 1, c(2) $\le$ 1
@@ -532,14 +533,74 @@ Cloud fracs for each cloud, and the overlap, are randomly set (using the "cc" fi
   \item c(2) exclusively = c(2) - c(1,2)
 \end{itemize}
 
-\section{Timings}
+\subsubsection{Examples}
+Figures 3-6 illustrate the results of our "emcwf2sarta" code. Blue and Red are the ECMWF 91 level 
+water and ice profiles (in g/g) while cyan and magenta are the water and cirrus slabs we end up with.
+The horizontal extent of the slabs are the integrated cloud profiles, converted to g/m2 and normalized by
+a factor of 10000 for the plots. It is possible to tweak the "emcwf2sarta" code in the future. For example
+we can move the cirrus cloud higher, if we want to reduce overall computed radiances.
+
+\dfigure{Figs/clouds_profile10.eps}{}{}{Figs/clouds_profile100.eps}{}{}
+\dfigure{Figs/clouds_profile1000.eps}{}{}{Figs/clouds_profile2000.eps}{}{}
+
+%\section{Timings}
 
 \section{Comparison to AIRS observations}
 
+We have been able to make some comparisons of \sasc against AIRS observations, for the 10 years of data available 
+to us. Figure \ref{AIRS_obs_July} is a gridded map showing daytime AIRS 1231 \wn observations (converted to BT),
+while Figure \ref{SARTA_calc_July} is a similar map, showing \sasc calculations, using ERA fields. Notice the 
+overall similarities in the two figures. Obvious differences include the DCC clouds seen in the AIRS observations,
+and not present in the calculations. Though not shown here, this problem is also seen when using ECMWF model fields.
+Since these maps are for July, no daytime AIRS observations are possible over the South Polar region.
+
+\dfigure{Figs/yy_2007_mm_7_airs_global_obs1231_2}{AIRS BT1231 \wn observations in July 2007}{AIRS_obs_July}{Figs/yy_2007_mm_7_airs_global_eracal1231_2}{\sasc calculations for 1231 \wn, using ERA fields for July 2007}{SARTA_calc_July}
+
+The next two figures are a zoom in on the Pacific/Indian Oceans, for March 10,2011; the \sasc calculations
+used ECMWF fields, which are higher resolution in time and space. 
+Figure \ref{AIRS_obs_March2011} is a gridded map showing daytime AIRS 1231 \wn observations (converted to BT),
+while Figure \ref{SARTA_calc_March2011} is a similar map, showing \sasc calculations. Notice the 
+overall similarities in the two figures. 
+
+\dfigure{Figs/airs_bt_image}{AIRS BT1231 \wn observations for March 11, 2011}{AIRS_obs_March2011}{Figs/ecmwf_bt_image}{\sasc calculations for 1231 \wn, using ECMWF fields for March 11, 2011}{SARTA_calc_March2011}
+
 \section{Comparison to more sophisticated algorithms}
 
-Comparison to PCRTM, using ERA, shows that typically \sasc produces brightness temperatures that are about 1-2 K warmer 
-than PCRTM-scatter.
+We have been able to make some comparisons of \sasc against \pcrtm, which is a Fast Radiative Transfer code trained using 
+DISORT. The implementation we compare against uses 50 random maximal overlap clouds. Other differences are that 
+the \pcrtm implementation uses ice cloud sizes that vary between 50 to 125 um, fixed 20 um water sizes, and 
+Ping Yang's scattering parameters. The same ECMWF profiles were sent in for both \sasc and \pcrtm, for nadir 
+observations for May 2012.
+
+\dfigure{Figs/spectra_sartaVSpcrtm.jpg}{Comparing \sasc vs \pcrtm}{spectra}{Figs/pcrtm_calc_vs_sarta_bias}{BT1231 comparisons}{bt1231_sarta_pcrtm}
+
+Figure \ref{spectra} is a 2d histogram, showing bias between the two codes as a function of wavenumber. The thick 
+black line is the mean of the bias, while the blue lines are one standard deviation away; the colorscale is the 
+log of the number of instances. The figure shows that typically \sasc produces brightness temperatures that are about 
+3 $\pm$ 4 K warmer than \pcrtm, for window channels. This could arise from a number of factors, such as too 
+little cirrus cloud (either amount or fraction). To alleviate this, it is possible to tweak our 
+"emcwf2sarta" code, as mentioned in section 4.2.5. Figure \ref{bt1231_sarta_pcrtm} shows the BT1231 \wn bias between
+\pcrtm and \sasc, as a function of computed \pcrtm temperature. The colorscale is the log of the number of
+observations, and shows that the differences typically begin to manifest at about 260 K.
+
+\dfigure{Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions.jpg}{Comparing \sasc vs \pcrtm vs AIRS observations, over all the globe}{pdf_airs_sarta_pcrtm}{Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific.jpg}{Comparing \sasc vs \pcrtm vs AIRS observations, over the Tropical Pacific}{pdf_airs_sarta_pcrtm_tropical_pacific}. 
+
+Figures \ref{pdf_airs_sarta_pcrtm} and \ref{pdf_airs_sarta_pcrtm_tropical_pacific} shows 
+the BT1231 \wn pdfs over all points on the globe, and over the Tropical Pacific. In each case, blue, red 
+and black are the \pcrtm, \sasc and AIRS observations, respectively. As expected from the above discussion,
+typically \sasc is "warmer" than \pcrtm, but it is not easy to chose between the two when comparing to the 
+AIRS observations.
+
+While the speeds of the two codes are very similar, the architecture of our \sasc is very much the same as 
+the clear sky \sa code, and so should be easy for a new user to learn. The user can use an ice cloud with 
+more loading to bring the \sasc line more in line with the \pcrtm simulations.In addition, and perhaps
+more correctly, the "ecmwf2sarta" routine should be easy to modify, in order to move cirrus clouds higher 
+up, if we feel the radiances need to be made smaller. Alternately, Figures \ref{pdf1_sarta_pcrtm} and 
+\ref{pdf2_sarta_pcrtm} shows the night time biases between \sasc and \pcrtm for 820, 960, 1231 and 2616 \wn
+over all points on the globe. The graph on the left uses the 50 subcolumn version of \pcrtm while the one on the right 
+shows a one subcolum version, and one sees that clearly the tail has been modified.
+
+\dfigure{Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg}{Comparing \sasc vs \pcrtm (50 subcolumns)}{pdf1_sarta_pcrtm}{Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg}{Comparing \sasc vs \pcrtm (1 subcolumn)}{pdf2_sarta_pcrtm}. 
 
 \bibliographystyle{unsrt}
 \bibliography{/home/sergio/PAPERS/BIB/atmspec2002}

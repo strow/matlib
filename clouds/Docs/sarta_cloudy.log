@@ -1,7 +1,7 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2011.6.14)  28 FEB 2013 13:58
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2011.6.14)  1 MAR 2013 11:38
 entering extended mode
 \write18 enabled.
-**sarta_cloudy.tex
+**sarta_cloudy
 (./sarta_cloudy.tex
 LaTeX2e <2003/12/01>
 Babel <v3.8d> and hyphenation patterns for american, french, german, ngerman, b
@@ -67,25 +67,45 @@ Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 \c@SC@C=\count88
 \SC@BOX=\box26
 )
+(/usr/share/texmf/tex/latex/graphics/color.sty
+Package: color 1999/02/16 v1.0i Standard LaTeX Color (DPC)
+
+(/usr/share/texmf/tex/latex/graphics/color.cfg
+File: color.cfg 2005/02/03 v1.3 color configuration of teTeX/TeXLive
+)
+Package color Info: Driver file: pdftex.def on input line 125.
+)
+(/usr/share/texmf/tex/latex/oberdiek/epstopdf.sty
+Package: epstopdf 2001/02/04 v1.1 Conversion with epstopdf on the fly (HO)
+)
 (/usr/share/texmf/tex/latex/tools/xspace.sty
 Package: xspace 1997/10/13 v1.06 Space after command names (DPC)
-) (./sarta_cloudy.aux)
+) (./sarta_cloudy.aux
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
+
+LaTeX Warning: Label `' multiply defined.
+
+)
 \openout1 = `sarta_cloudy.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-
-(/usr/share/texmf/tex/context/base/supp-pdf.tex
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 55.
+LaTeX Font Info:    ... okay on input line 55.
+ (/usr/share/texmf/tex/context/base/supp-pdf.tex
 (/usr/share/texmf/tex/context/base/supp-mis.tex
 loading : Context Support Macros / Miscellaneous (2004.10.26)
 \protectiondepth=\count89
@@ -141,158 +161,188 @@ LaTeX Info: Redefining \selectfont on input line 125.
 \JustifyingParindent=\skip57
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 54.
+(Font)              <12> on input line 57.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 54.
+(Font)              <8> on input line 57.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 54.
+(Font)              <6> on input line 57.
 
-Overfull \hbox (21.7889pt too wide) in paragraph at lines 54--54
+Overfull \hbox (21.7889pt too wide) in paragraph at lines 57--57
  [][] 
  []
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 58.
+(Font)              <7> on input line 61.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 58.
+(Font)              <5> on input line 61.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 72.
+(Font)              <10.95> on input line 75.
 [1
 
 {/usr/share/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for OT1+phv on input line 97.
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 100.
+
 
 (/usr/share/texmf/tex/latex/psnfss/ot1phv.fd
 File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
 )
-<radiation1.pdf, id=29, 614.295pt x 794.97pt>
-File: radiation1.pdf Graphic file (type pdf)
- <use radiation1.pdf>
-Underfull \hbox (badness 2158) in paragraph at lines 113--113
+<Figs/radiation1.pdf, id=29, 614.295pt x 794.97pt>
+File: Figs/radiation1.pdf Graphic file (type pdf)
+ <use Figs/radiation1.pdf>
+Underfull \hbox (badness 2158) in paragraph at lines 114--114
 \OT1/cmr/m/n/10.95 sur-face, (yel-low) so-lar and (gray)
  []
 
-[2 <./radiation1.pdf
-Warning: pdflatex (file ./radiation1.pdf): pdf inclusion: Page Group detected w
-hich pdfTeX can't handle. Ignoring it.
+[2 <./Figs/radiation1.pdf
+Warning: pdflatex (file ./Figs/radiation1.pdf): pdf inclusion: Page Group detec
+ted which pdfTeX can't handle. Ignoring it.
 >] [3] [4]
 LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <12> not available
-(Font)              Font shape `OT1/phv/b/n' tried instead on input line 229.
+(Font)              Font shape `OT1/phv/b/n' tried instead on input line 230.
  [5]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 289.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 290.
 
  (/usr/share/texmf/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 289.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 290.
  [6] [7]
-<twolayers.pdf, id=72, 614.295pt x 794.97pt>
-File: twolayers.pdf Graphic file (type pdf)
- <use twolayers.pdf>
-Underfull \hbox (badness 10000) in paragraph at lines 375--375
-[][]\OT1/cmr/m/n/10.95 :
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 375--375
-|\OT1/cmr/m/n/10.95 Pitfalls when
- []
-
-
-Underfull \hbox (badness 3815) in paragraph at lines 375--375
-\OT1/cmr/m/n/10.95 ap-ply-ing Beer's
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 375--375
-\OT1/cmr/m/n/10.95 law to fi-nite
- []
-
-
-Underfull \hbox (badness 2608) in paragraph at lines 375--375
-\OT1/cmr/m/n/10.95 width chan-nels.
- []
-
-
-Underfull \hbox (badness 2884) in paragraph at lines 375--375
-\OT1/cmr/m/n/10.95 from one layer
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 375--375
-\OT1/cmr/m/n/10.95 can-not sim-ply
- []
-
-
-Underfull \hbox (badness 1137) in paragraph at lines 375--375
-\OT1/cmr/m/n/10.95 mul-ti-ply in the
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 375--375
-\OT1/cmr/m/n/10.95 con-tri-bu-tions
- []
-
-[8] [9 <./twolayers.pdf
-Warning: pdflatex (file ./twolayers.pdf): pdf inclusion: Page Group detected wh
-ich pdfTeX can't handle. Ignoring it.
->]
-Overfull \hbox (3.81421pt too wide) in paragraph at lines 403--411
-\OT1/cmr/m/n/10.95 Remebering from the dis-cus-sion on monochro-matic scat-ter-
-ing ra-dia-tive trans-
- []
-
-[10]
-Overfull \hbox (3.0234pt too wide) in paragraph at lines 451--452
+<Figs/twolayers.pdf, id=72, 614.295pt x 794.97pt>
+File: Figs/twolayers.pdf Graphic file (type pdf)
+ <use Figs/twolayers.pdf>
+[8] [9 <./Figs/twolayers.pdf
+Warning: pdflatex (file ./Figs/twolayers.pdf): pdf inclusion: Page Group detect
+ed which pdfTeX can't handle. Ignoring it.
+>] [10]
+Overfull \hbox (3.0234pt too wide) in paragraph at lines 453--454
 []\OT1/cmr/m/n/10.95 species (wa-ter cloud [101], ice (habit) cloud [201], or a
 erosol (type)[301]) 
  []
 
-[11]
-! Undefined control sequence.
-l.470 \textcolor
-                {red}{Need to look at the code!}
-? 
-[12]
-Underfull \hbox (badness 10000) in paragraph at lines 512--515
+[11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 514--516
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 517--521
+Underfull \hbox (badness 10000) in paragraph at lines 518--522
 
  []
 
 [13]
-Overfull \hbox (5.45547pt too wide) in paragraph at lines 541--543
-\OT1/cmr/m/n/10.95 pro-duces bright-ness tem-per-a-tures that are about 1-2 K w
-armer than PCRTM-
+system(epstopdf Figs/clouds_profile10.eps)...executed.
+
+ <Figs/clouds_profile10.pdf, id=105, 494.84875pt x 404.51125pt>
+File: Figs/clouds_profile10.pdf Graphic file (type pdf)
+
+<use Figs/clouds_profile10.pdf>
+system(epstopdf Figs/clouds_profile100.eps)...executed.
+
+
+<Figs/clouds_profile100.pdf, id=106, 494.84875pt x 404.51125pt>
+File: Figs/clouds_profile100.pdf Graphic file (type pdf)
+
+<use Figs/clouds_profile100.pdf>
+system(epstopdf Figs/clouds_profile1000.eps)...executed.
+
+
+<Figs/clouds_profile1000.pdf, id=107, 494.84875pt x 404.51125pt>
+File: Figs/clouds_profile1000.pdf Graphic file (type pdf)
+
+<use Figs/clouds_profile1000.pdf>
+system(epstopdf Figs/clouds_profile2000.eps)...executed.
+
+
+<Figs/clouds_profile2000.pdf, id=108, 494.84875pt x 404.51125pt>
+File: Figs/clouds_profile2000.pdf Graphic file (type pdf)
+
+<use Figs/clouds_profile2000.pdf> [14 <./Figs/clouds_profile10.pdf> <./Figs/clo
+uds_profile100.pdf>]
+<Figs/yy_2007_mm_7_airs_global_obs1231_2.jpg, id=132, 1204.5pt x 903.375pt>
+File: Figs/yy_2007_mm_7_airs_global_obs1231_2.jpg Graphic file (type jpg)
+
+<use Figs/yy_2007_mm_7_airs_global_obs1231_2.jpg>
+<Figs/yy_2007_mm_7_airs_global_eracal1231_2.jpg, id=133, 1204.5pt x 903.375pt>
+File: Figs/yy_2007_mm_7_airs_global_eracal1231_2.jpg Graphic file (type jpg)
+
+<use Figs/yy_2007_mm_7_airs_global_eracal1231_2.jpg>
+<Figs/airs_bt_image.png, id=134, 504.9264pt x 417.4797pt>
+File: Figs/airs_bt_image.png Graphic file (type png)
+
+<use Figs/airs_bt_image.png>
+<Figs/ecmwf_bt_image.png, id=135, 504.9264pt x 419.4069pt>
+File: Figs/ecmwf_bt_image.png Graphic file (type png)
+
+<use Figs/ecmwf_bt_image.png>
+Underfull \hbox (badness 1158) in paragraph at lines 565--565
+[]\OT1/cmr/m/n/10.95 Figure 10: \OT1/phv/m/n/10.95 SARTA-scatter \OT1/cmr/m/n/1
+0.95 cal-
  []
 
-(./sarta_cloudy.bbl [14]) [15] (./sarta_cloudy.aux) ) 
+[15 <./Figs/clouds_profile1000.pdf> <./Figs/clouds_profile2000.pdf> <./Figs/yy_
+2007_mm_7_airs_global_obs1231_2.jpg> <./Figs/yy_2007_mm_7_airs_global_eracal123
+1_2.jpg>] <Figs/spectra_sartaVSpcrtm.jpg, id=159, 1204.5pt x 903.375pt>
+File: Figs/spectra_sartaVSpcrtm.jpg Graphic file (type jpg)
+
+<use Figs/spectra_sartaVSpcrtm.jpg>
+<Figs/pcrtm_calc_vs_sarta_bias.jpg, id=160, 1204.5pt x 903.375pt>
+File: Figs/pcrtm_calc_vs_sarta_bias.jpg Graphic file (type jpg)
+
+<use Figs/pcrtm_calc_vs_sarta_bias.jpg> [16 <./Figs/airs_bt_image.png> <./Figs/
+ecmwf_bt_image.png> <./Figs/spectra_sartaVSpcrtm.jpg> <./Figs/pcrtm_calc_vs_sar
+ta_bias.jpg>]
+<Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions.jpg, id=166, 1204.5pt x 903.375p
+t>
+File: Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions.jpg Graphic file (type jpg)
+
+ <use Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions.jpg>
+<Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific.jpg, id=167, 1204.5pt x 903.375pt>
+File: Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific.jpg Graphic file (type jpg)
+
+<use Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific.jpg> [17 <./Figs/pcrtm_vs_sarta
+_vs_obs_pdf1231_allregions.jpg> <./Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific.j
+pg>] <Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg, id=171, 1204.5pt x 903.375pt>
+File: Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg Graphic file (type jpg)
+
+<use Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg>
+Underfull \hbox (badness 7291) in paragraph at lines 603--603
+\OT1/phv/m/n/10.95 scatter \OT1/cmr/m/n/10.95 vs \OT1/phv/m/n/10.95 PCRTM \OT1/
+cmr/m/n/10.95 (50 sub-
+ []
+
+<Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg, id=172, 1204.5pt x 903.375pt>
+File: Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg Graphic file (type jpg)
+
+<use Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg> (./sarta_cloudy.bbl [18 <./Figs/
+pcrtm_calc_vs_sarta_calc_histV1.jpg> <./Figs/pcrtm_calc_vs_sarta_calc_histV2.jp
+g>]) [19] (./sarta_cloudy.aux)
+
+LaTeX Warning: There were multiply-defined labels.
+
+ ) 
 Here is how much of TeX's memory you used:
- 1255 strings out of 94500
- 15806 string characters out of 1176766
- 66087 words of memory out of 1000000
- 4435 multiletter control sequences out of 10000+50000
+ 1392 strings out of 94500
+ 19491 string characters out of 1176766
+ 67257 words of memory out of 1000000
+ 4546 multiletter control sequences out of 10000+50000
  12858 words of font info for 37 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
- 25i,8n,20p,325b,251s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 25i,8n,24p,384b,269s stack positions out of 1500i,500n,5000p,200000b,5000s
 PDF statistics:
- 113 PDF objects out of 300000
+ 182 PDF objects out of 300000
  0 named destinations out of 131072
- 11 words of extra memory for PDF output out of 65536
-</usr/share/texmf/fonts/ty
-pe1/bluesky/cm/cmti10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr6.pfb>{/u
-sr/share/texmf/fonts/enc/dvips/psnfss/8r.enc}</usr/share/texmf/fonts/type1/urw/
-helvetic/uhvb8a.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmex10.pfb></usr/s
-hare/texmf/fonts/type1/bluesky/cm/cmr8.pfb></usr/share/texmf/fonts/type1/bluesk
-y/cm/cmmi6.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsy8.pfb></usr/share/t
-exmf/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texmf/fonts/type1/bluesky/
-cm/cmsy10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/t
-exmf/fonts/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm
-/cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmbx10.pfb></usr/share/texm
-f/fonts/type1/bluesky/cm/cmmi8.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr
-12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr17.pfb>
-Output written on sarta_cloudy.pdf (15 pages, 182099 bytes).
+ 81 words of extra memory for PDF output out of 65536
+</usr/share/texmf/fonts/type1/bluesky/cm/cmti10.pfb></usr/share/texmf/fonts/t
+ype1/bluesky/cm/cmr6.pfb>{/usr/share/texmf/fonts/enc/dvips/psnfss/8r.enc}</usr/
+share/texmf/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/share/texmf/fonts/type1/b
+luesky/cm/cmex10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr8.pfb></usr/sh
+are/texmf/fonts/type1/bluesky/cm/cmmi6.pfb></usr/share/texmf/fonts/type1/bluesk
+y/cm/cmsy8.pfb></usr/share/texmf/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/shar
+e/texmf/fonts/type1/bluesky/cm/cmsy10.pfb></usr/share/texmf/fonts/type1/bluesky
+/cm/cmbx12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmmi10.pfb></usr/share/
+texmf/fonts/type1/bluesky/cm/cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm
+/cmbx10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmmi8.pfb></usr/share/texm
+f/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr
+17.pfb>
+Output written on sarta_cloudy.pdf (19 pages, 1767946 bytes).

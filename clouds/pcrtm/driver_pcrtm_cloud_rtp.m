@@ -9,7 +9,9 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa,run_sarta)
 % run_sarta = optional structure argument that says
 %   run_sarta.clear = +/-1 for yes/no
 %   run_sarta.cloud = +/-1 for yes/no
-%   run_sarta.klayers_code = string to klayers
+%   run_sarta.overlap = 1,2,3 for max overlap, random pverlap, max random overlap (suggest 3)
+%   run_sarta.ncol0 >= 1 for number of random subcolumns (recommend 50)
+%   run_sarta.klayers_code = string to klayers executable
 %   run_sarta.sartaclear_code = string to sarta clear executable
 %   run_sarta.sartacloud_code = string to sarta cloud executable
 %
@@ -86,14 +88,12 @@ addpath([base_dir2 '/h4tools'])
 %}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% defaults
-
+%% recommended defaults
 ncol0   = 50;  %% number of random overlap clouds
 
 overlap = 1;   %% switch for maximum overlap
+overlap = 2;   %% switch for random overlap
 overlap = 3;   %% switch for maximum random overlap
-
-iChunk = 100;  %% speed up the code  by breaking input profiles into chunks
 
 if nargin == 4
   run_sarta.clear = -1;
@@ -104,7 +104,13 @@ elseif nargin == 5
   end
   if ~isfield(run_sarta,'cloud')
     run_sarta.cloud = -1;
-   end
+  end
+  if ~isfield(run_sarta,'overlap')
+    run_sarta.overlap = 3;
+  end
+  if ~isfield(run_sarta,'ncol0')
+    run_sarta.ncol0 = 50;
+  end
   if ~isfield(run_sarta,'klayers_code')
     run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
   end   
@@ -114,9 +120,10 @@ elseif nargin == 5
   if ~isfield(run_sarta,'sartacloud_code')
     run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
   end
-
 end
 
+ncol0 = run_sarta.ncol0;
+overlap = run_sarta.overlap;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if ~isfield(p0ALL,'ciwc')
@@ -128,6 +135,8 @@ elseif ~isfield(p0ALL,'cc')
 elseif h.ptype ~= 0
   error('driver_pcrtm_cloud_rtp.m requires LEVELS profiles (h.ptype = 0)');
 end
+
+iChunk = 100;  %% speed up the code  by breaking input profiles into chunks, don't change this (code really slows down!)
 
 clear p
 
