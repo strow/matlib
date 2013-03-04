@@ -1,3 +1,7 @@
+function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max);
+
+prof = pin;
+
 % Replace cfrac info
 
 nprof = length(prof.stemp);
@@ -10,7 +14,6 @@ tcc = profX.cfrac;
 prof.clwc = profX.clwc;
 prof.ciwc = profX.ciwc;
 prof.cc = profX.cc;
-clear profX
 
 % Compute cloud temperature
 pavg = 0.5*(prof.cprtop + prof.cprbot);
@@ -65,3 +68,8 @@ ii1 = ii( find(prof.cfrac(ii) > prof.cfrac2(ii)) );
 ii2 = setdiff(ii,ii1);
 prof.cfrac(ii1) = prof.cfrac(ii1)-hcmin;
 prof.cfrac2(ii2) = prof.cfrac2(ii2)-hcmin;
+
+ix = find(prof.cngwat > cngwat_max);
+prof.cngwat(ix) = cngwat_max;
+ix = find(prof.cngwat2 > cngwat_max);
+prof.cngwat2(ix) = cngwat_max;

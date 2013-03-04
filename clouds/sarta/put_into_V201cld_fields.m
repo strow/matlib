@@ -1,3 +1,7 @@
+function prof = put_into_V201cld_fields(pin);
+
+prof = pin;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set rtpV201 cloud2 fields
 %%%%%%%%%%%%%%%%%%%%%%%%%%%

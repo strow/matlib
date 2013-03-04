@@ -275,7 +275,7 @@ for ibox =1:nboxes
     end
   end % unique cloud profile
 
-  pcrtm_cloud_stats
+  pcrtm_cloud_stats    %% sets most of "tmpjunk" here
 
 %  ibotmpjunk.
 %  tmpjunk    

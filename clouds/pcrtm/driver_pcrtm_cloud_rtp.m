@@ -7,8 +7,8 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa,run_sarta)
 % then runs the PCRTM code
 %
 % run_sarta = optional structure argument that says
-%   run_sarta.clear = +/-1 for yes/no
-%   run_sarta.cloud = +/-1 for yes/no
+%   run_sarta.clear = +/-1 for yes/no, results into prof.sarta_clear
+%   run_sarta.cloud = +/-1 for yes/no, results into prof.sarta_cloudy
 %   run_sarta.overlap = 1,2,3 for max overlap, random pverlap, max random overlap (suggest 3)
 %   run_sarta.ncol0 >= 1 for number of random subcolumns (recommend 50)
 %   run_sarta.klayers_code = string to klayers executable
@@ -212,7 +212,7 @@ for iInd = 1 : iIndMax;
 %                                                           zen_ang,co2, parname,ppath);
 
   if run_sarta.clear > 0
-    get_sarta_clear
+    get_sarta_clear2
   end
 
   if run_sarta.cloud > 0

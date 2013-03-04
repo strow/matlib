@@ -8,8 +8,9 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % then runs the SARTA code
 %
 % run_sarta = optional structure argument that says
-%   run_sarta.clear = +/-1 for yes/no
-%   run_sarta.cloud = +/-1 for yes/no
+%   run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc
+%   run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc
+%   run_sarta.cumsum = 0 -- 1 to set cloud pressure based on cumulative sum, -ve for just go with "ecmwf2sarta" results
 %   run_sarta.klayers_code = string to klayers
 %   run_sarta.sartaclear_code = string to sarta clear executable
 %   run_sarta.sartacloud_code = string to sarta cloud executable
@@ -40,6 +41,7 @@ addpath([base_dir2 '/h4tools'])
 % testing the code
   [h,ha,p,pa] = oldrtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
   [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
+  run_sarta.clear = +1;
   run_sarta.cloud = +1;
   tic
   p1 = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
@@ -59,6 +61,9 @@ elseif nargin == 5
   if ~isfield(run_sarta,'cloud')
     run_sarta.cloud = -1;
    end
+  if ~isfield(run_sarta,'cumsum')
+    run_sarta.cumsum = -1;
+  end
   if ~isfield(run_sarta,'klayers_code')
     run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
   end   
@@ -90,12 +95,9 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 head  = h;
-prof  = p;  %% this is the output  <<<<<<<<<<<<<<<<<<<<<
 
-profX = p;  %% temporary
-
-nlev     = ceil(mean(profX.nlevs));
-nlev_std = (std(double(profX.nlevs)));
+nlev     = ceil(mean(p.nlevs));
+nlev_std = (std(double(p.nlevs)));
 
 if nlev_std > 1e-3
   error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
@@ -106,18 +108,35 @@ if h.ptype ~= 0
 end
 
 tic
-ecmwfcld2sartacld;        %% figure the two slab cloud profile info here, using profX
-                          %% this then puts the info into "prof" by calling put_into_prof
+[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud profile info here, using profX
+                                            %% this then puts the info into "prof" by calling put_into_prof w/in routine
   prof.ctype  = double(prof.ctype);
   prof.ctype2 = double(prof.ctype2);
 
-put_into_V201cld_fields   %% puts cloud info from above into rtpv201 fields 
-set_fracs_deffs           %% sets fracs and particle effective sizes eg cfrac2, and clears profX
-check_for_errors          %% see if there are possible pitfalls
+prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
+prof = set_fracs_deffs(head,prof,profX,...
+            cmin,cngwat_max);            %% sets fracs and particle effective sizes eg cfrac2
 
-if run_sarta.cloud > 0
+if run_sarta.cumsum > 0
+  prof = reset_cprtop(prof);
+end
+
+prof = check_for_errors(prof);           %% see if there are possible pitfalls
+
+clear profX
+
+if run_sarta.clear > 0 
+  disp('running SARTA clear, saving into rclearcalc')
+  tic
+  get_sarta_clear;
+  toc
+  prof.rclearcalc = profRX2.rcalc;
+end
+if run_sarta.cloud > 0 
   disp('running SARTA cloud')
+  tic
   get_sarta_cloud;
+  toc
   prof.rcalc = profRX2.rcalc;
 else
   disp('you did not ask for SARTA cloudy to be run; not changing p.rcalc')

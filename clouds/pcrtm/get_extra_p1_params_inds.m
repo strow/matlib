@@ -8,6 +8,7 @@ end
 if run_sarta.cloud > 0
   p1ALL.sarta_cloud(:,inds) = profRX2.rcalc;
   p1ALL.sarta_cld_co2_used(inds)  = ppmvLAY2(40,:);
+  
 end
 
 p1ALL.rad_allsky(:,inds)  = rad_allsky(h.ichan,:)*1000;

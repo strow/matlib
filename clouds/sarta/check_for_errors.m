@@ -1,3 +1,7 @@
+function prof = check_for_errors(pin)
+
+prof = pin;
+
 % Error checks:
 
 ii = prof.cfrac12 > prof.cfrac | prof.cfrac12 > prof.cfrac2;
@@ -13,12 +17,3 @@ prof.cprtop(prof.cprtop > prof.spres) = prof.spres(prof.cprtop > prof.spres);
 % extra check
 prof.cprtop(prof.cprtop > prof.cprbot) = prof.cprbot(prof.cprtop > prof.cprbot);
 
-
-clwc = prof.clwc;
-ciwc = prof.ciwc;
-cc = prof.cc;
-
-%[head,prof] = subset_rtp(head,prof,[],sort([1291 903 445 1614 1557 359]),[]);
-prof.clwc = clwc;
-prof.ciwc = ciwc;
-prof.cc = cc;
