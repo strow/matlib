@@ -53,7 +53,7 @@ addpath([base_dir2 '/h4tools'])
 %% defaults
 if nargin == 4
   run_sarta.clear = -1;
-  run_sarta.cloud = -1;
+  run_sarta.cloud = +1;
 elseif nargin == 5
   if ~isfield(run_sarta,'clear')
     run_sarta.clear = -1;
