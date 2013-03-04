@@ -1,6 +1,6 @@
 %
 % NAME
-%   bt2rad - translate radiance to brightness temperature
+%   bt2rad - translate brightness temperature to radiance
 %
 % SYNOPSIS
 %   rad = bt2rad(fr, bt);
