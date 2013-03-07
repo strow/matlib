@@ -132,6 +132,11 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
     end
     [head, hattr, prof, pattr] = rtpadd_grib_data([sourcename '.1'], head, hattr, prof, pattr, fields, rec_per_day, center_long);
     [head, hattr, prof, pattr] = rtpadd_grib_data([sourcename '.2'], head, hattr, prof, pattr, fields, rec_per_day, center_long);
+    delete([sourcename '.1'])
+    delete([sourcename '.2'])
+    if ~isempty(new_file)
+      delete(new_file);
+    end
 
     farewell(rn);
     return
