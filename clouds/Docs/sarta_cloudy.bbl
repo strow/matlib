@@ -1,0 +1,55 @@
+\begin{thebibliography}{1}
+
+\bibitem{lio:80}
+K.N. Liou.
+\newblock {\em An Introduction to Atmospheric Radiation}.
+\newblock Academic Press, 1980.
+
+\bibitem{goo:89}
+R.M. Goody and Yung. Y.L.
+\newblock {\em Atmospheric Radiation: Theoretical Basis}.
+\newblock Oxford University Press, 1989.
+
+\bibitem{edw:92}
+D.P. Edwards.
+\newblock {GENLN2}: A general line--by--line atmospheric transmittance and
+  radiance model.
+\newblock {\it NCAR Technical Note}~{\it 367+STR}, National Center for
+  Atmospheric Research, Boulder, Colo., 1992.
+
+\bibitem{stam:88}
+K.~Stamnes, S.-C. Tsay, W.~Wiscombe, and K.~Jayaweera.
+\newblock Numerically stable algorithm for discrete ordinate method radiative
+  transfer in multiple scattering and emitting layered media.
+\newblock {\em Appl. Opt}, 27:2502--2509, 1988.
+
+\bibitem{dee:98}
+M.N Deeter and F.~Evans.
+\newblock A {H}ybrid {E}ddington {S}ingle {S}cattering {R}adiative {T}ransfer
+  {M}odel for computing radiances from thermally emitting atmospheres.
+\newblock {\em {JQSRT}}, 60:635--648, 1998.
+
+\bibitem{cho:99}
+M.-D. Chou, K.-T. Lee, S.-C. Tsay, and Q.~Fu.
+\newblock Parameterization for cloud longwave scattering for use in
+  {A}tmospheric {M}odels.
+\newblock {\em J. Climate}, 12:159--169, 1999.
+
+\bibitem{mat:05}
+M.~Matricardi.
+\newblock {RTIASI} radiative transfer code for {ECMWF}, 2005.
+\newblock private communication.
+
+\bibitem{han:02*1}
+S.E. Hannon and L.~L. Strow.
+\newblock {SARTA}: The stand-alone airs radiative transfer algorithm.
+\newblock Technical report, University of Maryland Baltimore County, Department
+  of Physics, http://asl.umbc.edu/rta/sarta.html, 2002.
+
+\bibitem{str:02*2}
+L.~Strow, S.~Hannon, S.~DeSouza-Machado, D.~Tobin, and H~Motteler.
+\newblock An overview of the {AIRS} radiative transfer model.
+\newblock {\em IEEE Transactions on Geosciences and Remote Sensing},
+  41:303--313, 2003.
+
+\end{thebibliography}

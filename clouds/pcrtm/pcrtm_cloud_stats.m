@@ -3,7 +3,10 @@
 clear totalODwater meanDMEwater maxCTOPwater da_w
 clear totalODice meanDMEice maxCTOPice da_i
 
-for icol = 2:ucol_num(ibox)
+iAA = 2;  %% before Jan 2013
+iAA = 1;  %% after  Jan 2013
+
+for icol = iAA:ucol_num(ibox)
   clear da_w da_i
 
   da_w = find(cldphase(icol,:) == 1); 
@@ -50,8 +53,8 @@ tmpjunk.meanDMEwater(ibox) = NaN;
 tmpjunk.maxCTOPwater(ibox) = NaN;
 
 %% now check for ice or water
-if ucol_num(ibox) > 1
-  ixy = 2:ucol_num(ibox);
+if ucol_num(ibox) > iAA-1
+  ixy = iAA:ucol_num(ibox);
 
   isi = find(isfinite(meanDMEice(ixy)));
   if length(isi) > 0
@@ -69,3 +72,5 @@ if ucol_num(ibox) > 1
     tmpjunk.maxCTOPwater(ibox) = nansum(maxCTOPwater(ixy(isw)).*ucol_num_same(ibox,ixy(isw)))/summ;
   end
 end
+
+clear iAA
