@@ -48,6 +48,12 @@ SiteLatLon=[ ...
 load gvsites.mat
 SiteLatLon(101:100+length(gv_lat),:)=[gv_lat gv_lon];
 
+
+% Convert Longitudes from 0:360 into -180:180
+i360=find(SiteLatLon(:,2)>180);
+SiteLatLon(i360,2) = SiteLatLon(i360,2)-360;
+
+% If no input arguments, return lats and lons
 if nargin == 0
   isiteind = SiteLatLon(:,1);
   isitenum = SiteLatLon(:,2);
@@ -61,73 +67,37 @@ range_deg = range_km/111;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Longitude on 0:360 grid
-lon360 = lon;
-ii = find(lon < 0 & lon > -180.0001);
-lon360(ii) = 360 + lon360(ii);
-
-% Longitude on -180:180 grid
-lon180 = lon360;
-ii = find(lon360 > 180);
-lon180(ii) = lon360(ii) - 360;
-
 % Make up temporary work arrays
 nin = length(lat);
+dlatmax = range_deg; % latitude range
+
+% Locate invalid latitudes 
+igood = find(~isnan(lat));
+
+% Clear up work arrays
 sind = zeros(1,nin);
 snum = zeros(1,nin);
 
-dlatmax = range_deg; % latitude range
-
 % Loop over the fixed sites
-s = ~isnan(lat);
 for isite=1:nSite
+
    % skip over sites that are not assigned
    if isequal(SiteLatLon(isite,:),[0 0])
       continue;
    end
-
-   % current fixed site
+   
    slat = SiteLatLon(isite,1);
-   slon360 = SiteLatLon(isite,2);
-   if (slon360 > 180)
-      slon180 = slon360 - 360;
-   else
-      slon180 = slon360;
-   end
+   slon = SiteLatLon(isite,2);
 
-%   % current longitude range
-%   if (abs(slat) < 89.99)
-%      dlonmax = range_deg./cos( slat*pi/180 );
-%   else
-%      dlonmax = 360;
-%   end
-%
-%   % Latitude distance
-%   dlat = abs(lat - slat);
-%
-%   % Longitude distance. As the site or input lat/lon might be near
-%   % the longitude grid boundary at 180 or 360, calculate the
-%   % logitude difference on both grids and use the smaller value.
-%   dlon180 = abs(lon180 - slon180);
-%   dlon360 = abs(lon360 - slon360);
-%   dlon = min( [dlon180; dlon360] );
-%
-%   % Find indices of lat/lon within range
-%   ideg = find(dlat <= dlatmax & dlon <= dlonmax);
-%   if (length(ideg) > 0)
-%      dist = latlon2dist(lat(ideg),lon360(ideg),slat,slon360)/1000;
-%      ikm = ideg( find(dist < range_km) );
-%      if (length(ikm) >0)
-%         sind(ikm) = 1;
-%         snum(ikm) = isite;
-%      end
-%   end
+   % Use matlab "distance" command
+   isel = distance(slat,slon,lat(igood),lon(igood)) < range_deg;
 
-   sel = distance(slat,slon360,lat(s),lon(s)) < range_deg;
-%disp([num2str(isite) ' - ' num2str(sum(sel))])
-   sind(sel) = 1;
-   snum(sel) = isite;
-   s(sel) = 0;
+   % Mark positive hits
+   sind(igood(isel)) = 1;
+   snum(igood(isel)) = isite;
+  
+   % Remove them from the list - Show only the first match
+   igood(isel) = [];  % Surprise syntax for me!
 
 end % for nSite
 
