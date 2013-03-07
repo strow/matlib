@@ -275,7 +275,7 @@ for ibox =1:nboxes
     end
   end % unique cloud profile
 
-  pcrtm_cloud_stats
+  pcrtm_cloud_stats    %% sets most of "tmpjunk" here
 
 %  ibotmpjunk.
 %  tmpjunk    
@@ -351,12 +351,19 @@ elseif iNewVSOrig == +1
   % change the path to run PCRTM
   cd(ppath);
 
-  lalaNAME1 = [parname '.redirect_stdin']
-  lalaNAME2 = [parname '.pcrtm.in']
+  lalaNAME1 = [parname '.redirect_stdin'];
+  lalaNAME2 = [parname '.pcrtm.in'];
+  fprintf(1,'  name of redirect stdin file     is %s \n',lalaNAME1);
+  fprintf(1,'  which will ask PCRTMexe to read in %s \n',lalaNAME2);
 
   % delete old pcrtm.in and make new pcrtm.in
   unix(['rm -rf ',lalaNAME1]);
   unix(['rm -rf ',lalaNAME2]);
+
+  if ~exist([homepath,'/pcrtm.in.tmp'],'file')
+    fprintf(1,'looking for %s \n',[homepath,'/pcrtm.in.tmp']);
+    error('pcrtm.in.tmp file not found');
+  end
 
   fid = fopen([homepath,'/pcrtm.in.tmp'], 'r');
   vid = fopen(lalaNAME2, 'w');
