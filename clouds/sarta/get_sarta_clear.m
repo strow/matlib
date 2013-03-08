@@ -21,10 +21,10 @@ ugh = mktemp('ugh');
 %end
 %p.co2ppm = co2;    %% for cloud, use PCRTM values of co2 for debug purposes
 
-oldrtpwrite(fip,h,ha,prof,pa);
+rtpwrite(fip,h,ha,prof,pa);
 klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh];
   eval(klayerser);
 sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh];
   eval(sartaer);
-[headRX2 hattrR2 profRX2 pattrR2] = oldrtpread(frp);
+[headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
 rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh]; eval(rmer);
