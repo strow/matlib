@@ -484,7 +484,7 @@ transmittance. For example, for AIRS channel $j$,
 \begin{eqnarray*}
   \tau_{\text{AIRS}}^{i \rightarrow i+1}(j) = \int_{\delta \nu_{j}} \exp(-k_{i}(\nu)) \;\; \exp(-k_{i+1}(\nu)) \text{SRF}_{j}(\nu) d\nu
 \end{eqnarray*}
-which is $NOT$ equal to
+which is \emph{not} equal to
 \begin{eqnarray*}
   \int_{\delta \nu_{j}} \exp(-k_{i}(\nu)) \text{SRF}_{j}(\nu) d\nu \;\; \int_{\delta \nu_{j}} \exp(-k_{i+1}(\nu)) \text{SRF}_{j}(\nu) d\nu
 \end{eqnarray*}
@@ -583,7 +583,7 @@ instead of using eg climatological heights. For testing purposes, if
 the current operational AIRS L1/L2 dust flag detects dust, and we
 assume fixed particle sizes and aerosol height from climatology, we
 can almost always retrieve dust loadings that correlate very well with
-eg MODIS aerosol optical depths, {\em even if they are not necessarily
+eg MODIS aerosol optical depths, \emph{even if they are not necessarily
   accurate because we potentially used an incorrect height}.
 
 We have also prototyped a more complete L2 retrieval in the presence
@@ -904,7 +904,7 @@ version of \pcrtm while the one on the right shows a one subcolum
 version.  This suggests that the NWO overlap statistics significantly
 affect the output of PCRTM, making the radiances colder.  Figure
 \ref{pdf2_sarta_pcrtm} shows better agreement, and the remaining
-differences are likely to do our too-simple NWP cloud optical depth
+differences are likely to do with our too-simple NWP cloud optical depth
 weighting scheme.
 
 \dfigure{Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg}{Comparing \sasc vs

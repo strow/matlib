@@ -24,7 +24,8 @@ function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum);
 %% water_dme = 15;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-profX = profIN;  %% prof gets set in "put_into_prof"
+profX = profIN;  %% dummy copy
+prof  = profIN;  %% prof gets updated profile by profile, using "put_into_prof"
 
 iLevsVers = 1;   %% orig, also has slight mistake in "put_into_profs"
 iLevsVers = 2;   %% Oct 2011
@@ -51,12 +52,10 @@ iPrint = +1;    %% do     print chirpy talky comments
 iPrint = -1;    %% do not print chirpy talky comments
 tic;
 
-iStep = 1;
 jj = 0;
-iiii = 1 : iStep : length(profX.plat);
+iiii = 1 : length(profX.plat);
 for iiiiA = 1:length(iiii)
   ii = iiii(iiiiA);
-  jj = jj + 1;
   jj = ii;
 
   %%% this has all beeen superseded by stuff below *****************
@@ -163,7 +162,7 @@ for iiiiA = 1:length(iiii)
   [cT,cB,cOUT,cngwat,cTYPE,iFound] = combine_clouds(...
               iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(:,ii));
 
-  prof = put_into_prof(profX,ii,jj,plevs,ptemp,iLevsVers,...
+  prof = put_into_prof(prof,profX,ii,jj,plevs,ptemp,iLevsVers,...
                        cT,cB,cOUT,cngwat,cTYPE,iFound);
 
   if iPrint > 0

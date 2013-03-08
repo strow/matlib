@@ -1,0 +1,6 @@
+Docs/*.bbl
+Docs/*.log
+Docs/*.blg
+Docs/*.aux
+
+
