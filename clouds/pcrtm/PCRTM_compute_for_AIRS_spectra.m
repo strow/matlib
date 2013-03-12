@@ -7,7 +7,7 @@ function [rad_allsky rad_clrsky tmpjunk] = PCRTM_compute_for_AIRS_spectra(nboxes
 
 % nboxes         the number of profiles                                                                
 % nlev           the number of layers, all boxes has same levels
-% ncol           the number of subcolumn
+% ncol           the number of subcolumn; if equal to -1, this is ONE COLUMN, CLOUD FRAC = 1
 % overlap =1     maximum overlap
 % overlap =2     random overlap
 % overlap =3     maximum-random overlap
@@ -82,12 +82,16 @@ homepath = pwd;
                                
 %  cloud assignment to each sub column wthin a gridbox
 [unique_col_frac ucol_num ucol_num_same subcol_frac] = ...
-  get_subcolumn_frac_v2(nboxes, nlev, ncol, cc', overlap);
-tmpjunk.unique_col_frac = unique_col_frac;
-tmpjunk.ucol_num        = ucol_num;
-tmpjunk.ucol_num_same   = ucol_num_same;
-tmpjunk.subcol_frac     = subcol_frac;
- 
+  get_subcolumn_frac_v2(nboxes, nlev, abs(ncol), cc', overlap);
+if ncol > 0
+  tmpjunk.unique_col_frac = unique_col_frac;
+  tmpjunk.ucol_num        = ucol_num;
+  tmpjunk.ucol_num_same   = ucol_num_same;
+  tmpjunk.subcol_frac     = subcol_frac;
+%else
+%  error('oooh have not figured out the ONE COLUMN, CFRAC = 1???  TEST CASE YET!')
+end
+
 % convert ozone from g/kg to ppmv
 o3 = o3 *1e3/47.998*28.96;
 
@@ -465,7 +469,7 @@ if exist([parname,'.out'], 'file')
     for j = 1:ucol_num(ibox)
       rad = rad +tmprad(:,j) .* ucol_num_same(ibox,j);
     end
-    PC_allsky = reshape(rad/ncol,numPC(1),numbnd);
+    PC_allsky = reshape(rad/abs(ncol),numPC(1),numbnd);
         
     % clear sky spectra
     PC_clrsky = reshape(tmprad(:, ucol_num(ibox) +1),numPC(1), numbnd );  
