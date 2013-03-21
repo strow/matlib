@@ -16,9 +16,10 @@
 %   radiance units are milliwatts per square meter per steradian.
 %
 %   fr can be a row or column vector, and bt a vector or array.
-%   When the length of fr equals the number of rows of bt, it is
-%   applied along columns.  When fr is scalar it is applied to all
-%   elements of bt.  If bt is a row vector with the same length 
+%   When the length of fr equals the number of rows of bt, it 
+%   is applied along columns.  If fr is scalar it is applied to 
+%   all elements of bt, and if bt is scalar it is applied to all
+%   elements of fr.  If bt is a row vector with the same length 
 %   as fr, then for this one case fr is applied along the row.
 %
 % AUTHOR
@@ -40,30 +41,29 @@ c2 = (h*c/k) * 100;
 % rad = c1 * fr^3 / (exp(c2*fr/bt) - 1)
 
 % set up the data
-fr = fr(:);               % make fr a column vector
-k = length(fr);           % fr vector length
-dd = size(bt);            % bt dimension list
-[m,n] = size(bt);         % bt size as a 2d array
-bt = reshape(bt, m, n);   % make bt a 2d array
+d1 = size(fr);              % fr dimension list
+fr = fr(:);                 % make fr a column vector
+k = length(fr);             % fr vector length
+d2 = size(bt);              % bt dimension list
+[m,n] = size(bt);           % bt size as a 2d array
+bt = reshape(bt, m, n);     % treat bt as a 2d array
+j = n;                      % copy fr across j columns
 
-% special case: bt is a row vector and length(bt) = length(fr)
-if m == 1 && n == k
-  bt = bt'; n = 1; m = k;  
-end
-
-% special case: fr is a scalar and bt has more than one row
-if k == 1 && m > 1
-  fr = fr * ones(m,1); k = m;
-end
-
-% check that fr conforms with bt
-if m ~= k
-  error('the length of fr must equal the number of rows of bt')
+% fr and bt special cases 
+if k ~= m                   % length of fr != rows of bt
+  j = 1;                    % keep fr as a single column
+  if k > 1 && m==1 && n==1  % fr is a vector and bt a scalar
+    d2 = d1;                % reshape bt at the end to match fr
+  elseif k == n && m == 1   % bt is a row vec with same len as fr
+    bt = bt(:);             % reshape bt as a column, to match fr
+  elseif k ~= 1             % if k == 1 then fr is scalar, otherwise...
+    error('the length of fr must equal the number of rows of bt')
+  end
 end
 
 % do the vectorized calculation
-rad  = c1 * (fr.^3 * ones(1,n)) ./ (exp((c2 * fr * ones(1,n)) ./ bt) - 1);
+rad  = c1 * (fr.^3 * ones(1,j)) ./ (exp((c2 * fr * ones(1,j)) ./ bt) - 1);
 
 % restore bt original shape
-rad = reshape(rad, dd);
+rad = reshape(rad, d2);
 

@@ -46,6 +46,8 @@ ddStart = 01; ddEnd = 10;
 ddStart = 11; ddEnd = 20;
 ddStart = 21; ddEnd = 31;
 
+ddStart = 01; ddEnd = 10;
+
 for dd = ddStart : ddEnd
   clear h ha p pa
 
@@ -54,10 +56,11 @@ for dd = ddStart : ddEnd
   fout = [fmain  num2str(JOB,'%02d') '_2378chansNEW.rtp'];                    %% fixed the random cld fracn when calling sarta
   fout = [fmain  num2str(JOB,'%02d') '_2378chansNEW_ncol0_1.rtp'];            %% fixed the random cld fracn when calling sarta
   fout = [fmain  num2str(JOB,'%02d') '_2378chansNEW_ncol0_1_csum_0p3.rtp'];   %% fixed the random cld fracn when calling sarta
+  fout = [fmain  num2str(JOB,'%02d') '_2378chansNEW2_ncol0_1.rtp'];           %% oops, found a bug in ecmwf2sarta, testing
 
   ee = exist(fin);
   if ee > 0
-    [h,ha,p,pa] = oldrtpread(fin);
+    [h,ha,p,pa] = rtpread(fin);
     [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
 
     robs1 = p.robs1;
@@ -79,7 +82,7 @@ for dd = ddStart : ddEnd
     run_sarta.clear = +1;
     run_sarta.cloud = +1;
     run_sarta.ncol0 = +1;    %%% instead of 50
-    run_sarta.cumsum = 0.3;  %%% this is for the sarta run
+%    run_sarta.cumsum = 0.3;  %%% this is for the sarta run
 
     tic
     p1 = driver_pcrtm_cloud_rtp(h,ha,p,pa,run_sarta);
