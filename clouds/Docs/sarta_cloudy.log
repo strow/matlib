@@ -1,7 +1,7 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2011.6.14)  1 MAR 2013 17:44
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2013.3.5)  11 MAR 2013 12:34
 entering extended mode
 \write18 enabled.
-**sarta_cloudy
+**sarta_cloudy.tex
 (./sarta_cloudy.tex
 LaTeX2e <2003/12/01>
 Babel <v3.8d> and hyphenation patterns for american, french, german, ngerman, b
@@ -190,18 +190,10 @@ File: pdftex.def 2002/06/19 v0.03k graphics/color for pdftex
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
-(/usr/share/texmf/tex/latex/sidecap/sidecap.sty
-Package: sidecap 2003/06/06 v1.6f SideCap Package (RN/HjG)
-
-(/usr/share/texmf/tex/latex/base/ifthen.sty
-Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
-)
-\SC@BOXWD=\dimen105
-\SC@CAPWD=\dimen106
-\SC@tempdima=\dimen107
-\SC@tempdimb=\dimen108
-\c@SC@C=\count88
-\SC@BOX=\box26
+(/usr/share/texmf/tex/latex/enumitem/enumitem.sty
+Package: enumitem 2004/07/19 v1.0 Customized lists
+\labelindent=\skip43
+\enit@outerparindent=\dimen105
 )
 (/usr/share/texmf/tex/latex/graphics/color.sty
 Package: color 1999/02/16 v1.0i Standard LaTeX Color (DPC)
@@ -216,7 +208,7 @@ Package: epstopdf 2001/02/04 v1.1 Conversion with epstopdf on the fly (HO)
 )
 (/usr/share/texmf/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2000/07/18 v2.13 AMS math features
-\@mathmargin=\skip43
+\@mathmargin=\skip44
 
 For additional information on amsmath, use the `?' option.
 (/usr/share/texmf/tex/latex/amsmath/amstext.sty
@@ -225,49 +217,49 @@ Package: amstext 2000/06/29 v2.01
 (/usr/share/texmf/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0
 \@emptytoks=\toks15
-\ex@=\dimen109
+\ex@=\dimen106
 ))
 (/usr/share/texmf/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d
-\pmbraise@=\dimen110
+\pmbraise@=\dimen107
 )
 (/usr/share/texmf/tex/latex/amsmath/amsopn.sty
 Package: amsopn 1999/12/14 v2.01 operator names
 )
-\inf@bad=\count89
+\inf@bad=\count88
 LaTeX Info: Redefining \frac on input line 211.
-\uproot@=\count90
-\leftroot@=\count91
+\uproot@=\count89
+\leftroot@=\count90
 LaTeX Info: Redefining \overline on input line 307.
-\classnum@=\count92
-\DOTSCASE@=\count93
+\classnum@=\count91
+\DOTSCASE@=\count92
 LaTeX Info: Redefining \ldots on input line 379.
 LaTeX Info: Redefining \dots on input line 382.
 LaTeX Info: Redefining \cdots on input line 467.
-\Mathstrutbox@=\box27
-\strutbox@=\box28
-\big@size=\dimen111
+\Mathstrutbox@=\box26
+\strutbox@=\box27
+\big@size=\dimen108
 LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
-\macc@depth=\count94
-\c@MaxMatrixCols=\count95
+\macc@depth=\count93
+\c@MaxMatrixCols=\count94
 \dotsspace@=\muskip10
-\c@parentequation=\count96
-\dspbrk@lvl=\count97
+\c@parentequation=\count95
+\dspbrk@lvl=\count96
 \tag@help=\toks16
-\row@=\count98
-\column@=\count99
-\maxfields@=\count100
+\row@=\count97
+\column@=\count98
+\maxfields@=\count99
 \andhelp@=\toks17
-\eqnshift@=\dimen112
-\alignsep@=\dimen113
-\tagshift@=\dimen114
-\tagwidth@=\dimen115
-\totwidth@=\dimen116
-\lineht@=\dimen117
+\eqnshift@=\dimen109
+\alignsep@=\dimen110
+\tagshift@=\dimen111
+\tagwidth@=\dimen112
+\totwidth@=\dimen113
+\lineht@=\dimen114
 \@envbody=\toks18
-\multlinegap=\skip44
-\multlinetaggap=\skip45
+\multlinegap=\skip45
+\multlinetaggap=\skip46
 \mathdisplay@stack=\toks19
 LaTeX Info: Redefining \[ on input line 2666.
 LaTeX Info: Redefining \] on input line 2667.
@@ -277,21 +269,18 @@ Package: caption 2006/01/12 v3.0i Customising captions (AR)
 
 (/usr/share/texmf/tex/latex/caption/caption3.sty
 Package: caption3 2006/01/12 v3.0i caption3 kernel (AR)
-\captionmargin=\dimen118
-\captionmarginx=\dimen119
-\captionwidth=\dimen120
-\captionindent=\dimen121
-\captionparindent=\dimen122
-\captionhangindent=\dimen123
-)
-Package caption Info: sidecap package v1.4d (or newer) detected on input line 4
-00.
-)
+\captionmargin=\dimen115
+\captionmarginx=\dimen116
+\captionwidth=\dimen117
+\captionindent=\dimen118
+\captionparindent=\dimen119
+\captionhangindent=\dimen120
+))
 (/usr/share/texmf/tex/latex/wrapfig/wrapfig.sty
-\wrapoverhang=\dimen124
-\WF@size=\dimen125
-\c@WF@wrappedlines=\count101
-\WF@box=\box29
+\wrapoverhang=\dimen121
+\WF@size=\dimen122
+\c@WF@wrappedlines=\count100
+\WF@box=\box28
 \WF@everypar=\toks20
 Package: wrapfig 2003/01/31  v 3.6
 )
@@ -300,87 +289,78 @@ Package: xspace 1997/10/13 v1.06 Space after command names (DPC)
 )
 (/usr/share/texmf/tex/latex/geometry/geometry.sty
 Package: geometry 2002/07/08 v3.2 Page Geometry
-\Gm@cnth=\count102
-\Gm@cntv=\count103
-\c@Gm@tempcnt=\count104
-\Gm@bindingoffset=\dimen126
-\Gm@wd@mp=\dimen127
-\Gm@odd@mp=\dimen128
-\Gm@even@mp=\dimen129
+\Gm@cnth=\count101
+\Gm@cntv=\count102
+\c@Gm@tempcnt=\count103
+\Gm@bindingoffset=\dimen123
+\Gm@wd@mp=\dimen124
+\Gm@odd@mp=\dimen125
+\Gm@even@mp=\dimen126
 \Gm@dimlist=\toks21
 
-(/usr/share/texmf/tex/latex/geometry/geometry.cfg)) (./sarta_cloudy.aux
-
-LaTeX Warning: Label `' multiply defined.
-
-
-LaTeX Warning: Label `' multiply defined.
-
-
-LaTeX Warning: Label `' multiply defined.
-
-)
+(/usr/share/texmf/tex/latex/geometry/geometry.cfg)) (./sarta_cloudy.aux)
 \openout1 = `sarta_cloudy.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for LMR/hlcm/m/n on input line 93.
-LaTeX Font Info:    Try loading font information for LMR+hlcm on input line 93.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 90.
+LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 90.
+LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 90.
+LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 90.
+LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 90.
+LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 90.
+LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Checking defaults for LMR/hlcm/m/n on input line 90.
+LaTeX Font Info:    Try loading font information for LMR+hlcm on input line 90.
 
- (/usr/share/texmf/tex/latex/lucidabr/lmrhlcm.fd
+
+(/usr/share/texmf/tex/latex/lucidabr/lmrhlcm.fd
 File: lmrhlcm.fd 1997/09/07 v4.2 Lucida New Math Arrows (SPQR/DPC)
 )
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Try loading font information for T1+hlh on input line 93.
+LaTeX Font Info:    ... okay on input line 90.
+LaTeX Font Info:    Try loading font information for T1+hlh on input line 90.
 
 (/usr/share/texmf/tex/latex/lucida/t1hlh.fd
 File: t1hlh.fd 2003/01/04 Fontinst v1.914 font definitions for T1/hlh.
 )
 LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 93.
+(Font)              scaled to size 10.29301pt on input line 90.
 
 (/usr/share/texmf/tex/context/base/supp-pdf.tex
 (/usr/share/texmf/tex/context/base/supp-mis.tex
 loading : Context Support Macros / Miscellaneous (2004.10.26)
-\protectiondepth=\count105
-\scratchcounter=\count106
+\protectiondepth=\count104
+\scratchcounter=\count105
 \scratchtoks=\toks22
-\scratchdimen=\dimen130
-\scratchskip=\skip46
+\scratchdimen=\dimen127
+\scratchskip=\skip47
 \scratchmuskip=\muskip11
-\scratchbox=\box30
+\scratchbox=\box29
 \scratchread=\read1
 \scratchwrite=\write3
-\zeropoint=\dimen131
-\onepoint=\dimen132
-\onebasepoint=\dimen133
-\minusone=\count107
-\thousandpoint=\dimen134
-\onerealpoint=\dimen135
+\zeropoint=\dimen128
+\onepoint=\dimen129
+\onebasepoint=\dimen130
+\minusone=\count106
+\thousandpoint=\dimen131
+\onerealpoint=\dimen132
 \emptytoks=\toks23
-\nextbox=\box31
-\nextdepth=\dimen136
+\nextbox=\box30
+\nextdepth=\dimen133
 \everyline=\toks24
-\!!counta=\count108
-\!!countb=\count109
-\recursecounter=\count110
+\!!counta=\count107
+\!!countb=\count108
+\recursecounter=\count109
 )
 loading : Context Support Macros / PDF (2004.03.26)
-\nofMPsegments=\count111
-\nofMParguments=\count112
-\MPscratchCnt=\count113
-\MPscratchDim=\dimen137
-\MPnumerator=\count114
+\nofMPsegments=\count110
+\nofMParguments=\count111
+\MPscratchCnt=\count112
+\MPscratchDim=\dimen134
+\MPnumerator=\count113
 \everyMPtoPDFconversion=\toks25
 ) (/usr/share/texmf/tex/latex/ms/ragged2e.sty
 Package: ragged2e 2003/03/25 v2.04 ragged2e Package (MS)
@@ -389,20 +369,20 @@ Package: ragged2e 2003/03/25 v2.04 ragged2e Package (MS)
 Package: everysel 1999/06/08 v1.03 EverySelectfont Package (MS)
 LaTeX Info: Redefining \selectfont on input line 125.
 )
-\CenteringLeftskip=\skip47
-\RaggedLeftLeftskip=\skip48
-\RaggedRightLeftskip=\skip49
-\CenteringRightskip=\skip50
-\RaggedLeftRightskip=\skip51
-\RaggedRightRightskip=\skip52
-\CenteringParfillskip=\skip53
-\RaggedLeftParfillskip=\skip54
-\RaggedRightParfillskip=\skip55
-\JustifyingParfillskip=\skip56
-\CenteringParindent=\skip57
-\RaggedLeftParindent=\skip58
-\RaggedRightParindent=\skip59
-\JustifyingParindent=\skip60
+\CenteringLeftskip=\skip48
+\RaggedLeftLeftskip=\skip49
+\RaggedRightLeftskip=\skip50
+\CenteringRightskip=\skip51
+\RaggedLeftRightskip=\skip52
+\RaggedRightRightskip=\skip53
+\CenteringParfillskip=\skip54
+\RaggedLeftParfillskip=\skip55
+\RaggedRightParfillskip=\skip56
+\JustifyingParfillskip=\skip57
+\CenteringParindent=\skip58
+\RaggedLeftParindent=\skip59
+\RaggedRightParindent=\skip60
+\JustifyingParindent=\skip61
 )
 -------------------- Geometry parameters
 paper: letterpaper
@@ -444,292 +424,343 @@ driver: pdftex
 (1in=72.27pt, 1cm=28.45pt)
 -----------------------
 LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 15.72485pt on input line 95.
-LaTeX Font Info:    Try loading font information for T1+hls on input line 95.
+(Font)              scaled to size 15.72485pt on input line 92.
+LaTeX Font Info:    Try loading font information for T1+hls on input line 92.
 
 (/usr/share/texmf/tex/latex/lucida/t1hls.fd
 File: t1hls.fd 2003/01/04 Fontinst v1.914 font definitions for T1/hls.
 )
 LaTeX Font Info:    Font shape `T1/hls/m/n' will be
-(Font)              scaled to size 15.72485pt on input line 95.
+(Font)              scaled to size 15.72485pt on input line 92.
 LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 11.15991pt on input line 95.
+(Font)              scaled to size 11.15991pt on input line 92.
 LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 7.76001pt on input line 95.
+(Font)              scaled to size 7.76001pt on input line 92.
 LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 6.12003pt on input line 95.
-LaTeX Font Info:    Try loading font information for OML+hlcm on input line 95.
+(Font)              scaled to size 6.12003pt on input line 92.
+LaTeX Font Info:    Try loading font information for OML+hlcm on input line 92.
 
 
 (/usr/share/texmf/tex/latex/lucidabr/omlhlcm.fd
 File: omlhlcm.fd 1997/09/07 v4.2 Lucida New Math Italic (SPQR/DPC)
 )
 LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
-(Font)              scaled to size 11.15991pt on input line 95.
+(Font)              scaled to size 11.15991pt on input line 92.
 LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
-(Font)              scaled to size 7.76001pt on input line 95.
+(Font)              scaled to size 7.76001pt on input line 92.
 LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
-(Font)              scaled to size 6.12003pt on input line 95.
-LaTeX Font Info:    Try loading font information for OMS+hlcy on input line 95.
+(Font)              scaled to size 6.12003pt on input line 92.
+LaTeX Font Info:    Try loading font information for OMS+hlcy on input line 92.
 
 
 (/usr/share/texmf/tex/latex/lucidabr/omshlcy.fd
 File: omshlcy.fd 1997/09/07 v4.2 Lucida New Math Symbols (SPQR/DPC)
 )
 LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
-(Font)              scaled to size 11.15991pt on input line 95.
+(Font)              scaled to size 11.15991pt on input line 92.
 LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
-(Font)              scaled to size 7.76001pt on input line 95.
+(Font)              scaled to size 7.76001pt on input line 92.
 LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
-(Font)              scaled to size 6.12003pt on input line 95.
-LaTeX Font Info:    Try loading font information for OMX+hlcv on input line 95.
+(Font)              scaled to size 6.12003pt on input line 92.
+LaTeX Font Info:    Try loading font information for OMX+hlcv on input line 92.
 
 
 (/usr/share/texmf/tex/latex/lucidabr/omxhlcv.fd
 File: omxhlcv.fd 1997/09/07 v4.2 Lucida New Math Extension (SPQR/DPC)
 )
 LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
-(Font)              scaled to size 11.15991pt on input line 95.
+(Font)              scaled to size 11.15991pt on input line 92.
 LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
-(Font)              scaled to size 7.76001pt on input line 95.
+(Font)              scaled to size 7.76001pt on input line 92.
 LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
-(Font)              scaled to size 6.12003pt on input line 95.
+(Font)              scaled to size 6.12003pt on input line 92.
 LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
-(Font)              scaled to size 11.15991pt on input line 95.
+(Font)              scaled to size 11.15991pt on input line 92.
 LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
-(Font)              scaled to size 7.76001pt on input line 95.
+(Font)              scaled to size 7.76001pt on input line 92.
 LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
-(Font)              scaled to size 6.12003pt on input line 95.
+(Font)              scaled to size 6.12003pt on input line 92.
 LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
-(Font)              scaled to size 11.15991pt on input line 95.
+(Font)              scaled to size 11.15991pt on input line 92.
 LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
-(Font)              scaled to size 7.76001pt on input line 95.
+(Font)              scaled to size 7.76001pt on input line 92.
 LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
-(Font)              scaled to size 6.12003pt on input line 95.
+(Font)              scaled to size 6.12003pt on input line 92.
 LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 9.49997pt on input line 97.
+(Font)              scaled to size 9.49997pt on input line 94.
 LaTeX Font Info:    Font shape `T1/hlh/b/n' will be
-(Font)              scaled to size 9.49997pt on input line 97.
+(Font)              scaled to size 9.49997pt on input line 94.
 LaTeX Font Info:    Font shape `T1/hls/m/n' will be
-(Font)              scaled to size 9.49997pt on input line 99.
+(Font)              scaled to size 9.49997pt on input line 96.
+LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
+(Font)              scaled to size 6.93004pt on input line 110.
+LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
+(Font)              scaled to size 5.19997pt on input line 110.
+LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
+(Font)              scaled to size 9.49997pt on input line 110.
+LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
+(Font)              scaled to size 6.93004pt on input line 110.
+LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
+(Font)              scaled to size 5.19997pt on input line 110.
+LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
+(Font)              scaled to size 9.49997pt on input line 110.
+LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
+(Font)              scaled to size 6.93004pt on input line 110.
+LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
+(Font)              scaled to size 5.19997pt on input line 110.
+LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
+(Font)              scaled to size 9.49997pt on input line 110.
+LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
+(Font)              scaled to size 6.93004pt on input line 110.
+LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
+(Font)              scaled to size 5.19997pt on input line 110.
+LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
+(Font)              scaled to size 9.49997pt on input line 110.
+LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
+(Font)              scaled to size 6.93004pt on input line 110.
+LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
+(Font)              scaled to size 5.19997pt on input line 110.
+LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
+(Font)              scaled to size 9.49997pt on input line 110.
+LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
+(Font)              scaled to size 6.93004pt on input line 110.
+LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
+(Font)              scaled to size 5.19997pt on input line 110.
 LaTeX Font Info:    Font shape `T1/hlh/b/n' will be
-(Font)              scaled to size 11.15991pt on input line 110.
+(Font)              scaled to size 11.15991pt on input line 116.
 LaTeX Font Info:    Font shape `T1/hls/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 112.
+(Font)              scaled to size 10.29301pt on input line 118.
+LaTeX Font Info:    Font shape `T1/hlh/m/it' will be
+(Font)              scaled to size 10.29301pt on input line 131.
 LaTeX Font Info:    Font shape `T1/hlh/b/n' will be
-(Font)              scaled to size 10.29301pt on input line 124.
+(Font)              scaled to size 10.29301pt on input line 146.
 
 
-LaTeX Warning: Citation `mac:10' on page 1 undefined on input line 124.
+LaTeX Warning: Citation `mac:10' on page 1 undefined on input line 146.
+
+
+Overfull \hbox (3.92139pt too wide) in paragraph at lines 144--153
+[]\T1/hlh/m/n/10.95 We have al-ready suc-cess-fully used \T1/hls/m/n/10.95 SART
+A-CLOUDY \T1/hlh/m/n/10.95 to re-trieve dust op-ti-cal depths and heights
+ []
 
 [1
 
 {/usr/share/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
-(Font)              scaled to size 10.29301pt on input line 136.
+(Font)              scaled to size 10.29301pt on input line 164.
 LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 136.
+(Font)              scaled to size 10.29301pt on input line 164.
 LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 136.
+(Font)              scaled to size 10.29301pt on input line 164.
 LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 136.
+(Font)              scaled to size 10.29301pt on input line 164.
 LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 136.
+(Font)              scaled to size 10.29301pt on input line 164.
 
-<Figs/radiation1.pdf, id=15, 614.295pt x 794.97pt>
-File: Figs/radiation1.pdf Graphic file (type pdf)
- <use Figs/radiation1.pdf>
-LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 8.64006pt on input line 165.
-LaTeX Font Info:    Font shape `T1/hlh/b/n' will be
-(Font)              scaled to size 8.64006pt on input line 165.
 
-[2 <./Figs/radiation1.pdf
-Warning: pdflatex (file ./Figs/radiation1.pdf): pdf inclusion: Page Group detec
-ted which pdfTeX can't handle. Ignoring it.
->] [3]
+LaTeX Warning: Citation `lio:80' on page 2 undefined on input line 166.
+
+
+LaTeX Warning: Citation `goo:89' on page 2 undefined on input line 166.
+
+
+LaTeX Warning: Citation `edw:92' on page 2 undefined on input line 166.
+
+[2]
+
+LaTeX Warning: Citation `lio:80' on page 3 undefined on input line 274.
+
+[3]
 LaTeX Font Info:    Font shape `T1/hls/b/n' will be
-(Font)              scaled to size 10.29301pt on input line 289.
- [4]
-LaTeX Font Info:    Try loading font information for OMS+hlh on input line 349.
+(Font)              scaled to size 10.29301pt on input line 321.
+
+
+LaTeX Warning: Citation `stam:88' on page 4 undefined on input line 324.
+
+
+LaTeX Warning: Citation `dee:98' on page 4 undefined on input line 324.
+
+
+LaTeX Warning: Citation `cho:99' on page 4 undefined on input line 346.
+
+
+LaTeX Warning: Citation `cho:99' on page 4 undefined on input line 352.
+
+
+LaTeX Warning: Citation `mat:05' on page 4 undefined on input line 352.
+
+
+Overfull \hbox (4.8758pt too wide) in paragraph at lines 362--365
+\T1/hlh/m/n/10.95 where the ef-fec-tive sin-gle scat-ter-ing albedo $\OML/hlcm/
+m/it/10.95 !$ \T1/hlh/m/n/10.95 and backscat-ter $\OML/hlcm/m/it/10.95 b$ \T1/h
+lh/m/n/10.95 are ob-tained from the scatterer-
+ []
+
+[4]
+LaTeX Font Info:    Try loading font information for OMS+hlh on input line 406.
 
  (/usr/share/texmf/tex/latex/lucidabr/omshlh.fd
 File: omshlh.fd 1997/09/07 v4.2 Lucida Bright (SPQR/DPC)
 )
 LaTeX Font Info:    Font shape `OMS/hlh/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/hlcy/m/n' tried instead on input line 349.
+(Font)              Font shape `OMS/hlcy/m/n' tried instead on input line 406.
 LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
-(Font)              scaled to size 10.29301pt on input line 349.
- [5]
-<Figs/twolayers.pdf, id=42, 614.295pt x 794.97pt>
-File: Figs/twolayers.pdf Graphic file (type pdf)
- <use Figs/twolayers.pdf>
-Underfull \hbox (badness 10000) in paragraph at lines 396--409
-\T1/hlh/m/n/10.95 works is as fol-lows. The at-mo-spheric gas ab-sorp-tion for
+(Font)              scaled to size 10.29301pt on input line 406.
+ [5] [6]
+
+LaTeX Warning: Citation `han:02*1' on page 7 undefined on input line 538.
+
+
+LaTeX Warning: Citation `str:02*2' on page 7 undefined on input line 538.
+
+[7]
+Overfull \hbox (4.8758pt too wide) in paragraph at lines 577--580
+\T1/hlh/m/n/10.95 where the ef-fec-tive sin-gle scat-ter-ing albedo $\OML/hlcm/
+m/it/10.95 !$ \T1/hlh/m/n/10.95 and backscat-ter $\OML/hlcm/m/it/10.95 b$ \T1/h
+lh/m/n/10.95 are ob-tained from the scatterer-
  []
 
-[6 <./Figs/twolayers.pdf
-Warning: pdflatex (file ./Figs/twolayers.pdf): pdf inclusion: Page Group detect
-ed which pdfTeX can't handle. Ignoring it.
->] [7] [8] [9] [10]
+
+LaTeX Warning: Citation `mac:10' on page 8 undefined on input line 594.
+
+[8] [9] [10]
+
+LaTeX Warning: Reference `fig1' on page 11 undefined on input line 796.
+
+
+LaTeX Warning: Reference `fig4' on page 11 undefined on input line 796.
+
 system(epstopdf Figs/clouds_profile10.eps)...executed.
 
-
-<Figs/clouds_profile10.pdf, id=72, 494.84875pt x 404.51125pt>
+<Figs/clouds_profile10.pdf, id=54, 494.84875pt x 404.51125pt>
 File: Figs/clouds_profile10.pdf Graphic file (type pdf)
 
 <use Figs/clouds_profile10.pdf>
+LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
+(Font)              scaled to size 8.64006pt on input line 807.
+LaTeX Font Info:    Font shape `T1/hlh/b/n' will be
+(Font)              scaled to size 8.64006pt on input line 807.
+LaTeX Font Info:    Font shape `T1/hls/m/n' will be
+(Font)              scaled to size 8.64006pt on input line 807.
 system(epstopdf Figs/clouds_profile100.eps)...executed.
 
 
-<Figs/clouds_profile100.pdf, id=73, 494.84875pt x 404.51125pt>
+<Figs/clouds_profile100.pdf, id=55, 494.84875pt x 404.51125pt>
 File: Figs/clouds_profile100.pdf Graphic file (type pdf)
 
 <use Figs/clouds_profile100.pdf>
 system(epstopdf Figs/clouds_profile1000.eps)...executed.
 
 
-<Figs/clouds_profile1000.pdf, id=74, 494.84875pt x 404.51125pt>
+<Figs/clouds_profile1000.pdf, id=56, 494.84875pt x 404.51125pt>
 File: Figs/clouds_profile1000.pdf Graphic file (type pdf)
 
 <use Figs/clouds_profile1000.pdf>
 system(epstopdf Figs/clouds_profile2000.eps)...executed.
 
 
-<Figs/clouds_profile2000.pdf, id=75, 494.84875pt x 404.51125pt>
+<Figs/clouds_profile2000.pdf, id=57, 494.84875pt x 404.51125pt>
 File: Figs/clouds_profile2000.pdf Graphic file (type pdf)
 
 <use Figs/clouds_profile2000.pdf>
-<Figs/globalBT1231obs2_crop.pdf, id=76, 517.39943pt x 408.81383pt>
+
+LaTeX Warning: Reference `AIRS_obs_July' on page 11 undefined on input line 816
+.
+
+
+LaTeX Warning: Reference `SARTA_calc_July' on page 11 undefined on input line 8
+17.
+
+<Figs/globalBT1231obs2_crop.pdf, id=58, 517.39943pt x 408.81383pt>
 File: Figs/globalBT1231obs2_crop.pdf Graphic file (type pdf)
 
 <use Figs/globalBT1231obs2_crop.pdf>
-LaTeX Font Info:    Font shape `T1/hlh/m/n' will be
-(Font)              scaled to size 5.19997pt on input line 623.
 LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
-(Font)              scaled to size 8.64006pt on input line 623.
-LaTeX Font Info:    Font shape `OML/hlcm/m/it' will be
-(Font)              scaled to size 5.19997pt on input line 623.
+(Font)              scaled to size 8.64006pt on input line 836.
 LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
-(Font)              scaled to size 8.64006pt on input line 623.
-LaTeX Font Info:    Font shape `OMS/hlcy/m/n' will be
-(Font)              scaled to size 5.19997pt on input line 623.
+(Font)              scaled to size 8.64006pt on input line 836.
 LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
-(Font)              scaled to size 8.64006pt on input line 623.
-LaTeX Font Info:    Font shape `OMX/hlcv/m/n' will be
-(Font)              scaled to size 5.19997pt on input line 623.
+(Font)              scaled to size 8.64006pt on input line 836.
 LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
-(Font)              scaled to size 8.64006pt on input line 623.
-LaTeX Font Info:    Font shape `OML/hlcm/m/n' will be
-(Font)              scaled to size 5.19997pt on input line 623.
+(Font)              scaled to size 8.64006pt on input line 836.
 LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
-(Font)              scaled to size 8.64006pt on input line 623.
-LaTeX Font Info:    Font shape `LMR/hlcm/m/n' will be
-(Font)              scaled to size 5.19997pt on input line 623.
+(Font)              scaled to size 8.64006pt on input line 836.
 
-<Figs/globalBT1231era2_crop.pdf, id=77, 519.54674pt x 409.38847pt>
+<Figs/globalBT1231era2_crop.pdf, id=59, 519.54674pt x 409.38847pt>
 File: Figs/globalBT1231era2_crop.pdf Graphic file (type pdf)
 
 <use Figs/globalBT1231era2_crop.pdf>
-LaTeX Font Info:    Font shape `T1/hls/m/n' will be
-(Font)              scaled to size 8.64006pt on input line 623.
- [11 <./Figs/clouds_profile10.pdf> <./Figs/clouds_profile100.pdf> <./Figs/cloud
-s_profile1000.pdf> <./Figs/clouds_profile2000.pdf>] <Figs/airs_bt_image.png, id
-=121, 504.9264pt x 417.4797pt>
+
+LaTeX Warning: Reference `AIRS_obs_March2011' on page 11 undefined on input lin
+e 841.
+
+
+LaTeX Warning: Reference `SARTA_calc_March2011' on page 11 undefined on input l
+ine 843.
+
+[11] [12 <./Figs/clouds_profile10.pdf> <./Figs/clouds_profile100.pdf> <./Figs/c
+louds_profile1000.pdf> <./Figs/clouds_profile2000.pdf> <./Figs/globalBT1231obs2
+_crop.pdf> <./Figs/globalBT1231era2_crop.pdf>]
+<Figs/airs_bt_image.png, id=139, 504.9264pt x 417.4797pt>
 File: Figs/airs_bt_image.png Graphic file (type png)
 
 <use Figs/airs_bt_image.png>
-<Figs/ecmwf_bt_image.png, id=122, 504.9264pt x 419.4069pt>
+<Figs/ecmwf_bt_image.png, id=140, 504.9264pt x 419.4069pt>
 File: Figs/ecmwf_bt_image.png Graphic file (type png)
 
-<use Figs/ecmwf_bt_image.png> [12 <./Figs/globalBT1231obs2_crop.pdf> <./Figs/gl
-obalBT1231era2_crop.pdf> <./Figs/airs_bt_image.png> <./Figs/ecmwf_bt_image.png>
-] <Figs/spectra_sartaVSpcrtm.jpg, id=158, 1204.5pt x 903.375pt>
+<use Figs/ecmwf_bt_image.png>
+<Figs/spectra_sartaVSpcrtm.jpg, id=141, 1204.5pt x 903.375pt>
 File: Figs/spectra_sartaVSpcrtm.jpg Graphic file (type jpg)
 
 <use Figs/spectra_sartaVSpcrtm.jpg>
-Underfull \hbox (badness 4543) in paragraph at lines 641--641
-[]\T1/hlh/b/n/9 Figure 11: |\T1/hlh/m/n/9 Com-par-ing \T1/hls/m/n/9 SARTA-CLOUD
-Y \T1/hlh/m/n/9 vs
- []
-
-<Figs/pcrtm_calc_vs_sarta_biasV1.jpg, id=159, 1204.5pt x 903.375pt>
-File: Figs/pcrtm_calc_vs_sarta_biasV1.jpg Graphic file (type jpg)
-
-<use Figs/pcrtm_calc_vs_sarta_biasV1.jpg>
-<Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions_2.jpg, id=160, 1204.5pt x 903.37
-5pt>
-File: Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions_2.jpg Graphic file (type jp
-g)
- <use Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions_2.jpg>
-Underfull \hbox (badness 4543) in paragraph at lines 652--652
-[]\T1/hlh/b/n/9 Figure 13: |\T1/hlh/m/n/9 Com-par-ing \T1/hls/m/n/9 SARTA-CLOUD
-Y \T1/hlh/m/n/9 vs
- []
-
-
-<Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific_2.jpg, id=161, 1204.5pt x 903.375pt
->
-File: Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific_2.jpg Graphic file (type jpg)
- <use Figs/pcrtm_vs_sarta_vs_obs_pdf1231_pacific_2.jpg>
-Underfull \hbox (badness 4543) in paragraph at lines 652--652
-[]\T1/hlh/b/n/9 Figure 14: |\T1/hlh/m/n/9 Com-par-ing \T1/hls/m/n/9 SARTA-CLOUD
-Y \T1/hlh/m/n/9 vs
- []
-
-[13 <./Figs/spectra_sartaVSpcrtm.jpg> <./Figs/pcrtm_calc_vs_sarta_biasV1.jpg> <
-./Figs/pcrtm_vs_sarta_vs_obs_pdf1231_allregions_2.jpg> <./Figs/pcrtm_vs_sarta_v
-s_obs_pdf1231_pacific_2.jpg>]
-<Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg, id=166, 1204.5pt x 903.375pt>
-File: Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg Graphic file (type jpg)
-
-<use Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg>
-Underfull \hbox (badness 4543) in paragraph at lines 669--669
-[]\T1/hlh/b/n/9 Figure 15: |\T1/hlh/m/n/9 Com-par-ing \T1/hls/m/n/9 SARTA-CLOUD
-Y \T1/hlh/m/n/9 vs
- []
-
-<Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg, id=167, 1204.5pt x 903.375pt>
-File: Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg Graphic file (type jpg)
-
-<use Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg>
-Underfull \hbox (badness 4543) in paragraph at lines 669--669
-[]\T1/hlh/b/n/9 Figure 16: |\T1/hlh/m/n/9 Com-par-ing \T1/hls/m/n/9 SARTA-CLOUD
-Y \T1/hlh/m/n/9 vs
- []
-
-(./sarta_cloudy.bbl
-LaTeX Font Info:    Font shape `T1/hlh/m/it' will be
-(Font)              scaled to size 10.29301pt on input line 5.
- [14 <./Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg> <./Figs/pcrtm_calc_vs_sarta_c
-alc_histV2.jpg>]) [15] (./sarta_cloudy.aux)
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: There were multiply-defined labels.
-
- ) 
+! Use of \caption@@settype doesn't match its definition.
+\new@ifnextchar ...served@d = #1\def \reserved@a {
+                                                  #2}\def \reserved@b {#3}\f...
+l.881 ...bar indicates counts}{bt1231_sarta_pcrtm}
+                                                  
+? 
+! Use of \caption@@settype doesn't match its definition.
+<argument> \def \reserved@a *
+                             {\nobreak \@xcentercr }\reserved@a 
+l.881 ...bar indicates counts}{bt1231_sarta_pcrtm}
+                                                  
+? 
+! Use of \caption@@settype doesn't match its definition.
+\@ifnextchar ... \reserved@d =#1\def \reserved@a {
+                                                  #2}\def \reserved@b {#3}\f...
+l.881 ...bar indicates counts}{bt1231_sarta_pcrtm}
+                                                  
+? 
+! Use of \@icentercr doesn't match its definition.
+\@ifnextchar ...eserved@d =#1\def \reserved@a {#2}
+                                                  \def \reserved@b {#3}\futu...
+l.881 ...bar indicates counts}{bt1231_sarta_pcrtm}
+                                                  
+? X
+ 
 Here is how much of TeX's memory you used:
- 3358 strings out of 94500
- 50463 string characters out of 1176766
- 93434 words of memory out of 1000000
- 6448 multiletter control sequences out of 10000+50000
- 32633 words of font info for 81 fonts, out of 500000 for 2000
+ 3289 strings out of 94500
+ 49110 string characters out of 1176767
+ 94010 words of memory out of 1000000
+ 6394 multiletter control sequences out of 10000+50000
+ 37688 words of font info for 92 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
- 35i,9n,38p,390b,375s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 35i,10n,38p,362b,375s stack positions out of 1500i,500n,5000p,200000b,5000s
 PDF statistics:
- 174 PDF objects out of 300000
+ 141 PDF objects out of 300000
  0 named destinations out of 131072
- 81 words of extra memory for PDF output out of 65536
+ 46 words of extra memory for PDF output out of 65536
 
-Warning: pdflatex (file hlhri8r): Font hlhri8r at 618 not found
-
-Warning: pdflatex (file hlsr8r): Font hlsr8r at 518 not found
+Warning: pdflatex (file hlhr8r): Font hlhr8r at 367 not found
 
 Warning: pdflatex (file hlcry): Font hlcry at 367 not found
 
-Warning: pdflatex (file hlhr8r): Font hlhr8r at 367 not found
+Warning: pdflatex (file hlhr8r): Font hlhr8r at 518 not found
+
+Warning: pdflatex (file hlsr8r): Font hlsr8r at 518 not found
+
+Warning: pdflatex (file hlhb8r): Font hlhb8r at 518 not found
 
 Warning: pdflatex (file hlsb8r): Font hlsb8r at 618 not found
 
@@ -741,10 +772,6 @@ Warning: pdflatex (file hlcrima): Font hlcrima at 367 not found
 
 Warning: pdflatex (file hlcry): Font hlcry at 466 not found
 
-Warning: pdflatex (file hlhr8r): Font hlhr8r at 518 not found
-
-Warning: pdflatex (file hlhb8r): Font hlhb8r at 518 not found
-
 Warning: pdflatex (file hlhr8r): Font hlhr8r at 466 not found
 
 Warning: pdflatex (file hlcry): Font hlcry at 618 not found
@@ -755,11 +782,15 @@ Warning: pdflatex (file hlcrima): Font hlcrima at 618 not found
 
 Warning: pdflatex (file hlhb8r): Font hlhb8r at 618 not found
 
+Warning: pdflatex (file hlhri8r): Font hlhri8r at 618 not found
+
 Warning: pdflatex (file hlsr8r): Font hlsr8r at 618 not found
 
 Warning: pdflatex (file hlhr8r): Font hlhr8r at 618 not found
 
 Warning: pdflatex (file hlhb8r): Font hlhb8r at 670 not found
+
+Warning: pdflatex (file hlcry): Font hlcry at 570 not found
 
 Warning: pdflatex (file hlsr8r): Font hlsr8r at 570 not found
 
@@ -772,4 +803,4 @@ Warning: pdflatex (file hlhr8r): Font hlhr8r at 670 not found
 Warning: pdflatex (file hlhr8r): Font hlhr8r at 943 not found
 
 Warning: pdflatex (file hlsr8r): Font hlsr8r at 943 not found
-Output written on sarta_cloudy.pdf (15 pages, 1724546 bytes).
+Output written on sarta_cloudy.pdf (12 pages, 560717 bytes).
