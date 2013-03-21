@@ -4,16 +4,20 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa,run_sarta)
 %     [takes about 800 secs for 41 chans/2700 profiles]
 
 % takes an input [h ha p0ALL pa] which incudes cloud structure from (ERA/ECMWF) and
-% then runs the PCRTM code
+% then runs the PCRTM code; always give estimate of PCRTM clear and PCRTM cloud
+%
+% can optionally also run SARTA clear and/or SARTA cloud
 %
 % run_sarta = optional structure argument that says
-%   run_sarta.clear = +/-1 for yes/no, results into prof.sarta_clear
-%   run_sarta.cloud = +/-1 for yes/no, results into prof.sarta_cloudy
-%   run_sarta.overlap = 1,2,3 for max overlap, random pverlap, max random overlap (suggest 3)
-%   run_sarta.ncol0 >= 1 for number of random subcolumns (recommend 50)
-%   run_sarta.klayers_code = string to klayers executable
-%   run_sarta.sartaclear_code = string to sarta clear executable
-%   run_sarta.sartacloud_code = string to sarta cloud executable
+%   >>> options for PCRTM runs
+%     run_sarta.overlap = 1,2,3 for max overlap, random pverlap, max random overlap (suggest 3)
+%     run_sarta.ncol0 >= 1 for number of random subcolumns (recommend 50)
+%   >>> options for SARTA runs
+%     run_sarta.clear = +/-1 for yes/no, results into prof.sarta_clear
+%     run_sarta.cloud = +/-1 for yes/no, results into prof.sarta_cloudy
+%     run_sarta.klayers_code = string to klayers executable
+%     run_sarta.sartaclear_code = string to sarta clear executable
+%     run_sarta.sartacloud_code = string to sarta cloud executable
 %
 % Requirements : 
 %   p0ALL must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -43,7 +47,7 @@ addpath([base_dir2 '/h4tools'])
 % testing the code
   run_sarta.clear = +1;
   run_sarta.cloud = +1;
-  [h,ha,p,pa] = oldrtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
+  [h,ha,p,pa] = rtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
   [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
   tic
   p1 = driver_pcrtm_cloud_rtp(h,ha,p,pa,run_sarta);
@@ -112,13 +116,15 @@ elseif nargin == 5
     run_sarta.ncol0 = 50;
   end
   if ~isfield(run_sarta,'klayers_code')
-    run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
+    %run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
+    run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
   end   
   if ~isfield(run_sarta,'sartaclear_code')
     run_sarta.sartaclear_code = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
   end
   if ~isfield(run_sarta,'sartacloud_code')
-    run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
+    %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
+    run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
   end
 end
 
@@ -145,8 +151,11 @@ p0ALLX = p0ALL;
 
 [yy,mm,dd,hh] = tai2utc(p0ALL.rtime);
 
-iIndMax = ceil(length(p0ALL.xtrack))/iChunk;
-for iInd = 1 : iIndMax;
+iIndMax = ceil(length(p0ALL.xtrack)/iChunk);
+
+fprintf(1,'num of input profiles = %4i will be processed in %4i chunks \n',length(p0ALL.xtrack),iIndMax)
+
+for iInd = 1 : iIndMax
 
   inds = (1:iChunk) + (iInd-1)*iChunk;
   inds = intersect(1:length(p0ALL.xtrack),inds);

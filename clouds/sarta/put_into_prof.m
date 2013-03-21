@@ -1,4 +1,4 @@
-function prof = put_into_prof(profX,ii,jj,plevs,ptemp,iLevsVers,...
+function prof = put_into_prof(pin,profX,ii,jj,plevs,ptemp,iLevsVers,...
                               cT,cB,cOUT,cngwat,cTYPE,iFound)
 
 % When two clouds are present, the meaning of cfrac1 and cfrac2
@@ -25,7 +25,7 @@ function prof = put_into_prof(profX,ii,jj,plevs,ptemp,iLevsVers,...
 ice_dme   = 60;
 water_dme = 15;
 
-prof = profX;
+prof  = pin;
 
 cfrac = profX.cfrac(ii);
 
