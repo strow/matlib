@@ -17,8 +17,9 @@
 %
 %   fr can be a row or column vector, and rad a vector or array.
 %   When the length of fr equals the number of rows of rad, it is
-%   applied along columns.  When fr is scalar it is applied to all
-%   elements of rad.  If rad is a row vector with the same length 
+%   applied along columns.  If fr is scalar it is applied to all
+%   elements of rad, and if rad is scalar it is applied to all
+%   elements of fr.  If rad is a row vector with the same length 
 %   as fr, then for this one case fr is applied along the row.
 %
 % AUTHOR
@@ -40,30 +41,29 @@ c2 = (h*c/k) * 100;
 % bt = c2 * fr / log(1 + c1 * fr^3 / rad)
 
 % set up the data
+d1 = size(fr);              % fr dimension list
 fr = fr(:);                 % make fr a column vector
 k = length(fr);             % fr vector length
-dd = size(rad);             % rad dimension list
+d2 = size(rad);             % rad dimension list
 [m,n] = size(rad);          % rad size as a 2d array
-rad = reshape(rad, m, n);   % make rad a 2d array
+rad = reshape(rad, m, n);   % treat rad as a 2d array
+j = n;                      % copy fr across j columns
 
-% special case: rad is a row vector and length(rad) = length(fr)
-if m == 1 && n == k
-  rad = rad'; n = 1; m = k;  
-end
-
-% special case: fr is a scalar and rad has more than one row
-if k == 1 && m > 1
-  fr = fr * ones(m,1); k = m;
-end
-
-% check that fr conforms with rad
-if m ~= k
-  error('the length of fr must equal the number of rows of rad')
+% fr and rad special cases 
+if k ~= m                   % length of fr != rows of rad
+  j = 1;                    % keep fr as a single column
+  if k > 1 && m==1 && n==1  % fr is a vector and rad a scalar
+    d2 = d1;                % reshape rad at the end to match fr
+  elseif k == n && m == 1   % rad is a row vec with same len as fr
+    rad = rad(:);           % reshape rad as a column, to match fr
+  elseif k ~= 1             % if k == 1 then fr is scalar, otherwise...
+    error('the length of fr must equal the number of rows of rad')
+  end
 end
 
 % do the vectorized calculation
-bt = c2 * (fr * ones(1,n)) ./ log(1 + c1 * (fr.^3 * ones(1,n)) ./ rad);
+bt = c2 * (fr * ones(1,j)) ./ log(1 + c1 * (fr.^3 * ones(1,j)) ./ rad);
 
 % restore rad original shape
-bt = reshape(bt, dd);
+bt = reshape(bt, d2);
 
