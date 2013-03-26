@@ -2,7 +2,7 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa,run_sarta)
 
 %     [this is based on xdriver_PCRTM_compute_for_AIRS_spectra_ERAorECMWF.m]
 %     [takes about 800 secs for 41 chans/2700 profiles]
-
+%
 % takes an input [h ha p0ALL pa] which incudes cloud structure from (ERA/ECMWF) and
 % then runs the PCRTM code; always give estimate of PCRTM clear and PCRTM cloud
 %
@@ -12,6 +12,7 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa,run_sarta)
 %   >>> options for PCRTM runs
 %     run_sarta.overlap = 1,2,3 for max overlap, random pverlap, max random overlap (suggest 3)
 %     run_sarta.ncol0 >= 1 for number of random subcolumns (recommend 50)
+%       if run_sarta.ncol0 == -1 then we do ONE column, cloud fraction = 1 == TEST CASE
 %   >>> options for SARTA runs
 %     run_sarta.clear = +/-1 for yes/no, results into prof.sarta_clear
 %     run_sarta.cloud = +/-1 for yes/no, results into prof.sarta_cloudy
@@ -45,10 +46,16 @@ addpath([base_dir2 '/h4tools'])
 
 %{
 % testing the code
+  addpath /asl/matlib/h4tools
+  addpath /asl/matlib/rtptools
+  addpath /asl/matlib/aslutil
+  addpath ../sarta
   run_sarta.clear = +1;
   run_sarta.cloud = +1;
   [h,ha,p,pa] = rtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
   [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
+  [h,p] = subset_rtp_allcloudfields(h,p,[],[],10);
+  run_sarta.ncol0 = -1;
   tic
   p1 = driver_pcrtm_cloud_rtp(h,ha,p,pa,run_sarta);
   toc
@@ -173,6 +180,11 @@ for iInd = 1 : iIndMax
   WCT = double(p.clwc);   %% cloud liquid water content in kg/kg
   ICT = double(p.ciwc);   %% cloud ice    water content in kg/kg
   cc  = double(p.cc);     %% cloud fraction
+  if ncol0 == -1
+    disp('this is the CFRAC = 1  TEST CASE');
+    yes_cld = find(cc > eps);
+    cc(yes_cld) = 1;
+  end
 
   TT = double(p.ptemp);        %% temperature profile
   if h.gunit(1) == 21 & h.gunit(2) == 21

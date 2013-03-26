@@ -15,6 +15,9 @@
 \newcommand{\sa}{\textsf{SARTA}\xspace}
 \newcommand{\sasc}{\textsf{SARTA-CLOUDY}\xspace}
 \newcommand{\pcrtm}{\textsf{PCRTM}\xspace}
+\newcommand{\disort}{\textsf{DISORT}\xspace}
+\newcommand{\ecmwfXsarta}{\textsf{ecmwf2sarta}\xspace}
+\newcommand{\ecmwf}{\textsf{ECMWF}\xspace}
 
 % figure1 figure1-caption figure1-label figure2 figure2-caption figure2-label
 \newcommand{\dfigure}[6]
@@ -85,11 +88,11 @@
 \author{S. De Souza-Machado, L. L. Strow, S. E. Hannon \\
       University of Maryland Baltimore County, Baltimore, MD 21250 USA}
 
-    \begin{document}
+\begin{document}
 
-    \maketitle
+\maketitle
 
-    \begin{abstract}
+\begin{abstract}
 
       The \textsf{SARTA CLOUDY} code is a modification of UMBC's \sa
       clear-sky fast radiative transfer algorithm, allowing users to
@@ -100,17 +103,17 @@
       atmosphere is effectively recast as that of (an) additional
       absorbing gas(es), which allows us to use the efficient
       radiative transfer algorithm of the clear sky code. The liens of
-      the code are that model vertical cloud fields (from eg ECMWF)
-      need to be reshaped into at most two slab clouds. However,
-      comparisons against packages which uses sophisticated algorithms
-      (eg maximal overlap clouds and scattering trained on DISORT
-      algorithm) shows that the \textsf{SARTA CLOUDY} code produces
-      radiances accurate to about 3K (converted to equivalent
-      Brightness Temperature)
+      the code are that model vertical cloud fields (from eg \ecmwf)
+      need to be reshaped into at most two slab clouds. For a single cloud
+      field, comparisons against packages which uses sophisticated algorithms
+      (eg scattering trained on \disort algorithm) shows that the 
+      \textsf{SARTA CLOUDY} code produces radiances (converted to equivalent 
+      Brightness Temperature) accurate to about 0.04 $\pm$ 0.93 K for water clouds,  and 
+      -0.56 $\pm$ 2.73 K for ice clouds.
 
-    \end{abstract}
+\end{abstract}
 
-    \section{Introduction}
+\section{Introduction}
 
     This document gives an overview of \sasc, a version of UMBC's
     clear-sky \sa algorithm that includes scattering by clouds an
@@ -138,14 +141,14 @@
     transfer, and how the scattering algorithm can be easily adapted
     to work in this polychromatic case as well.
 
-    We have already successfully used \sasc to retrieve dust optical
+    We have successfully used \sasc to retrieve dust optical
     depths and heights for individual AIRS Fields-of-Views
     \cite{mac:10}.  For a fixed dust layer height, and a handful of
     AIRS channels, three iterations for convergence were done in
     several milliseconds, for each AIRS pixel. We also summarize how
     we convert Numerical Weather Prediction Model (NWP) fields into
     clouds fields that can be processed inside of \sasc and show some
-    comparisons of window channel radiances computed using ECMWF/ERA
+    comparisons of window channel radiances computed using \ecmwf or re-analysis
     fields versus actual AIRS observations.
 
     We also show limited comparisons between radiances produced by
@@ -167,7 +170,7 @@
     \end{equation}
     where $\mu$ is the cosine of the viewing angle, $k_{e}$ is the
     extinction optical depth, $\nu$ is the wavenumber and $J(\nu)$ is
-    the source function. For a nonscattering ``clear sky'', the source
+    the source function. For a non-scattering ``clear sky'', the source
     function is usually the Planck emission $B(\nu,T)$ at the layer
     temperature $T$, leading to an equation that can easily be solved
     for an individual layer. Dividing the atmosphere into layers and
@@ -317,26 +320,34 @@ angle the sun makes with the vertical, $\cos(\theta_{\text{solar}})$.
 
 \subsection{\textsf{Monochromatic PCLSAM} scattering algorithm}
 
-\kc can be interfaced with advanced scattering codes such as DISORT
+\kc can be interfaced with advanced scattering codes such as \disort
 \cite{stam:88} and RTPSEC \cite{dee:98}. While well tested and
-numerically very accurate, these codes are complicated, leading to run
-times that far longer than for the clear sky case.
+numerically very accurate, these codes are complicated and more
+optimized to work for the visible and ultraviolet regions where one
+can model the atmosphere with about 2-3 layers. In the infrared, the 
+need to account for the vertical temperature structure means the atmosphere
+needs to be modelled using 50-100 layers; accounting for 
+scattering effects using these codes leads to run times that are 
+significantly longer than for the clear sky case.
+
 % Sergio; I know what you want to say, I think, but too confusing?  In
 % addition, the separation of radiative effects into solar and
 % terrestrial means, for typical infrared instruments such as AIRS,
 % IASI and CRiS, means one can optimize codes to work on either the
 % thermal and/or the short wave infrared regions.
 
-We chose to implement a radiative transfer algorithm optimized to work
-where scattering is less important than absorption effects. In the
-thermal infrared, the effects of scattering due to aerosols and clouds
-are small compared to the scatterer absorption, making the
+The separation of radiative effects into solar and  terrestrial means, 
+for typical infrared instruments such as AIRS, IASI and CrIS, that one can 
+optimize codes to work best in either the thermal and/or the short wave infrared regions.
+We chose to implement a radiative transfer algorithm optimized to work 
+in the thermal infrared. Here, the effects of scattering due to aerosols and clouds
+are small compared to the absorption, making the
 \textsf{PCLSAM} (Parameterization of Cloud Longwave Scattering for use
 in Atmospheric Models) scheme \cite{cho:99} very attractive. This
-model assumes the downward intensity through a cloud layer is the same
-as the Planck emission at the cloud temperature and thus simplifies
-the problem, although it typically slightly overestimates the final
-TOA radiance. This algorithm changes the optical depth from $k$ to a
+model reparameterizes the cloud scattering parameters into an optical depth, 
+thus effectively treating the cloud or aerosol as another atmospheric gas. 
+
+The methodology to change the scatttering parameters to a
 parameterized number $k\prime$ as described briefly below; more
 details can be found in \cite{cho:99,mat:05}.
 
@@ -350,7 +361,7 @@ k\prime(\nu) = k_{\text{total}}(\nu) \times \{ (1-\omega(\nu)
 (1-b(\nu)) \}
 \]
 where the effective single scattering albedo $\omega$ and backscatter
-$b$ are obtained from the scatterer-only case $\omega_{0}$ using
+$b$ are obtained from the scatterer-only case using
 \[
 \omega(\nu) = \omega_{0}(\nu)
 k^{\text{scatterer}}_{\text{extinction}}(\nu)/k_{\text{total}}(\nu)
@@ -358,6 +369,8 @@ k^{\text{scatterer}}_{\text{extinction}}(\nu)/k_{\text{total}}(\nu)
 \[
 b(\nu) = (1 - g(\nu))/2
 \]
+As usual,$\omega_{0}(\nu)$ and $g(\nu)$ are the single scattering albedo and
+asymmetry parameters, respectively. 
 Note that if there are no scatterers in the layer, $\omega(\nu)
 \rightarrow 0$ and we recover the clear sky optical depth.
 
@@ -374,19 +387,28 @@ scattering jacobians as well as fluxes, in a manner exactly analogous
 to that for clear sky jacobians and fluxes.
 
 We have attempted to account for solar scattering in the shortwave,
-but comparing to DISORT and actual AIRS observations, we state this a
-significant lien on the code in this spectral region.  We note that
-while computing the direct beam scattered solar contribution, we use
-the extinction optical depth $k$ in $ \left[ 1 - e^{-k (\frac{1}{\mu}
-    + \frac{1}{\mu_{sun}})} \right]$, rather than the parameterized
-optical depth $k \prime$.
+but comparing to \disort and actual AIRS observations, we state this a
+significant lien on the code in this spectral region. For example, 
+for low optical depths (less than about 0.25), we typically have a bias
+of less than 0.25 K in the thermal infrared, and a bias of about 1 K 
+in the SWIR during the daytime. The bias depends on the scatterer (cloud or
+aerosol) and solar $\rightarrow$ view angle, as the solar scattering depends more sensitively
+on the details of the phase function, which we do not consider other than 
+through the asymmetry factor.
+% We note that
+% while computing the direct beam scattered solar contribution, we use
+% the extinction optical depth $k$ in $ \left[ 1 - e^{-k (\frac{1}{\mu}
+%    + \frac{1}{\mu_{sun}})} \right]$, rather than the parameterized
+% optical depth $k \prime$.
+
 % Sergio, any estimate of the scattering accuracy in the SWIR You
 % can't tell them we have it, it's not good, w/o any estimate.
 Some important points to consider:
 
 \begin{itemize}
-\item While absorption spectra due to atmospheric gases has sharp
-  spectral structure, the crystal bonding, and smoothing over particle
+\item While absorption spectra due to atmospheric gases have sharp
+  spectral structure, the complicated vibrational transitions in the
+  aerosol and ice/water molecular bonds, and smoothing over particle
   size distributions, "blurs" out sharp features, resulting in
   spectrally smooth absorption and scattering parameters.
 \item Aerosol particles range in size from 0.1 um (smoke) to 4 um
@@ -512,7 +534,7 @@ law within the individual layers!
 % transfer becomes polychromatic radiative transfer, and the above
 % needs to be taken into consideration.
 
-The \sa polycrhomatic approach requires special care when there are
+The \sa polychromatic approach requires special care when there are
 different variable gases absorption/emission lines (\ozone, \water,
 and \cd) within one \textsf{AIRS} channel. \sa handles this problem by
 parameterizing the effective layer-to-space transmittances, and then
@@ -534,22 +556,23 @@ scatterer, where needed, and then perform the radiative transfer using
 the clear sky algorithm. The only time penalty incurred for each
 cloud/aerosol layer, is reading in and interpolating the relevant
 scattering tables. Since the scattering parameters vary smoothly in
-spectral frequency, it is very straightforward to construct scattering
+spectral frequency and in particle effective radius {\em r}, 
+it is very straightforward to construct scattering
 optical depth tables for the $j$th AIRS channel for scattering species
-$S$; then for an arbitrary loading $q(j,i)^{S}$ g/m2
+{\em S}. For an arbitrary cloud/aerosol atmospheric column loading $q(i)$ g/m2 of
+this species at layer {\em i}, after interpolation of our scattering tables to arbitrary radius {\em r} we have
 \begin{eqnarray*}
-  \text{extinction}(j,i,r)^{S} & = &  \text{extinction}(r)^{S}(1) \times  q(j,i)^{S} \\
-  \text{ssa}(j,i,r)^{S} & = &  \text{ssa}(r)^{S} \\
-  g(j,i,r)^{S} & = &  g(r)^{S} \\
+  \tau_{extinction}(j,i,r) & = &  \tau_{extinction}(j,r)(1 g/m2) \times  q(i) \\
+  \omega_o(j,i,r) & = &  \omega_{0}(j,r) \\
+  \text{g}(j,i,r) & = &  \text{g}(j,r) \\
 \end{eqnarray*}
-where ssa and $g$ are the single scattering albedo and asymmetry
-parameter respectively, and $\text{extinction}(j,r)^{S}(1)$ is the
-extinction for a column loading of 1 g/m2; the particle size is
-denoted by $r$. The effective optical depths for channel $j$, layer
-$i$ are then given by
+where as in the monochromatic case $\omega_0$ and {\em g} are the single scattering 
+albedo and asymmetry parameter respectively, and $\tau_{extinction}(j,r)(1 g/m2)$ is the
+extinction for a column loading of 1 g/m2.
+The effective optical depths for channel $j$, layer $i$ are then given by
 \[
 k_{\text{AIRS,total}}^{j,i} = k_{\text{AIRS}}^{j,i}(\text{gases}) +
-\text{extinction}_{\text{AIRS}}^{j,i}(\text{scatterer})
+\tau_{extinction}^{j,i}(r)
 \]
 However again, to account for scattering effects, this is
 reparameterized as
@@ -560,7 +583,7 @@ k\prime_{\text{AIRS}}^{j,i} = k_{\text{AIRS}}^{j,i} \times \{
 where the effective single scattering albedo $\omega$ and backscatter
 $b$ are obtained from the scatterer-only case $\omega_{0}$ using
 \[
-\omega(j,i) = \text{ssa}(j,i) \times
+\omega(j,i) = \omega_{0}(j,i) \times
 \text{extinction}(j,i)/k_{\text{AIRS,total}}^{j,i}
 \]
 \[
@@ -572,45 +595,64 @@ using the standard equations of radiative transfer.
 \section{Outline for AIRS L2 operational retrievals}
 
 As mentioned earlier, we have already successfully used our code to
-retrieve dust loadings and heights, for a sandstorm which eventually
-blew over the Mediterranean in late February, 2007 \cite{mac:10}. The
-optical depth retrievals agreed with many A-Train sensors, including
-MODIS, PARASOL, OMI and Calipso. Out task was arguably made easier by
-assuming the dust filled the Field-of-View, fixed particle size
-distribution, particle refractive index and effective particle size
-(4um diameter). One complication was to also solve for dust height,
-instead of using eg climatological heights. For testing purposes, if
-the current operational AIRS L1/L2 dust flag detects dust, and we
-assume fixed particle sizes and aerosol height from climatology, we
-can almost always retrieve dust loadings that correlate very well with
-eg MODIS aerosol optical depths, \emph{even if they are not necessarily
-  accurate because we potentially used an incorrect height}.
+study duststorms, such as the one which eventually blew over the 
+Mediterranean in late February, 2007 \cite{mac:10}. For each pixel, we assumed 
+the dust filled the Field-of-View, and we used scattering parameters 
+coming from an assumption about the particle size distribution (with 4 um 
+effective diameter) and particle refractive index. Using these, we were able to solve 
+for dust loading and dust layer height, instead of relying on 
+climatological heights. Our final retrieved dust loadings were in very 
+good agreement with optical depth retrievals of other A-Train sensors, including
+MODIS, PARASOL, OMI and Calipso. 
 
-We have also prototyped a more complete L2 retrieval in the presence
-of dust. Again in this case, we made some assumptions namely we know
-the effective particle size and height of the dust, and made a further
-assumption that we knew the underlying surface emissivity (over ocean
-or land). With these a-priori assumptions, we were able to solve for
-$T(z),WV(z)$ and surface temperature, as well as dust loading, using a
-1D-var approach.
+%For testing purposes, if
+%the current operational AIRS L1/L2 dust flag detects dust, and we
+%assume fixed particle sizes and aerosol height from climatology, we
+%can almost always retrieve dust loadings that correlate very well with
+%eg MODIS aerosol optical depths, \emph{even if they are not necessarily
+%  accurate because we potentially used an incorrect height}.
 
-With the above experience, we outline some suggestions for including
-the \sasc code in an operation AIRS L2 retrieval.  The additional
-a-priori parameters required would be similar to those we needed for
-the dust case, namely cloud fraction, height, particle size and
-surface emissivity; in addition we would need cloud phase. Something
-similar to the current L2 retrieval could provide estimates of cloud
-heights and fractions, from which one could easily produce the
-required parameters. This could also be done using atmospheric
-profiles (for T(z) and Q(z)) from re-analysis to start.  From the
-height(s) one infers phase.  Work is needed to determine if a liquid
-cloud particle size must be derived or if climatology can be used.
-The re-analysis temperature can be used infer cirrus particle size, or
+%We have also prototyped a more complete L2 retrieval in the presence
+%of dust. Again in this case, we made some assumptions, namely we know
+%the effective particle size and height of the dust, and a further
+%assumption that we knew the underlying surface emissivity (over ocean
+%or land). With these a-priori assumptions, we were able to solve for
+%$T(z),WV(z)$ and surface temperature, as well as dust loading, using a
+%1D-var approach.
+
+For the cloud case, in addition to what the clear sky \sa needs as input
+(for example temperature, humidity and ozone profiles, surface emissivity, 
+view angles), \sasc requires the following extra parameters : (3) cloud fractions
+for each cloud, plus the overlap fraction (2) effective cloud loadings, 
+(2) cloud top heights, (2) cloud bottom heights and (2) effective particle sizes.
+The last two parameters can come from assuming a 20 \um effective water droplet
+size, and a cirrus size based on the temperature; similarly we could 
+set cloud bottom height based on an assumption about cloud thickness. This means
+a L2 algorithm would need to solve for an additional seven (7) parameters. 
+ 
+%With the above experience, we outline some suggestions for including
+%the \sasc code in an operational AIRS L2 retrieval.  The additional
+%a-priori parameters required would be similar to those we needed for
+%the dust case, namely cloud fraction, height, particle size and
+%surface emissivity; in addition we would need cloud phase. An algorithm 
+%similar to the current L2 retrieval could provide estimates of cloud
+%heights and fractions, which can then be used to easily produce the
+%required parameters; from the height(s) one infers phase.  
+%%Work is needed to determine if a liquid cloud particle size 
+%must be derived or if climatology can be used.
+
+Our prior work has demonstrated that \sa clear sky radiances produced using 
+\ecmwf temperature and water profile fields agree very well with clear sky AIRS
+observations; in addition we have also shown \ecmwf cloud fields are statistically 
+very good. One scenario we suggest would be to use \ecmwf forecast fields 
+as a first guess for atmospheric profiles (T(z) and Q(z) and surface temperature), 
+and re-analysis climatology as a first guess for cloud fractions and cloud tops.
+From these, the \ecmwf temperature can be used infer cirrus particle size, or
 one can derive it from the observed spectra, especially for the case
 of very small cirrus particles which have a very spectrally dependent
 emissivity.  This leaves two additional cloud parameters, ice and
-water optical depths, although cloud fraction and height will probably
-need further adjustment.  One could also think about getting cloud
+water optical depths to be solved at the first iteration. Subsequent iterations could
+then be used to adjust other parameters. One could also think about getting cloud
 fraction and height from MODIS.
 
 If dust is detected, which will only happen, in general, when clouds
@@ -623,17 +665,23 @@ This section provides some details on converting NWP profiles to a
 format that can be used for radiative transfer.  This allows some
 testing of both the RTA code and the NWP model clouds.  But, there are
 a number of difficulties in this process.  For \sasc we presently only
-have two scattering layers implemented.  Thus the NWP profile is
+use a model with two scattering layers implemented.  Thus the NWP profile is
 generally turned into a single effective water cloud in one layer, and
-a single effective ice cloud, in one layer.  This restriction can be
-lifted with some work.  In addition, our algorithm
-(\textsf{ecmwf2sarta}) to convert NWP profiles to \sasc input profiles
+a single effective ice cloud, in one layer.  
+
+Our current algorithm \ecmwfXsarta to convert NWP profiles to \sasc input profiles
 needs a more sophisticated approach for handling high optical depth
 clouds, which should be relatively easy to implement.  The basic
-problem at present is that we weight cloud optical depths in all NWP
-layers equally, instead of putting higher weights on higher altitude
+issue is that presently we equally weight cloud optical depths in all NWP
+layers, instead of putting higher weights on higher altitude
 layers that have sufficient optical depth to render the lower layer
-optical depths unimportant in the radiative transfer.
+optical depths unimportant in the radiative transfer. We are in the
+process of implementing a new cloud weighting scheme to address this issue.
+
+In addition, it should be fairly 
+straightforward to extend this to a \textsf{N} layer scattering code, 
+as we have recently worked with Xianglei Huang (U. of Michigan) and 
+X. Liu (NASA-Langley) on multiple cloud overlaps.
 
 Typically, Numerical Weather Prediction (NWP) models provide
 vertically resolved temperature and gas profiles at each grid
@@ -708,13 +756,13 @@ simple multiplication.  Possible scatterer types are:
 \subsection{Cloud levels $\rightarrow$ Slabs}
 
 As mentioned above, we need to go from $\simeq$ 90 levels of cloud
-profile information (ECMWF), to two slabs. Our \textsf{ecmwf2sarta}
+profile information (from \ecmwf), to two slabs. Our \ecmwfXsarta
 Matlab routine does the necessary manipulations as summarized below.
 
 \subsubsection{Input requirements}
 
 As stated above, in addition to the usual temperature and trace gas
-profiles, we also need the following information from ECMWF/ERA
+profiles, we also need the following information from \ecmwf
 \begin{itemize}
 \item p.ciwc : 91xP cloud ice profiles
 \item p.ciwc : 91xP cloud ice profiles
@@ -751,8 +799,8 @@ profiles, we also need the following information from ECMWF/ERA
 \item Effective particle size for water is set to 20 $\mu$m $\pm$ random
   amount
 \item Effective particle size for cirrus is set according to the
-  temperature of the cloudtop (again, $\pm$ a random amount).
-\item Cloud fracs for each cloud, and the overlap, are randomly set
+  temperature of the cloud top (again, $\pm$ a random amount).
+\item Cloud fractions for each cloud, and the overlap, are randomly set
   (using the "cc" field), so that they satisfy
   \begin{itemize}
   \item c(1) $\le$ 1, c(2) $\le$ 1
@@ -766,18 +814,18 @@ There are more sophisticated overlap schemes that can be used.
 
 \subsubsection{Examples}
 Figures \ref{fig1}-\ref{fig4} illustrate the results of our
-\textsf{ecmwf2sarta} code. Blue and Red are the ECMWF 91 level water
+\ecmwfXsarta code. Blue and Red are the \ecmwf 91 level water
 and ice profiles (in g/g) while cyan and magenta are the water and
 cirrus output slabs.  The horizontal extent of the slabs are
 the integrated cloud profiles, converted to g/m2 and normalized by a
 factor of 10000 for the plots. It is possible to modify
-\textsf{ecmwf2sarta} code in the future by using a weighting scheme
+\ecmwfXsarta code in the future by using a weighting scheme
 that uses knowledge of radiative transfer.
 
-\dfigure{Figs/clouds_profile10.eps}{\textsf{ecmwf2sarta} Sample
-  1}{fig1}{Figs/clouds_profile100.eps}{\textsf{ecmwf2sarta} Sample
-  2}{fig2} \dfigure{Figs/clouds_profile1000.eps}{\textsf{ecmwf2sarta}
-  Sample 3}{fig3}{Figs/clouds_profile2000.eps}{\textsf{ecmwf2sarta}
+\dfigure{Figs/clouds_profile10.eps}{\ecmwfXsarta Sample
+  1}{fig1}{Figs/clouds_profile100.eps}{\ecmwfXsarta Sample
+  2}{fig2} \dfigure{Figs/clouds_profile1000.eps}{\ecmwfXsarta
+  Sample 3}{fig3}{Figs/clouds_profile2000.eps}{\ecmwfXsarta
   Sample 4}{fig4}
 
 % \section{Timings}
@@ -793,7 +841,7 @@ figures. Obvious differences include more/colder deep convective
 clouds (DCCs) in the AIRS observations. This map is a combination of
 day/night observations as evident by the slope of missing low-latitude
 data.  It is interesting to note how well the radiances computed from
-ECMWF agree with AIRS observations in the polar regions!
+\ecmwf agree with AIRS observations in the polar regions!
 % Since these maps are for July, no daytime AIRS observations are
 % possible over the South Polar region.
 % \dfigure{Figs/yy_2007_mm_7_airs_global_obs1231_2}{AIRS BT1231 \wn
@@ -801,52 +849,56 @@ ECMWF agree with AIRS observations in the polar regions!
 % 2007}{AIRS_obs_July}{Figs/yy_2007_mm_7_airs_global_eracal1231_2}{\sasc
 % calculations for 1231 \wn, using ERA fields for July
 % 2007}{SARTA_calc_July}
+
 % Sergio:  need dates for first two figures below.  Also March 11, 2011?
 \dfigure{Figs/globalBT1231obs2_crop}{AIRS BT1231 \wn
   observations}{AIRS_obs_July}{Figs/globalBT1231era2_crop}{\sasc
   calculations for 1231 \wn, using ERA fields}{SARTA_calc_July}
 
 The next two figures zoom in on the Pacific/Indian Oceans, for March
-10,2011; the \sasc calculations used ECMWF fields, which are higher
+10,2011; the \sasc calculations used \ecmwf fields, which are higher
 resolution in time and space than ERA-Interim.  Figure
 \ref{AIRS_obs_March2011} is a gridded map showing daytime AIRS 1231
 \wn observations (converted to BT), while Figure
 \ref{SARTA_calc_March2011} is a similar map, showing \sasc
-calculations. Althought there are many general similarities, the cloud
-fields are quantitatively quite different.  In general the ECMWF
+calculations. Although there are many general similarities, the cloud
+fields are quantitatively quite different.  In general the \ecmwf
 computed clouds are spread wider spatially.  
 
 \dfigure{Figs/airs_bt_image}{AIRS BT1231 \wn observations for March
   11, 2011}{AIRS_obs_March2011}{Figs/ecmwf_bt_image}{\sasc
-  calculations for 1231 \wn, using ECMWF fields for March 11,
+  calculations for 1231 \wn, using \ecmwf fields for March 11,
   2011}{SARTA_calc_March2011}
 
 \section{Comparison to Other RTA Algorithms}
 
-We have done some limited comparisons of \sasc against \pcrtm,
-which is a fast radiative transfer code trained using DISORT, that
-uses principal components for the radiative transfer.  Note
-that in the discussion in this section is very different from Section
-5, where we outlined a plan for an AIRS L2 retrieval algorithm.
+We have done some limited comparisons of \sasc against \pcrtm,\cite{liu:06,liu:09*2}
+which is a fast radiative transfer code trained using \disort, that
+uses principal components for the radiative transfer. \pcrtm uses 
+Mie (or other) scattering parameters to obtain reflection and transmission 
+scattering coefficients using \disort, while our \textsf{PCLSAM} scattering algorithm
+effectively only uses the absorptive portions of the scattering parameters. 
+Note that the main focus of this section is very different from Section
+5, in which we outlined a plan for an AIRS L2 retrieval algorithm.
+For all discussions in this section, \ecmwf profiles were used in running
+both \sasc and \pcrtm.
 
-The \pcrtm implementation we compare against uses 50 random subcolumn
+The \pcrtm implementation we compare against uses 50 random sub-column
 incarnations of maximal overlap clouds. Since it is impossible for a
 finite resolution NWP grid to resolve the fine structure of clouds, an
 improvement on the simulation of radiances would include an average of
 several instances of clouds built from the NWP fields (ie use sub-grid
 points). In particular, the overlapping and extent of the clouds at
-different subgrid points can also be varied, ranging from all at fixed
-locations, to clouds at various locations within the subgrid.  Other
+different sub-grid points can also be varied, ranging from all at fixed
+locations, to clouds at various locations within the sub-grid.  Other
 differences are that the \pcrtm implementation uses ice cloud sizes
 that vary between 50 to 125 um, fixed 20 um water sizes, and Ping
 Yang's scattering parameters.
 
-For all discussions in this section, ECMWF profiles were used in running
-both \sasc and \pcrtm.
-
-\dfigure{Figs/spectra_sartaVSpcrtm.jpg}{Comparing \sasc vs
-  \pcrtm}{spectra}{Figs/pcrtm_calc_vs_sarta_biasV1}{BT1231
-  comparisons}{bt1231_sarta_pcrtm}
+\dfigure{Figs/spectra_sartaVSpcrtm.jpg}{Bias between two scattering codes \\
+  \sasc - \pcrtm (50 sub-columns)}{spectra}{Figs/pcrtm_calc_vs_sarta_biasV1}{BT1231
+  comparisons : vertical axis is \\ \sasc - \pcrtm (50 sub-columns) \\
+  while colorbar indicates counts}{bt1231_sarta_pcrtm}
 
 Figure \ref{spectra} is a 2d histogram, showing bias between the two
 codes as a function of wavenumber. The thick black line is the mean of
@@ -888,29 +940,48 @@ overlap may also be the cause of difference between \sasc and \pcrtm.
 % is "warmer" than \pcrtm, but it is not easy to chose between the two
 % when comparing to the AIRS observations.
 
-
 % Sergio:  you have *got* to make the sign clear in any figures 
 % showing a difference!!  Like the two figures below!!  What is being
 % subtacted from what!  It should *not* just be in the title, which
 % people often don't look at.  It should be in the caption!  In fact,
 % figures in papers should not have titles!
+
+A simple test to determine the difference between \sasc and \pcrtm was
+devised as described below \footnote{with additional suggestions by Xu Liu}. 
+The cloud ice vertical profile (from \ecmwf) is set to 0, and the 
+water cloud fractions set to 1 (at the relevant levels for \pcrtm, and 
+for the column for \sasc); in addition, only one sub-column should be used for 
+\pcrtm. The cloud liquid profile is changed from spanning 
+91 (or 37) levels, to spanning the {\em (cloud top, cloud bottom)} that is 
+output from \ecmwfXsarta routine. This effectively ensures that we compare a 
+one slab water cloud, at {\em approximately the same} vertical location in both models, 
+which as described above have quite similar water scattering parameters.
+
+The results showed that for
+about 2700 profiles on May 1, 2012, the cloud effect at 1231 \wn 
+(defined as cloudy calc - clear calc) was 5.2 $\pm$ 7.3 K, while
+the difference between the models (\pcrtm - \sasc) was 0.04 $\pm$ 0.93 K.
+A similar test for ice cloud yielded a cloud effect of 9.5 $\pm$ 11.0 K
+and a model difference of -0.56 $\pm$ 2.73 K; we remind the reader 
+there are significant differences 
+between the ice parameters used in the two models.
+
 While the speeds of the two codes are very similar, the architecture
 of our \sasc is very much the same as the clear sky \sa code, and so
-should be easy for a new user to learn. Figures \ref{pdf1_sarta_pcrtm}
+should be easy for an existing \sa user to learn. Figures \ref{pdf1_sarta_pcrtm}
 and \ref{pdf2_sarta_pcrtm} shows the night time biases between \sasc
 and \pcrtm for 820, 960, 1231 and 2616 \wn over all points on the
-globe (SARTA minus PCRTM). The graph on the left uses the 50 subcolumn
-version of \pcrtm while the one on the right shows a one subcolum
+globe (\sasc minus \pcrtm). The graph on the left uses the 50 sub-column
+version of \pcrtm while the one on the right shows a one speculum
 version.  This suggests that the NWO overlap statistics significantly
-affect the output of PCRTM, making the radiances colder.  Figure
+affect the output of \pcrtm, making the radiances colder.  Figure
 \ref{pdf2_sarta_pcrtm} shows better agreement, and the remaining
 differences are likely to do with our too-simple NWP cloud optical depth
 weighting scheme.
 
-\dfigure{Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg}{Comparing \sasc vs
-  \pcrtm (50
-  subcolumns)}{pdf1_sarta_pcrtm}{Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg}{Comparing
-  \sasc vs \pcrtm (1 subcolumn)}{pdf2_sarta_pcrtm}
+\dfigure{Figs/pcrtm_calc_vs_sarta_calc_histV1.jpg}{Bias between two scattering codes \\
+  \sasc - \pcrtm (50 sub-columns)}{pdf1_sarta_pcrtm}{Figs/pcrtm_calc_vs_sarta_calc_histV2.jpg}{Bias between two
+  scattering codes \\  \sasc - \pcrtm (1 sub-column)}{pdf2_sarta_pcrtm}
 
 % Importantly, even though there is a bias between the \sasc and \pcrtm
 % calculations, this should not impact an operational temperature and
@@ -926,8 +997,23 @@ weighting scheme.
 % retrieve a dust loading, even though it was not necessarily correct
 % because we potentially used an incorrect height.
 
+\section{Conclusions}
+We have outlined the steps that can be taken for an operational AIRS L2 scheme that 
+accounts for the effects of cloud (water and ice) and aerosol, which should improve 
+the yield and quality of the L2 products. Central to these steps is the \sasc 
+algorithm we have written, which is very similar to the clear sky \sa code. 
+Tests show that \sasc works as well as scattering algorithms which implement 
+complicated but accurate scattering schemes, such as \pcrtm and Ping Yang's ice 
+scattering parameters. Some work still can be done to improve our code, such as make 
+it a general $N$ layer scattering code, rather than the two it is currently restricted
+to, and an improved \ecmwfXsarta algorithm to turn NWP cloud fields into two slabs. 
+However, these issues are tangential to using \sasc for AIRS L2 retrievals. In 
+addition, in the future we could also consider implementing the same {\emph reflection,
+transmission} coefficient based code such as \pcrtm.
+
 \bibliographystyle{unsrt}
 % \bibliography{/home/sergio/PAPERS/BIB/atmspec2002}
-\bibliography{/Users/strow/Tex/Bib/atmspec2002}
+\bibliography{atmspec2002}
+% \bibliography{/Users/strow/Tex/Bib/atmspec2002}
 
 \end{document}
