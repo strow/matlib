@@ -2,7 +2,7 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 
 %% modelled on MATLABCODE/CLOUD_ECMWF_ERA/PACKAGE_CFRAC/readecmwf91_nearest_gasNcloud_slabprof.m
 %% also see /asl/rtp_prod/airs/rtp/create_rcalc_ecm_cld_allfov.m
-
+%
 % function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % takes an input [h ha p pa] which incudes cloud structure from (ERA/ECMWF) and
 % then runs the SARTA code
