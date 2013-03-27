@@ -12,6 +12,7 @@ Docs/Figs/*
 *.png
 *.bib             # no tex junk
 *.bbl
+*.aux
 *.log             # no log files
 *.core            # no coredumps
 

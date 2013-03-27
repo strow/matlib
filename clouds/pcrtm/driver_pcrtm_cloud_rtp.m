@@ -254,4 +254,6 @@ if run_sarta.clear > 0
   disp('added on sarta clear calcs');
 end
 
-%rtpwrite(thefilenameOUT,h,ha,p0ALL,pa);
+% now overwrite p.rcalc and replace with pcrtm calcs
+p1ALL.rcalc = p1ALL.rad_allsky;
+
