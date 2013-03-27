@@ -45,10 +45,7 @@ if waterORice > 0
     p1.clwc(:,oo2(ii)) = 0;
     xx = find(p1.plevs(:,oo2(ii)) >= cT & p1.plevs(:,oo2(ii)) <= cB);
     p1.clwc(xx,oo2(ii)) = sumwater(oo2(ii))/(cB-cT);
-  end
-  for ii = 1 : length(p1.stemp)
-    nlevs = p1.nlevs(ii);
-    sumwater2(ii) = trapz(p1.plevs(1:nlevs,ii),p1.clwc(1:nlevs,ii));
+    p1.cfrac(oo2(ii))  = 1;
   end
 
   %% now make sure all info is in cngwat, cprtop etc and not in cngwat2 cprtop2 etc
@@ -59,8 +56,11 @@ if waterORice > 0
     p1.cprbot(oo1(ii))  = p1.cprbot2(oo1(ii));
     p1.cpsize(oo1(ii))  = p1.cpsize2(oo1(ii));
     p1.ctype(oo1(ii))   = 101;
+    %% fix the cloud fracs
     p1.cfrac12(oo1(ii)) = 0;
     p1.cfrac2(oo1(ii))  = 0;
+    p1.cngwat2(oo1(ii))  = 0;
+    p1.cfrac(oo1(ii))   = 1;
   end
 
 end
@@ -108,10 +108,7 @@ if waterORice < 0
     p1.ciwc(:,oo2(ii)) = 0;
     xx = find(p1.plevs(:,oo2(ii)) >= cT & p1.plevs(:,oo2(ii)) <= cB);
     p1.ciwc(xx,oo2(ii)) = sumice(oo2(ii))/(cB-cT);
-  end
-  for ii = 1 : length(p1.stemp)
-    nlevs = p1.nlevs(ii);
-    sumice2(ii) = trapz(p1.plevs(1:nlevs,ii),p1.ciwc(1:nlevs,ii));
+    p1.cfrac(oo2(ii))  = 1;
   end
 
   %% now make sure all info is in cngwat, cprtop etc and not in cngwat2 cprtop2 etc
@@ -122,9 +119,11 @@ if waterORice < 0
     p1.cprbot(oo1(ii))  = p1.cprbot2(oo1(ii));
     p1.cpsize(oo1(ii))  = p1.cpsize2(oo1(ii));
     p1.ctype(oo1(ii))   = 201;
+    %% fix the cloud fracs
     p1.cfrac12(oo1(ii)) = 0;
     p1.cfrac2(oo1(ii))  = 0;
-
+    p1.cngwat2(oo1(ii)) = 0;
+    p1.cfrac(oo1(ii))   = 1;
   end
 
 end
