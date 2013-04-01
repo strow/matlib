@@ -11,7 +11,9 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %   >>> options for SARTA runs
 %     run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc
 %     run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc
-%     run_sarta.cumsum = 0 -- 1 to set cloud pressure based on cumulative sum, -ve for just go with "ecmwf2sarta" results
+%     run_sarta.cumsum = 0 -- 1 : set cloud pressure based on cumulative sum of p.ciwc and p.clwc, 
+%                        +100   : go for where cloudOD ~ 1 (if that can be found)
+%                        < 0    : just go with "ecmwf2sarta" results (default before March 2012
 %     run_sarta.klayers_code = string to klayers
 %     run_sarta.sartaclear_code = string to sarta clear executable
 %     run_sarta.sartacloud_code = string to sarta cloud executable
@@ -23,7 +25,11 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %
 % Can do ECM (91 levels) or ERA (37 levels)
 %
-
+% updates
+%  3/28/2012 : run_sarta.cumsum = 100  option allows the clouds to be placed where OD ~ 1
+%  3/11/2012 : run_sarta.cumsum = 0--1 option allows the clouds to be placed where cumsum(ciwc)/sum(ciwc) = X
+%                                  -1  option is to default wherever ecmwf2sarta put the cloud
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 base_dir = fileparts(mfilename('fullpath')); % current directory
 base_dir1 = fileparts(base_dir);  % dir:  ../
@@ -44,6 +50,7 @@ addpath([base_dir2 '/h4tools'])
   [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
   run_sarta.clear = +1;
   run_sarta.cloud = +1;
+  run_sarta.cumsum = 100;
   tic
   p1 = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
   toc
@@ -127,8 +134,26 @@ prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv
 prof = set_fracs_deffs(head,prof,profX,...
             cmin,cngwat_max);            %% sets fracs and particle effective sizes eg cfrac2
 
-if run_sarta.cumsum > 0
+if run_sarta.cumsum > 0 & run_sarta.cumsum <= 1
+  %% set cloud top according to cumulative sum fraction of ciwc or clwc
   prof = reset_cprtop(prof);
+elseif run_sarta.cumsum > 99
+  %% set cloud top according to where cloud OD = 1
+%  profXYZ = prof;
+%  aaaa = load('/home/sergio/test_paul_p2.mat');
+  prof = reset_cprtop_cloudOD(prof);
+%{
+  figure(1); plot(prof.sarta_lvlODice,'b');   hold on; plot(aaaa.p2.pcrtm_lvlODice,'r'); hold off
+  figure(2); plot(prof.sarta_lvlODwater,'b'); hold on; plot(aaaa.p2.pcrtm_lvlODwater,'r'); hold off
+  ice = find(prof.ctype == 201);
+  water = find(prof.ctype2 == 101);
+  figure(3); plot(prof.sarta_lvl_iceOD_1(ice),prof.cprtop(ice),'bo',...
+                  prof.sarta_lvl_waterOD_1(water),prof.cprtop2(water),'rx',...
+                  [0 1000],[00 1000],'k')
+             axis([0 1000 0 1000]); grid
+  xlabel('OD = 1'); ylabel('cprtop')
+  keyboard
+%}
 end
 
 prof = check_for_errors(prof);           %% see if there are possible pitfalls

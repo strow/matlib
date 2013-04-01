@@ -32,7 +32,7 @@ else
   watercldYW = flipud(cumsum(flipud(watercldX)));    
 end
 
-%% this is mean cld pressure (a^0 = so no weighting!!!)
+%% this is mean cld pressure (a^0 = 1, so no weighting!!!)
 aa.icecldX(ii) = nansum((plevs.*(icecldXW.^0)).*icecldX);
 aa.watercldX(ii) = nansum((plevs.*(watercldXW.^0)).*watercldX);
 
