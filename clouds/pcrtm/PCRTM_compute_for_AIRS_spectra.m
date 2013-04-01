@@ -148,9 +148,12 @@ for ibox =1:nboxes
       Pp = Pres(ilev);
     end
 
-    newT(ilev) = interp1(log(P(:,ibox)), TT(:,ibox), log(Pp),[],'extrap');               %% sergio : orig was interp1(log(P),TT(:,ibox),log(Pp))
-    newh2o(ilev) = exp(interp1(log(P(:,ibox)), log(q(:,ibox)), log(Pp),[],'extrap'));    %% sergio : orig was exp(interp1(log(P),q(:,ibox),log(Pp)))
-    newozone(ilev) = exp(interp1(log(P(:,ibox)), log(o3(:,ibox)), log(Pp),[],'extrap')); %% sergio : orig was exp(interp1(log(P),o3(:,ibox),log(Pp)))
+    %% sergio : orig was interp1(log(P),TT(:,ibox),log(Pp))
+    newT(ilev) = interp1(log(P(:,ibox)), TT(:,ibox), log(Pp),[],'extrap');               
+    %% sergio : orig was exp(interp1(log(P),q(:,ibox),log(Pp)))
+    newh2o(ilev) = exp(interp1(log(P(:,ibox)), log(q(:,ibox)), log(Pp),[],'extrap'));    
+    %% sergio : orig was exp(interp1(log(P),o3(:,ibox),log(Pp)))
+    newozone(ilev) = exp(interp1(log(P(:,ibox)), log(o3(:,ibox)), log(Pp),[],'extrap')); 
   end
     
   % set a minimum cloud cover (0.001) to decide clear or cloudy over the box
@@ -195,6 +198,10 @@ for ibox =1:nboxes
     idp(i) = itmp(1);
   end
          
+  %% remember from above   idc = find(cc(:,ibox)>0.001);  
+  sergio_ice_opt(1:nlev)   = 0;
+  sergio_water_opt(1:nlev) = 0;
+
   for i = 1: length(idc)
             
     ilev = idc(i);
@@ -218,7 +225,7 @@ for ibox =1:nboxes
     cldde_liq(ilev) = 20; % Diameter in PCRTM
 
     % cloud phase and cloud effective size  in  micron
-    if cldpres_layer(ilev) <=440
+    if cldpres_layer(ilev) <= 440
       cldphase_layer(ilev) = 2;  % cirrus cloud
       cldde_layer(ilev) = cldde_ice(ilev);
     else
@@ -240,8 +247,12 @@ for ibox =1:nboxes
     qw = WCT(ilev,ibox)/ TT(ilev,ibox) *P(ilev,ibox)*100/R *1e3;  %change liquid water content from kg/kg to g/m^3
     % ECMWF technical report, Klein S. A., 1999                   
     water_opt = 3 * qw/cldde_liq(ilev)/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3; 
-    sub_opt(ilev) = ice_opt + water_opt; 
-               
+
+    sub_opt(ilev) = ice_opt + water_opt;  %%% <<<<<<<<<<<<<<<<<<-- should we do this??? SSM 03/28/2013
+         
+    sergio_ice_opt(ilev)   = ice_opt;
+    sergio_water_opt(ilev) = water_opt;
+
   end
   %$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     

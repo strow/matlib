@@ -175,6 +175,7 @@ for iiiiA = 1:length(iiii)
 
 end    %% loop over iiiiA
 
+%% put in the cloud cumulative fraction info, so that it can be used if necessary by "reset_cprtop"
 prof.watercldX = aa.watercldX;
 prof.icecldX   = aa.icecldX;
 prof.watercldY = aa.watercldY;

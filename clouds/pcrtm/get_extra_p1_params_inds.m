@@ -1,4 +1,6 @@
-p1ALL.robs1(:,inds)       = profRX.robs1;
+%if isfield(p0ALL,'robs1')
+%  p1ALL.robs1(:,inds)       = p0ALL.robs1(:,inds);
+%end
 
 if run_sarta.clear > 0
   p1ALL.sarta_clear(:,inds) = profRX.rcalc;
@@ -8,7 +10,6 @@ end
 if run_sarta.cloud > 0
   p1ALL.sarta_cloud(:,inds) = profRX2.rcalc;
   p1ALL.sarta_cld_co2_used(inds)  = ppmvLAY2(40,:);
-  
 end
 
 p1ALL.rad_allsky(:,inds)  = rad_allsky(h.ichan,:)*1000;
@@ -24,6 +25,7 @@ p1ALL.landfrac(inds)     = p.landfrac;
 p1ALL.solzen(inds)       = p.solzen;
 p1ALL.stemp(inds)        = p.stemp;
 
+%% these are the SARTA two slab CLOUD parameters
 p1ALL.ctype(inds)        = p.ctype;
 p1ALL.cfrac(inds)        = p.cfrac;
 p1ALL.cngwat(inds)       = p.cngwat;
@@ -36,9 +38,17 @@ p1ALL.cngwat2(inds)      = p.cngwat2;
 p1ALL.cpsize2(inds)      = p.cpsize2;
 p1ALL.cprtop2(inds)      = p.cprtop2;
 
+%% these are the PCRTM MEAN CLOUD column parameters, which is basically : sub_opt = ice(high) + water(low)
 p1ALL.pcrtm_iceOD(inds)     = tmpjunk.totalODice;
 p1ALL.pcrtm_iceDME(inds)    = tmpjunk.meanDMEice;
 p1ALL.pcrtm_iceCTOP(inds)   = tmpjunk.maxCTOPice;
 p1ALL.pcrtm_waterOD(inds)   = tmpjunk.totalODwater;
 p1ALL.pcrtm_waterDME(inds)  = tmpjunk.meanDMEwater;
 p1ALL.pcrtm_waterCTOP(inds) = tmpjunk.maxCTOPwater;
+
+%% these are the PCRTM CLOUD profile parameters, and should compare to each other
+p1ALL.pcrtm_lvlODice(:,inds)   = tmpjunk.lvlODice;
+p1ALL.pcrtm_lvlODwater(:,inds) = tmpjunk.lvlODwater;
+p1ALL.pcrtm_iceODX(inds)       = tmpjunk.totalODiceX;
+p1ALL.pcrtm_waterODX(inds)     = tmpjunk.totalODwaterX;
+

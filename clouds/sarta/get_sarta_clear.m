@@ -16,11 +16,6 @@ fop = mktemp('temp.op.rtp');
 frp = mktemp('temp.rp.rtp');
 ugh = mktemp('ugh');
 
-%if isfield(p,'co2ppm')
-%  p = rmfield(p,'co2ppm');
-%end
-%p.co2ppm = co2;    %% for cloud, use PCRTM values of co2 for debug purposes
-
 rtpwrite(fip,h,ha,prof,pa);
 klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh];
   eval(klayerser);
