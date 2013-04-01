@@ -33,6 +33,5 @@ rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh]; eval(rmer);
 
 [ppmvLAY2,ppmvAVG2,ppmvMAX2,pavgLAY2,tavgLAY2] = layers2ppmv(headRX,profRX,1:length(profRX.stemp),2);
 
-figure(1);
-plot(ppmvLAY2(40,:)); title('CO2 ppmv')
+%figure(1); plot(ppmvLAY2(40,:)); title('CO2 ppmv')
 

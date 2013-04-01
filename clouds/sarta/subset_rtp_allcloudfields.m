@@ -481,8 +481,20 @@ if length(fieldsIN) ~= length(fieldsOUT)
     bad = find(iaFound < 0);
     for ii = 1 : length(bad)
       fprintf(1,' did not find field %s \n',fieldsIN{bad(ii)})
+      str = ['blah = profin.' fieldsIN{bad(ii)} ';'];
+      eval(str);
+      [mm,nn] = size(blah);
+      if mm == 1
+        %% this is like eg p.stemp = 1 x N ---> 1 x M
+        str = ['prof.' fieldsIN{bad(ii)} ' = blah(indp);'];         
+        eval(str)
+      else
+        %% this is like eg p.robs1 = L x N ---> L x M
+        str = ['prof.' fieldsIN{bad(ii)} ' = blah(:,indp);'];         
+        eval(str)
+      end
     end
-    error('more fieldnames in INPUT than in OUTPUT');
+    disp('more fieldnames in INPUT than in OUTPUT, fixed that ....');
   elseif length(fieldsIN) < length(fieldsOUT)
     error('WOW : more fieldnames in OUTPUT than in INPUT');
   end
