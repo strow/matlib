@@ -14,12 +14,22 @@ end
 fip = mktemp('temp.ip.rtp');
 fop = mktemp('temp.op.rtp');
 frp = mktemp('temp.rp.rtp');
-ugh = mktemp('ugh');
+ugh1 = mktemp('ugh1');
+ugh2 = mktemp('ugh2');
 
 rtpwrite(fip,h,ha,prof,pa);
-klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh];
+klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh1];
   eval(klayerser);
-sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh];
+
+sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh2];
   eval(sartaer);
-[headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
-rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh]; eval(rmer);
+try
+  [headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
+catch me
+  me
+  fprintf(1,'oops : error running sarta cloudy, look at error log %s \n',ugh2);
+  %keyboard
+  error('woof! try again!')
+end
+  
+rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh1 ' ' ugh2]; eval(rmer);

@@ -29,6 +29,8 @@ prof  = pin;
 
 cfrac = profX.cfrac(ii);
 
+%% really, ii == jj!!!!
+
 prof.plat(jj) = profX.plat(ii);
 prof.plon(jj) = profX.plon(ii);
 prof.cemis(jj)   = 0;
@@ -64,7 +66,6 @@ if length(cTYPE) == 1
 
   icefound   = -1;
   waterfound = -1;
-  %cc = convert_gg_to_gm2(cT,cB,cngwat,profX.plevs(:,ii),profX.ptemp(:,ii));
   cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp);
 
   kk = 1;
@@ -107,7 +108,6 @@ if length(cTYPE) == 2
 
   icefound   = -1;
   waterfound = -1;
-  %cc = convert_gg_to_gm2(cT,cB,cngwat,profX.plevs(:,ii),profX.ptemp(:,ii));
   cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp);
 
   kk = 1;
@@ -157,3 +157,4 @@ if length(cTYPE) == 2
     prof.udef(16,jj) = min(prof.cfrac(jj),prof.udef(15,jj));
   end
 end
+
