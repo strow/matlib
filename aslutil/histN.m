@@ -1,8 +1,24 @@
 function histmat = histN(varargin)
+% histN is a function to bin data over any given sets of dimensions.  This
+%   function can be used to evaluate data that has variations in multiple
+%   dimensions and make plots.
+%
+% histmat = histN(dataA, binsA)
+% histmat = histN(dataA, dataB, binsA, binsB)
+% histmat = histN(dataA, dataB, ... binsA, binsB ...)
+% 
+% Example:
+%   [a]=histN(rand(10)*10,rand(10)*4,0:10,1:4)
+%
+% Note: A warning is given if data points have been left out of the selection.
+%
+% See also:  GSTATS
+
+% Written by Paul Schou -- 10 April 2013
 
 % checks for even number of inputs
-if mod(nargin,2) ~= 0
-  error('Number of inputs must be even, (valA, valB, ... binA, binB ...)')
+if mod(nargin,2) ~= 0 || nargin == 0
+  error('Number of inputs must be even:  histN(valA, valB, ... binA, binB ...)')
 end
 
 outsize = [];
@@ -22,6 +38,7 @@ end
 %histmat = zeros(outsize);
 bins = zeros(numel(varargin{1}),length(outsize));
 
+% the remaining part of this code is taken out of gstats and simplified
 for i = 1:nargin/2
   [x bins(:,i)] = histc(varargin{i}(:),varargin{i+nargin/2});
 end
