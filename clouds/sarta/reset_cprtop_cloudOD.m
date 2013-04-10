@@ -1,7 +1,9 @@
-function p1 = reset_cprtop_cloudOD(p0);
+function p1 = reset_cprtop_cloudOD(p0,cumsumOD);
 
 %% computes cloud ODs based on formulas given by Xianglei and Xiuhong
 %% see PCRTM_compute_for_AIRS_spectra.m
+%% if cumsumOD < 99 then look for where cumulative cloudOD == cumsum
+%%    cumsumOD > 99 then look for peak of cloud wgt fcn
 
 p1 = p0;
 p1.orig_ctop  = p1.cprtop;
@@ -54,13 +56,19 @@ for ii = 1 : length(p0.stemp)
   Z = cumsum(dz);
   diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
 
+  Z = p2h(ptemp)/1000;
+  diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
+
   % compute ice cloud optical depth from Ebert and Curry (1992, J. Geophys. Res.,  
   qi = ciwc ./ ptemp .* press *100/R * 1e3;  %%change IWC from kg/kg to g/m3  
   iceOD = (0.003448 + 2.431./cldde_ice) .*qi ./ cc .* diffZ *1e3;
 
   bad = find(isnan(cldde_ice)); cldde_ice(bad) = -9999;
   p1.sarta_lvlDMEice(:,ii) = cldde_ice;
-  bad = find(isnan(iceOD)); iceOD(bad) = 0;
+  bad = find(isnan(iceOD) | isinf(iceOD)); iceOD(bad) = 0;
+
+  %% now check things are ok ie where there is iwc, there is finite cc
+  
   p1.sarta_lvlODice(:,ii) = iceOD;
   p1.sarta_lvlZ(:,ii) = Z;
 
@@ -74,7 +82,7 @@ for ii = 1 : length(p0.stemp)
 
   bad = find(isnan(cldde_liq)); cldde_liq(bad) = -9999;
   p1.sarta_lvlDMEwater(:,ii) = cldde_liq;
-  bad = find(isnan(waterOD)); waterOD(bad) = 0;
+  bad = find(isnan(waterOD) | isinf(waterOD)); waterOD(bad) = 0;
   p1.sarta_lvlODwater(:,ii) = waterOD;
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,7 +90,7 @@ for ii = 1 : length(p0.stemp)
   icesum = cumsum(iceOD);
   watersum = cumsum(waterOD);
 
-  od_ice1_top = find(icesum > 1,1);
+  od_ice1_top = find(icesum >= cumsumOD,1);
   if length(od_ice1_top) > 0
     p1.sarta_lvl_iceOD_1(ii) = press(od_ice1_top);
   else
@@ -98,7 +106,7 @@ for ii = 1 : length(p0.stemp)
     end
   end
 
-  od_water1_top = find(watersum > 1,1);
+  od_water1_top = find(watersum >= cumsumOD,1);
   if length(od_water1_top) > 0
     p1.sarta_lvl_waterOD_1(ii) = press(od_water1_top);
   else
@@ -114,6 +122,15 @@ for ii = 1 : length(p0.stemp)
     end
   end
 
+  p1.sarta_iceOD_warn(ii) = -1;  %% assume things ok between ciwc and cc
+  if sum(iceOD) < eps & sum(ciwc)*1e5 > 0
+    p1.sarta_iceOD_warn(ii) = +1;
+  end
+  p1.sarta_waterOD_warn(ii) = -1;  %% assume things ok between clwc and cc
+  if sum(waterOD) < eps & sum(clwc)*1e5 > 0
+    p1.sarta_waterOD_warn(ii) = +1;
+  end
+
 %{
   plot(1:length(press),iceOD/nansum(iceOD),'b',1:length(press),waterOD/nansum(waterOD),'r',...
        od_ice1_top,0.1,'bo',       od_water1_top,0.1,'ro')
@@ -126,74 +143,105 @@ for ii = 1 : length(p0.stemp)
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% this is basically "reset_cprtop"
-%% except we replaced 
-%%   icecldY   with sarta_lvl_iceOD_1
-%%   watercldY with sarta_lvl_waterOD_1
 
-%% this is ice
-
-ice = find(p1.ctype == 201 & p1.ctype2 ~= 201);
-pcenter_ice(ice) = (p0.cprtop(ice) + p0.cprbot(ice))/2;
-%% these are the ones we want to "raise"
-oo = find(pcenter_ice(ice) > p1.sarta_lvl_iceOD_1(ice) & p1.sarta_lvl_iceOD_1(ice) > 0); 
-if length(oo) > 0
-  delta = pcenter_ice(ice) - p1.sarta_lvl_iceOD_1(ice);
-  p1.cprtop(ice(oo)) = p1.cprtop(ice(oo)) - delta(oo);
-  p1.cprbot(ice(oo)) = p1.cprbot(ice(oo)) - delta(oo);
+%% do the weighting functions
+wgtI = zeros(size(p0.ptemp));
+ii = 1;
+wgtI(ii,:) = 0;
+for ii = 2 : p0.nlevs(1)
+  wgtI(ii,:) = wgtI(ii-1,:) + p1.sarta_lvlODice(ii,:);
+end
+wgtI = exp(-wgtI) .* (1-exp(-p1.sarta_lvlODice));
+for ii = 1 : length(p1.stemp)
+  dodo = wgtI(:,ii);
+  if sum(dodo) > 0
+    bop = find(dodo == max(dodo),1);
+    wgtpeakIindex(ii) = bop;
+    wgtpeakI_tempr(ii) = p1.ptemp(bop,ii);
+    wgtpeakI(ii) = p1.plevs(bop,ii);
+  else
+    wgtpeakIindex(ii) = -1;
+    wgtpeakI_tempr(ii) = -9999;
+    wgtpeakI(ii) = -9999;
+  end
 end
 
-ice = find(p1.ctype2 == 201 & p1.ctype ~= 201);
-pcenter_ice(ice) = (p0.cprtop2(ice) + p0.cprbot2(ice))/2;
-%% these are the ones we want to "raise"
-oo = find(pcenter_ice(ice) > p1.sarta_lvl_iceOD_1(ice) & p1.sarta_lvl_iceOD_1(ice) > 0); 
-if length(oo) > 0
-  delta = pcenter_ice(ice) - p1.sarta_lvl_iceOD_1(ice);
-  p1.cprtop2(ice(oo)) = p1.cprtop2(ice(oo)) - delta(oo);
-  p1.cprbot2(ice(oo)) = p1.cprbot2(ice(oo)) - delta(oo);
+wgtW = zeros(size(p0.ptemp));
+ii = 1;
+wgtI(ii,:) = 0;
+for ii = 2 : p0.nlevs(1)
+  wgtW(ii,:) = wgtW(ii-1,:) + p1.sarta_lvlODwater(ii,:);
+end
+wgtW = exp(-wgtW) .* (1-exp(-p1.sarta_lvlODwater));
+for ii = 1 : length(p1.stemp)
+  dodo = wgtW(:,ii);
+  if sum(dodo) > 0
+    bop = find(dodo == max(dodo),1);
+    wgtpeakWindex(ii) = bop;
+    wgtpeakW_tempr(ii) = p1.ptemp(bop,ii);
+    wgtpeakW(ii) = p1.plevs(bop,ii);
+  else
+    wgtpeakWindex(ii) = -1;
+    wgtpeakW_tempr(ii) = -9999;
+    wgtpeakW(ii) = -9999;
+  end
 end
 
-ice = find(p1.ctype2 == 201 & p1.ctype == 201);
-pcenter_ice(ice) = (p0.cprtop(ice) + p0.cprbot(ice))/2;
-%% these are the ones we want to "raise"
-oo = find(pcenter_ice(ice) > p1.sarta_lvl_iceOD_1(ice) & p1.sarta_lvl_iceOD_1(ice) > 0);  
-if length(oo) > 0
-  delta = pcenter_ice(ice) - p1.sarta_lvl_iceOD_1(ice);
-  p1.cprtop(ice(oo)) = p1.cprtop(ice(oo)) - delta(oo);
-  p1.cprbot(ice(oo)) = p1.cprbot(ice(oo)) - delta(oo);
+p1.sarta_wgtI     = wgtI;
+p1.sarta_wgtW     = wgtW;
+
+p1.sarta_index_wgtpeakW = wgtpeakWindex;
+p1.sarta_index_wgtpeakI = wgtpeakIindex;
+
+p1.sarta_wgtpeakW = wgtpeakW;
+p1.sarta_wgtpeakI = wgtpeakI;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+iJunk = -1;
+if iJunk > 0
+  %% this shows that wgtpeakW < sarta_lvl_waterOD_1 ie higher up!!!!!
+  plot(p1.sarta_wgtpeakW,p1.sarta_lvl_waterOD_1,'o',p1.sarta_wgtpeakI,p1.sarta_lvl_iceOD_1,'rx',wgtpeakI,wgtpeakI)
+   axis([0 1000 0 1000])
+
+  plot(wgtpeakI,p1.cprtop,'o',wgtpeakW,p1.cprtop2,'ro',wgtpeakI,wgtpeakI); axis([0 1000 0 1000])
+  dn = -1000 : 10 : +1000; nn = hist(wgtpeakI-p1.cprtop,dn); plot(dn,nn)
+  dn = -1000 : 10 : +1000; nn = hist(wgtpeakW-p1.cprtop2,dn); plot(dn,nn)
+
+  %% do simple RT
+  ii = p0.nlevs(1);
+  radI(ii,:) = ttorad(1231*ones(size(p1.stemp)),p1.stemp);
+  for ii = p0.nlevs(1)-1 : -1 : +1
+    tau = exp(-p1.sarta_lvlODice(ii,:));
+    radI(ii,:) = radI(ii+1,:) .* tau + ttorad(1231*ones(size(p1.stemp)),p1.ptemp(ii,:)) .* (1 - tau);
+  end
+
+  ii = p0.nlevs(1);
+  radW(ii,:) = ttorad(1231*ones(size(p1.stemp)),p1.stemp);
+  for ii = p0.nlevs(1)-1 : -1 : +1
+    tau = exp(-p1.sarta_lvlODwater(ii,:));
+    radW(ii,:) = radW(ii+1,:) .* tau + ttorad(1231*ones(size(p1.stemp)),p1.ptemp(ii,:)) .* (1 - tau);
+  end
+
+  junkprof = 1 - exp(-(1:double(p0.nlevs(1)))/double(p0.nlevs(1)));  %% exponential atmosphere
+  ii = p0.nlevs(1);
+  radJ(ii,:) = ttorad(1231*ones(size(p1.stemp)),p1.stemp);
+  for ii = p0.nlevs(1)-1 : -1 : +1
+    tau = exp(-junkprof(ii))*ones(size(p1.stemp));
+    radJ(ii,:) = radJ(ii+1,:) .* tau + ttorad(1231*ones(size(p1.stemp)),p1.ptemp(ii,:)) .* (1 - tau);
+  end
+
+  lala = sum(p1.sarta_lvlODice);
+  scatter(ttorad(1231,wgtpeakI_tempr),radI(1,:),30,lala,'filled'); colorbar
+  lala = sum(p1.sarta_lvlODwater);
+  scatter(ttorad(1231,wgtpeakW_tempr),radW(1,:),30,lala,'filled'); colorbar
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% this is water
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-water = find(p1.ctype == 101 & p1.ctype2 ~= 101);
-pcenter_water(water) = (p0.cprtop(water) + p0.cprbot(water))/2;
-%% these are the ones we want to "raise"
-oo = find(pcenter_water(water) > p1.sarta_lvl_waterOD_1(water) & p1.sarta_lvl_waterOD_1(water) > 0);
-if length(oo) > 0
-  delta = pcenter_water(water) - p1.sarta_lvl_waterOD_1(water);
-  p1.cprtop(water(oo)) = p1.cprtop(water(oo)) - delta(oo);
-  p1.cprbot(water(oo)) = p1.cprbot(water(oo)) - delta(oo);
-end
+%% now do the actual replacement of cprtop/cprbot with above info
+p1 = do_the_reset_cprtop_cloudOD(p0,p1,cumsumOD);
 
-water = find(p1.ctype2 == 101 & p1.ctype ~= 101);
-pcenter_water(water) = (p0.cprtop2(water) + p0.cprbot2(water))/2;
-%% these are the ones we want to "raise"
-oo = find(pcenter_water(water) > p1.sarta_lvl_waterOD_1(water) & p1.sarta_lvl_waterOD_1(water) > 0);
-if length(oo) > 0
-  delta = pcenter_water(water) - p1.sarta_lvl_waterOD_1(water);
-  p1.cprtop2(water(oo)) = p1.cprtop2(water(oo)) - delta(oo);
-  p1.cprbot2(water(oo)) = p1.cprbot2(water(oo)) - delta(oo);
-end
-
-water = find(p1.ctype2 == 101 & p1.ctype == 101);
-pcenter_water(water) = (p0.cprtop(water) + p0.cprbot(water))/2;
-%% these are the ones we want to "raise"
-oo = find(pcenter_water(water) > p1.sarta_lvl_waterOD_1(water) & p1.sarta_lvl_waterOD_1(water) > 0);
-if length(oo) > 0
-  delta = pcenter_water(water) - p1.sarta_lvl_waterOD_1(water);
-  p1.cprtop(water(oo)) = p1.cprtop(water(oo)) - delta(oo);
-  p1.cprbot(water(oo)) = p1.cprbot(water(oo)) - delta(oo);
-end
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
