@@ -3,13 +3,56 @@
 %end
 
 if run_sarta.clear > 0
-  p1ALL.sarta_clear(:,inds) = profRX.rcalc;
+  p1ALL.sarta_clear(:,inds)       = profRX.rcalc;
   p1ALL.sarta_clr_co2_used(inds)  = ppmvLAY(40,:);
 end
 
 if run_sarta.cloud > 0
-  p1ALL.sarta_cloud(:,inds) = profRX2.rcalc;
+  p1ALL.sarta_cloud(:,inds)       = profRX2.rcalc;
   p1ALL.sarta_cld_co2_used(inds)  = ppmvLAY2(40,:);
+
+  if isfield(p2junk,'sarta_lvlZ')
+    p1ALL.sarta_lvlZ(:,inds) = p2junk.sarta_lvlZ;
+  end
+
+  if isfield(p2junk,'icecldX')
+    p1ALL.icecldX(:,inds) = p2junk.icecldX;
+  end
+  if isfield(p2junk,'icecldY')
+    p1ALL.icecldY(:,inds) = p2junk.icecldY;
+  end
+  if isfield(p2junk,'sarta_lvlDMEice')
+    p1ALL.sarta_lvlDMEice(:,inds) = p2junk.sarta_lvlDMEice;
+  end
+  if isfield(p2junk,'sarta_lvlODice')
+    p1ALL.sarta_lvlODice(:,inds) = p2junk.sarta_lvlODice;
+  end
+  if isfield(p2junk,'sarta_lvl_iceOD_1')
+    p1ALL.sarta_lvl_iceOD_1(inds) = p2junk.sarta_lvl_iceOD_1;
+  end
+  if isfield(p2junk,'sarta_wgtpeakI')
+    p1ALL.sarta_wgtpeakI(inds) = p2junk.sarta_wgtpeakI;
+  end
+
+  if isfield(p2junk,'watercldX')
+    p1ALL.watercldX(:,inds) = p2junk.watercldX;
+  end
+  if isfield(p2junk,'watercldY')
+    p1ALL.watercldY(:,inds) = p2junk.watercldY;
+  end
+  if isfield(p2junk,'sarta_lvlDMEwater')
+    p1ALL.sarta_lvlDMEwater(:,inds) = p2junk.sarta_lvlDMEwater;
+  end
+  if isfield(p2junk,'sarta_lvlODwater')
+    p1ALL.sarta_lvlODwater(:,inds) = p2junk.sarta_lvlODwater;
+  end
+  if isfield(p2junk,'sarta_lvl_waterOD_1')
+    p1ALL.sarta_lvl_waterOD_1(inds) = p2junk.sarta_lvl_waterOD_1;
+  end
+  if isfield(p2junk,'sarta_wgtpeakI')
+    p1ALL.sarta_wgtpeakW(inds) = p2junk.sarta_wgtpeakW;
+  end
+
 end
 
 p1ALL.rad_allsky(:,inds)  = rad_allsky(h.ichan,:)*1000;

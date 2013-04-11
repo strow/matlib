@@ -40,13 +40,14 @@ aa.watercldX(ii) = nansum((plevs.*(watercldXW.^0)).*watercldX);
 
 %% this is where we already have xcumsum of column total
 bonk = find(icecldYW > xcumsum,1);
-if length(bonk) > 0 & xcumsum > 0
+if length(bonk) > 0 & xcumsum > 0 & xcumsum <= 1
   aa.icecldY(ii) = plevs(bonk);
 else
   aa.icecldY(ii) = 1200;
 end
+
 bonk = find(watercldYW > xcumsum,1);
-if length(bonk) > 0  & xcumsum > 0
+if length(bonk) > 0  & xcumsum > 0 & xcumsum <= 1
   aa.watercldY(ii) = plevs(bonk);
 else
   aa.watercldY(ii) = 1200;  

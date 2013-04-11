@@ -21,14 +21,21 @@ if isfield(p,'co2ppm')
 end
 p.co2ppm = co2;    %% for cloud, use PCRTM values of co2 for debug purposes
 
-p2junk = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
+p2junk = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);   %% this has all the extra debugging cloud info
 
 rtpwrite(fip,h,ha,p2junk,pa);
 klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh];
   eval(klayerser);
 sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh];
   eval(sartaer);
-[headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
+try
+  [headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
+catch me
+  me
+  fprintf(1,'oops : error running sarta cloudy, look at error log %s \n',ugh2);
+  error('woof! try again!')
+end
+
 rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh]; eval(rmer);
 
 [ppmvLAY2,ppmvAVG2,ppmvMAX2,pavgLAY2,tavgLAY2] = layers2ppmv(headRX,profRX,1:length(profRX.stemp),2);

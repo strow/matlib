@@ -6,7 +6,7 @@ function [yOUT,wT,wB,peakN,N,maxN,minN] = boxshape(yIN,rGaussianCutoff);
 %% input      yIN   vector containing function
 %%     rGaussianCutOff = 0.250;   %% done for ages, till July 2012; might put cloud too high/wide
 %%     rGaussianCutOff = 0.375;   %% done after July 2012, trying to put cloud little lower/thin
-                                  %% and therefore closer to maxpart of cloud
+%%                                %% and therefore closer to maxpart of cloud
 
 %% output    yOUT   vector containing box approx
 %%             wT   left  edge of box shapes
@@ -117,7 +117,9 @@ if sumYmax == 1
   hahaT = haha(find(haha < iM)); wT = max(hahaT);  %pT = plevs(wT);
   hahaB = haha(find(haha > iM)); wB = min(hahaB);  %pB = plevs(wB);
     if length(wB) == 0
-      wB = length(yIN);
+      thediff = abs(iM-wT);
+      wB = length(yIN);  %% ORIG before Apr 2013
+      wB = min(iM + thediff,length(yIN));
       end
   peakN(1) = sum(yIN)/(wB-wT+1);
   yOUT(wT:wB) = yOUT(wT:wB) + peakN(1);
