@@ -58,9 +58,9 @@ end
 p1ALL.rad_allsky(:,inds)  = rad_allsky(h.ichan,:)*1000;
 p1ALL.rad_clrsky(:,inds)  = rad_clrsky(h.ichan,:)*1000;
 
-p1ALL.ncol(inds)                = ones(size(p0ALL.cpsize(inds)))*ncol0;
+p1ALL.ncol(inds)                = ones(size(p0ALL.stemp(inds)))*ncol0;
 p1ALL.pcrtm_co2_used(inds)      = co2;
-p1ALL.overlap(inds)             = ones(size(p0ALL.cpsize(inds)))*overlap;
+p1ALL.overlap(inds)             = ones(size(p0ALL.stemp(inds)))*overlap;
 
 p1ALL.rlat(inds)         = p.rlat;
 p1ALL.rlon(inds)         = p.rlon;
@@ -69,17 +69,43 @@ p1ALL.solzen(inds)       = p.solzen;
 p1ALL.stemp(inds)        = p.stemp;
 
 %% these are the SARTA two slab CLOUD parameters
-p1ALL.ctype(inds)        = p.ctype;
-p1ALL.cfrac(inds)        = p.cfrac;
-p1ALL.cngwat(inds)       = p.cngwat;
-p1ALL.cpsize(inds)       = p.cpsize;
-p1ALL.cprtop(inds)       = p.cprtop;
+if isfield(p,'ctype')
+  p1ALL.ctype(inds)        = p.ctype;
+end
+if isfield(p,'cfrac')
+  p1ALL.cfrac(inds)        = p.cfrac;
+end
+if isfield(p,'cngwat')
+  p1ALL.cngwat(inds)       = p.cngwat;
+end
+if isfield(p,'cpsize')
+  p1ALL.cpsize(inds)       = p.cpsize;
+end
+if isfield(p,'cprtop')
+  p1ALL.cprtop(inds)       = p.cprtop;
+end
+if isfield(p,'cprbot')
+  p1ALL.cprbot(inds)       = p.cprbot;
+end
 
-p1ALL.ctype2(inds)       = p.ctype2;
-p1ALL.cfrac2(inds)       = p.cfrac2;
-p1ALL.cngwat2(inds)      = p.cngwat2;
-p1ALL.cpsize2(inds)      = p.cpsize2;
-p1ALL.cprtop2(inds)      = p.cprtop2;
+if isfield(p,'ctype2')
+  p1ALL.ctype2(inds)        = p.ctype2;
+end
+if isfield(p,'cfrac2')
+  p1ALL.cfrac2(inds)        = p.cfrac2;
+end
+if isfield(p,'cngwat2')
+  p1ALL.cngwat2(inds)       = p.cngwat2;
+end
+if isfield(p,'cpsize2')
+  p1ALL.cpsize2(inds)       = p.cpsize2;
+end
+if isfield(p,'cprtop2')
+  p1ALL.cprtop2(inds)       = p.cprtop2;
+end
+if isfield(p,'cprbot2')
+  p1ALL.cprbot2(inds)       = p.cprbot2;
+end
 
 %% these are the PCRTM MEAN CLOUD column parameters, which is basically : sub_opt = ice(high) + water(low)
 p1ALL.pcrtm_iceOD(inds)     = tmpjunk.totalODice;

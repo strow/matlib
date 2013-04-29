@@ -11,10 +11,12 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % >>> options for SARTA runs
 %     run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc
 %     run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc
-%     run_sarta.cumsum = < 0        : just go with "ecmwf2sarta" results (default before March 2012)
-%                        0 -- 1     : set cloud pressure based on cumulative sum of p.ciwc and p.clwc, 
-%                        >  1--9998 : go for where cumsum(cloudOD) ~ N/100 (if that can be found)
-%                        >= 9999    : go for peak of wgt fcn of cloud ice, cloud liquid
+%     run_sarta.cumsum = < 0           : just go with "ecmwf2sarta" results (default before March 2012)
+%                        0 -- 1        : set cloud pressure based on cumulative sum of p.ciwc and p.clwc, 
+%                        >  1--9998    : go for where cumsum(cloudOD) ~ N/100 (if that can be found)
+%                        >= 9999       : go for peak of wgt fcn of cloud ice, cloud liquid
+%     run_sarta.cfrac < 0              : use random
+%                     > 0 to < 1       : use fixed amount specified by user
 %     run_sarta.klayers_code = string to klayers
 %     run_sarta.sartaclear_code = string to sarta clear executable
 %     run_sarta.sartacloud_code = string to sarta cloud executable
@@ -29,6 +31,7 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  04/22/2013 : introduced run_sarta.cfrac so that we can eg have cfrac = 1
 %  04/04/2013 : introduced/tweaked do_the_reset_cprtop_cloudOD.m
 %  04/04/2013 : mega updates in check_for_errors.m
 %  04/02/2013 : run_sarta.cumsum = N >= 9999 option allows the clouds to be placed at peak of cloud wgt fcn
@@ -70,6 +73,7 @@ if nargin == 4
   run_sarta.clear = -1;
   run_sarta.cloud = +1;
   run_sarta.cumsum = -1;
+  run_sarta.cfrac = -1;
   %run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs';
   %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
   run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
@@ -83,6 +87,9 @@ elseif nargin == 5
    end
   if ~isfield(run_sarta,'cumsum')
     run_sarta.cumsum = -1;
+  end
+  if ~isfield(run_sarta,'cfrac')
+    run_sarta.cfrac = -1;
   end
   if ~isfield(run_sarta,'klayers_code')
     %run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
@@ -113,6 +120,12 @@ elseif ~isfield(p,'cc')
   error('driver_pcrtm_cloud_rtp.m requires cc');
 elseif h.ptype ~= 0
   error('driver_pcrtm_cloud_rtp.m requires LEVELS profiles (h.ptype = 0)');
+end
+
+if ~isfield(p,'cfrac')
+  %% need random cfracs
+  disp('>>>>>>>> warning : need random cfracs .... initializing')
+  p.cfrac = rand(size(p.stemp));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -164,7 +177,6 @@ elseif run_sarta.cumsum > 1
   profXYZ = prof;
   prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum/100);  
 %{
-
   disp(' ')
   [prof.cngwat(junky) prof.cngwat2(junky)]
   [prof.cfrac(junky) prof.cfrac2(junky) prof.cfrac12(junky)]
@@ -202,6 +214,12 @@ if iFix > 10 & iNotOK > 0
 end
 
 clear profX
+
+if run_sarta.cfrac >= 0 & run_sarta.cfrac <= 1
+  oo = find(prof.cfrac  > 0 & prof.cngwat > 0);  prof.cfrac(oo)  = run_sarta.cfrac;
+  oo = find(prof.cfrac2 > 0 & prof.cngwat2 > 0); prof.cfrac2(oo) = run_sarta.cfrac;
+  oo = find(prof.cfrac  > 0 & prof.cfrac2 > 0);  prof.cfrac12(oo)  = run_sarta.cfrac;
+end
 
 if run_sarta.clear > 0 
   disp('running SARTA clear, saving into rclearcalc')
