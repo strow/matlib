@@ -19,7 +19,24 @@ ugh = mktemp('ugh');
 rtpwrite(fip,h,ha,prof,pa);
 klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh];
   eval(klayerser);
+try
+  [headRX2 hattrR2 profRX2 pattrR2] = rtpread(fop);
+catch me
+  me
+  fprintf(1,'oops : error running klayers, look at error log %s \n',ugh);
+  %keyboard
+  error('woof! try again!')
+end
+
 sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh];
   eval(sartaer);
-[headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
+try
+  [headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
+catch me
+  me
+  fprintf(1,'oops : error running sarta clear, look at error log %s \n',ugh);
+  %keyboard
+  error('woof! try again!')
+end
+
 rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh]; eval(rmer);

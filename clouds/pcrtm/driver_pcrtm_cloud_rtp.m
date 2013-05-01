@@ -181,7 +181,7 @@ for iInd = 1 : iIndMax
   ICT = double(p.ciwc);   %% cloud ice    water content in kg/kg
   cc  = double(p.cc);     %% cloud fraction
   if ncol0 == -1
-    disp('this is the CFRAC = 1  TEST CASE');
+    disp('FORCE CFRAC = 1 at all levels : TEST CASE');
     yes_cld = find(cc > eps);
     cc(yes_cld) = 1;
   end
