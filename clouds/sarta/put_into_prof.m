@@ -27,7 +27,8 @@ water_dme = 15;
 
 prof  = pin;
 
-cfrac = profX.cfrac(ii);
+cfrac = profX.cfrac(ii);                            %% before 4/20/2013
+%% cfrac = rand(1); profX.cfrac(ii) = cfrac;              %% after 4/20/2013
 
 %% really, ii == jj!!!!
 
