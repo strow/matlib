@@ -15,7 +15,6 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
 %  Written 17 March 2011 - Paul Schou
 %  Finalised - 2013.05.08 - Breno Imbiriba
 
-
   debug = 1; %indicate that we are in debug an print out a bunch of checks
 
   if ~isfield(prof,'wspeed');
@@ -100,7 +99,7 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
     lf = prof.landfrac(1,ifov);
     of = 1-lf;
     prof.emis(1:nemis_mix, ifov) = of*sea_emis_on_landgrid(iok, 1) + ...
-				   lf*emis(iok,1);
+				   lf*emis(iok,ifov);
   end
 
   % Compute Lambertian Reflectivity
