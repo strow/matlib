@@ -28,7 +28,7 @@ d = dir(file);
 recfile = mktemp(['rec_' d.name]);
 
 % Run wgrib2 and create temporary binary file
-eval(['! wgrib2 -no_header -bin ' recfile ' -d ' num2str(irec) ' ' file ' > /dev/null']);
+eval(['! /asl/opt/bin/wgrib2 -no_header -bin ' recfile ' -d ' num2str(irec) ' ' file ' > /dev/null']);
 
 % Read temporary binary file
 fid = fopen(recfile,'r');
