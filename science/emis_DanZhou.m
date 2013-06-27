@@ -21,8 +21,8 @@ function [efreq,emis] = emis_DanZhou(lat,lon,rtime,taiyear);
 % Created: 21 Dec 2010, Scott Hannon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-addpath /asl/matlab/iasi/utils  % emis_iasi_DanZhou2
-addpath /asl/matlab/science     % utc2tai & tai2utc
+%addpath /asl/matlab/iasi/utils  % emis_iasi_DanZhou2
+%addpath /asl/matlab/science     % utc2tai & tai2utc
 
 % The portion of Daniel Zhou (NASA Langley) database we have spans
 % 2007/07 to 2008/06 with one file per month.  Interpolate across

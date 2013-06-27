@@ -41,7 +41,7 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
   st_year = str2num(rtime_str(ist_year:ist_year+3));
 
   % Check if this year is AIRS or CrIS (1993/2000)
-  if(st_year ~= 1999 & st_year ~= 2000)
+  if(st_year ~= 1993 & st_year ~= 2000)
     error(['Bad definition of rtime - not coded to handle ' num2str(st_year)]);
   end
 
