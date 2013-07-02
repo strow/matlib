@@ -1,5 +1,5 @@
-function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
-%function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
+function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,root)
+%function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,root)
 %
 % Compute surface emissivity and add it to the RTP profile structure.
 % For Land: Dan Zhou's emissivity climatology.
@@ -11,9 +11,15 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
 %   prof.rtime/rlat/rlon
 %   prof.landfrac
 %
-
+% root = (optional) root location (default = '/asl');
+%
 %  Written 17 March 2011 - Paul Schou
-%  Finalised - 2013.05.08 - Breno Imbiriba
+%  Operational - 2013.05.08 - Breno Imbiriba
+%  Updated - 2013.07.02 - BI
+
+  if(nargin()~=5)
+    root = '/asl';
+  end
 
   debug = 1; %indicate that we are in debug an print out a bunch of checks
 
@@ -48,7 +54,7 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
 
 
   % Get land emissivity
-  [efreq, emis] = emis_DanZhou(prof.rlat, prof.rlon, prof.rtime, st_year);
+  [efreq, emis] = emis_DanZhou(prof.rlat, prof.rlon, prof.rtime, st_year, root);
 
   % Get water emissivity
   [sea_nemis, sea_efreq, sea_emis] = cal_seaemis2(prof.satzen, prof.wspeed);

@@ -1,5 +1,7 @@
-function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr)
-% function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr)
+function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
+% function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
+%
+% root - usuall '/asl' (optional)
 
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,30 +84,30 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr)
     % advertised, but some times it is -9.99e8. Go figure!
  
     % t  - air temperature  	ptemp
-    [dat_t plevs lats lons]= getdata_merra(reqtime, 't');
+    [dat_t plevs lats lons]= getdata_merra(reqtime, 't',[],root);
 
     nlevs=numel(plevs);
 
     dat_t(dat_t>1e14 | dat_t<-1)=NaN;
     for ilev=1:nlevs
-      ptemp(ilev,:) = interp2(lats, lons, dat_t(:,:,nlevs-ilev+1), tprof.rlat, tprof.rlon,'nearest');
+      ptemp(ilev,:) = interp_sphere(lats, lons, dat_t(:,:,nlevs-ilev+1), tprof.rlat, tprof.rlon,'nearest');
     end
     
     % qv - specific humidity	gas_1
-    [dat_q plevs lats lons]= getdata_merra(reqtime, 'qv');
+    [dat_q plevs lats lons]= getdata_merra(reqtime, 'qv',[],root);
     dat_q(dat_q>1e14 | dat_t<-1)=NaN;
     for ilev=1:nlevs
-      pgas_1(ilev,:) = interp2(lats, lons, dat_q(:,:,nlevs-ilev+1), tprof.rlat, tprof.rlon,'nearest');
+      pgas_1(ilev,:) = interp_sphere(lats, lons, dat_q(:,:,nlevs-ilev+1), tprof.rlat, tprof.rlon,'nearest');
     end
    
     % o3 - ozone mixing ratio	gas_3
-    [dat_o3 plevs lats lons]= getdata_merra(reqtime, 'o3');
+    [dat_o3 plevs lats lons]= getdata_merra(reqtime, 'o3',[],root);
     dat_o3(dat_o3>1e14 | dat_t<-1)=NaN;
     for ilev=1:nlevs
-      pgas_3(ilev,:) = interp2(lats, lons, dat_o3(:,:,nlevs-ilev+1), tprof.rlat, tprof.rlon,'nearest');
+      pgas_3(ilev,:) = interp_sphere(lats, lons, dat_o3(:,:,nlevs-ilev+1), tprof.rlat, tprof.rlon,'nearest');
     end
 
-    plevs=plevs(end:-1:1);
+    plevs=plevs(end:-1:1)';
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
     % Compute Valid Levels
@@ -122,24 +124,24 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr)
 
 
     % ps - surface pressure	spres
-    [dat_ps tmpx lats lons]= getdata_merra(reqtime, 'ps'); % It is in Pa, convert to mbar -> /100
+    [dat_ps tmpx lats lons]= getdata_merra(reqtime, 'ps',[],root); % It is in Pa, convert to mbar -> /100
     dat_ps(dat_ps>1e14)=NaN;
-    pps = interp2(lats,lons,dat_ps/100, tprof.rlat, tprof.rlon, 'nearest');
+    pps = interp_sphere(lats,lons,dat_ps/100, tprof.rlat, tprof.rlon, 'nearest');
     
     % ts - surface temperature	stemp
-    [dat_ts tmpx lats lons merra_str]= getdata_merra(reqtime, 'ts');
+    [dat_ts tmpx lats lons merra_str]= getdata_merra(reqtime, 'ts',[],root);
     dat_ts(dat_ts>1e14)=NaN;
-    pts = interp2(lats,lons,dat_ts, tprof.rlat, tprof.rlon, 'nearest');
+    pts = interp_sphere(lats,lons,dat_ts, tprof.rlat, tprof.rlon, 'nearest');
    
     tprof.spres = pps;
     tprof.stemp = pts;  
 
     
     % wind speed at 2m
-    [dat_u2m tmpx lats lons]= getdata_merra(reqtime, 'u2m');
-    [dat_v2m tmpx lats lons]= getdata_merra(reqtime, 'v2m');
+    [dat_u2m tmpx lats lons]= getdata_merra(reqtime, 'u2m',[],root);
+    [dat_v2m tmpx lats lons]= getdata_merra(reqtime, 'v2m',[],root);
     dat_w2m = sqrt(dat_u2m.^2 + dat_v2m.^2);
-    w2m = interp2(lats,lons,dat_w2m,tprof.rlat, tprof.rlon,'nearest'); 
+    w2m = interp_sphere(lats,lons,dat_w2m,tprof.rlat, tprof.rlon,'nearest'); 
 
     tprof.wspeed = w2m;
 
