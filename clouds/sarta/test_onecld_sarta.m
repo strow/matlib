@@ -24,7 +24,7 @@ run_sarta.clear = +1;
 if iAIRSTestOneCld > 0
   [pall]  = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
   [px,ix] = driver_sarta_cloud_rtp_onecldtest(h,ha,p,pa,run_sarta,+1);  %% for water
-  [px,ix] = driver_sarta_cloud_rtp_onecldtest(h,ha,p,pa,run_sarta,-1);  %% for ice
+  %[px,ix] = driver_sarta_cloud_rtp_onecldtest(h,ha,p,pa,run_sarta,-1);  %% for ice
 
   run_sarta.clear = +1;
   run_sarta.cloud = +1;
@@ -32,7 +32,8 @@ if iAIRSTestOneCld > 0
   addpath ../pcrtm
   addpath ../sarta
   cd ../pcrtm
-  p1 = driver_pcrtm_cloud_rtp(h,ha,px,pa,run_sarta);
+  p1 = driver_pcrtm_cloud_rtp_onecldtest(h,ha,px,pa,run_sarta,+1);  %% for water
+  %p1 = driver_pcrtm_cloud_rtp_onecldtest(h,ha,px,pa,run_sarta,-1);  %% for ice
 
   cd ../sarta
   p1.rsarta_water_cloud_only = px.rcalc;

@@ -56,7 +56,8 @@ for ii = 1 : length(p0.stemp)
   Z = cumsum(dz);
   diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
 
-  Z = p2h(ptemp)/1000;
+  %% bugfix on 6.3.2013 ... this was mistakenly ptemp before early June, 2013
+  Z = p2h(press)/1000;
   diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
 
   % compute ice cloud optical depth from Ebert and Curry (1992, J. Geophys. Res.,  
