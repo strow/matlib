@@ -109,6 +109,8 @@ overlap = 3;   %% switch for maximum random overlap
 if nargin == 4
   run_sarta.clear = -1;
   run_sarta.cloud = -1;
+  run_sarta.ncol0 = 50;
+  run_sarta.overlap = 3;
 elseif nargin == 5
   if ~isfield(run_sarta,'clear')
     run_sarta.clear = -1;
