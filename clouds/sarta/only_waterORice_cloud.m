@@ -10,6 +10,7 @@ if waterORice > 0
   %% keep only water slab clouds %%
   oo1 = find(p0.ctype  == 201 & p0.ctype2 == 101); %% so 2 = water, 1 = ice
   oo2 = find(p0.ctype2 == 201 & p0.ctype  == 101); %% so 2 = ice,   1 = water
+
   %% these are the ones we want yay yay yay
   oo = union(oo1,oo2);
   [hx,p1x] = subset_rtp_allcloudfields(h,p0,[],[],oo);
