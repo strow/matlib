@@ -123,7 +123,10 @@ for ibox =1:nboxes
 
   % use default profiles for Pres smaller than the smallest pressure of each
   % box, as the value is identical for each box, we use P(1) as the smallest pressure
-  indU = find (P(1,ibox) >= Pres);
+  indU = find (P(1,ibox) >= Pres);       %% before June 2013
+  if length(indU) == 0                   %% added this after June 2013
+    indU = 0;
+  end
   % parameters for default models in upper atmosphere
   for ilev = 1: indU(end)
     newT(ilev) = interp1(log(def_P), def_T, log(Pres(ilev)));                    

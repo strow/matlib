@@ -1,6 +1,3 @@
-function prof = put_into_prof(pin,profX,ii,jj,plevs,ptemp,iLevsVers,...
-                              cT,cB,cOUT,cngwat,cTYPE,iFound)
-
 % When two clouds are present, the meaning of cfrac1 and cfrac2
 % are the total fraction of the FOV containing that cloud in
 % any combination.  Along with cfrac12, these three fields are
@@ -25,12 +22,7 @@ function prof = put_into_prof(pin,profX,ii,jj,plevs,ptemp,iLevsVers,...
 ice_dme   = 60;
 water_dme = 15;
 
-prof  = pin;
-
-cfrac = profX.cfrac(ii);                            %% before 4/20/2013
-%% cfrac = rand(1); profX.cfrac(ii) = cfrac;              %% after 4/20/2013
-
-%% really, ii == jj!!!!
+cfrac = profX.cfrac(ii);
 
 prof.plat(jj) = profX.plat(ii);
 prof.plon(jj) = profX.plon(ii);
@@ -58,7 +50,7 @@ if length(cTYPE) < 1
 
   prof.udef(16,jj) = 0.0;  %%cfrac12
 
-end
+  end
 
 %%%%%%%%%%
 
@@ -67,6 +59,7 @@ if length(cTYPE) == 1
 
   icefound   = -1;
   waterfound = -1;
+  %cc = convert_gg_to_gm2(cT,cB,cngwat,profX.plevs(:,ii),profX.ptemp(:,ii));
   cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp);
 
   kk = 1;
@@ -88,7 +81,7 @@ if length(cTYPE) == 1
     prof.ctype(jj)  = 101;
     prof.cpsize(jj) = water_dme;  %% typical water particles
     waterfound      = +1;
-  end
+    end
 
   prof.udef(11,jj) = 0.0;
   prof.udef(12,jj) = 0.0;
@@ -100,7 +93,7 @@ if length(cTYPE) == 1
   prof.udef(16,jj) = 0.0;  %%cfrac12
   %prof.udef(16,jj) = min(prof.cfrac(jj),prof.udef(15,jj));  %%cfrac12
 
-end
+  end
 
 %%%%%%%%%%
 
@@ -109,6 +102,7 @@ if length(cTYPE) == 2
 
   icefound   = -1;
   waterfound = -1;
+  %cc = convert_gg_to_gm2(cT,cB,cngwat,profX.plevs(:,ii),profX.ptemp(:,ii));
   cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp);
 
   kk = 1;
@@ -129,7 +123,7 @@ if length(cTYPE) == 2
     prof.ctype(jj) = 101;
     prof.cpsize(jj) = water_dme;  %% typical water particles
     waterfound      = +1;
-  end
+    end
 
   kk = 2;
   prof.udef(11,jj)  = cc(kk);
@@ -149,13 +143,12 @@ if length(cTYPE) == 2
     prof.udef(17,jj) = 101;
     prof.udef(12,jj) = water_dme;  %% typical water particles
     waterfound       = +1;
-  end
+    end
 
   prof.udef(16,jj) = 0.9999*cfrac;  %%cfrac12
   if prof.cfrac(jj) < 0.9999
     prof.udef(16,jj) = 0.9999*min(prof.cfrac(jj),prof.udef(15,jj));  %%cfrac12
   else  
     prof.udef(16,jj) = min(prof.cfrac(jj),prof.udef(15,jj));
+    end
   end
-end
-

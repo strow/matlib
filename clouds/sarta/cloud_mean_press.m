@@ -15,6 +15,8 @@ watercldXW = ones(size(watercldX));%% unit weight
 icecldYW = ones(size(icecldX));%% unit weight
 watercldYW = ones(size(watercldX));%% unit weight
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% better to weight more at Top rather than Bottom - look at blahXW
 %% look at cumsum from top to bottom               - look at blahYW
 if plevs(1) < plevs(10)
