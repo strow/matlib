@@ -20,8 +20,8 @@ function [h ha p pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
 
   [salti landfrac] = usgs_deg10_dem(p.rlat, p.rlon,wgf);
 
-  p.salti=salti;
-  p.landfrac=landfrac;
+  p.salti=single(salti);
+  p.landfrac=single(landfrac);
 
   ha=set_attr(ha,'topo','usgs_deg10_dem');
 

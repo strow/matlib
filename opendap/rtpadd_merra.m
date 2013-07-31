@@ -2,6 +2,10 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
 % function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
 %
 % root - usuall '/asl' (optional)
+%
+% Add MERRA Model into the given RTP structure
+%
+% Paul Schou, Breno Imbiriba  
 
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -49,7 +53,7 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
   % Get the data times:
   mtimes = AirsDate(prof.rtime); % [mtimes]=days
 
-  threehours = round((mtimes-mtimes(1))*8); % [threehours]=3-hour long units
+  threehours = round((mtimes-floor(min(mtimes)))*8); % [threehours]=3-hour long units
   u3hours = unique(threehours); % unique list of the used 3-hour intervals
   n3hours = numel(u3hours);
 
@@ -64,16 +68,11 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
     tprof = ProfSubset2(prof,ifov);
 
     % Get required 3hr time slot
-    reqtime = mtimes(1) + u3hours(i3hours)/8; % [day]=[day]+[3hr]/8
+    reqtime = floor(min(mtimes)) + u3hours(i3hours)/8; % [day]=[day]+[3hr]/8
 
 
     %%%%%%%%%%%%%%%%%%%% 
     % Set profile variables
-
-    % ptime
-    tprof.ptime = ones(1,nfovs).*AirsDate(reqtime,-1); % [sec]
-    tprof.plat = tprof.rlat;
-    tprof.plon = tprof.rlon;
 
     ptemp=[]; pgas_1=[]; pgas_3=[]; pps=[]; pts=[];
 
@@ -85,6 +84,15 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
  
     % t  - air temperature  	ptemp
     [dat_t plevs lats lons]= getdata_merra(reqtime, 't',[],root);
+
+
+    % ptime, plat and plon
+
+    tprof.ptime = ones(1,nfovs).*AirsDate(reqtime,-1); % [sec]
+    [glats glons] = meshgrid(lats,lons);
+    tprof.plat = single(interp_sphere(lats, lons, glats, tprof.rlat, tprof.rlon, 'nearest'));
+    tprof.plon = single(interp_sphere(lats, lons, glons, tprof.rlat, tprof.rlon, 'nearest'));
+
 
     nlevs=numel(plevs);
 
@@ -114,13 +122,13 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
    
     % For each profile, find the last valid level. 
     % 
-    tprof.plevs = plevs*ones(1, nfovs);
-    tprof.nlevs = nlevs.*zeros(1, nfovs);
-    tprof.nlevs(1,:) = nlevs-sum(isnan(ptemp));
+    tprof.plevs = single(plevs*ones(1, nfovs));
+    tprof.nlevs = single(nlevs.*zeros(1, nfovs));
+    tprof.nlevs(1,:) = single(nlevs-sum(isnan(ptemp)));
 
-    tprof.ptemp = ptemp;
-    tprof.gas_1 = pgas_1;
-    tprof.gas_3 = pgas_3;
+    tprof.ptemp = single(ptemp);
+    tprof.gas_1 = single(pgas_1);
+    tprof.gas_3 = single(pgas_3);
 
 
     % ps - surface pressure	spres
@@ -133,8 +141,8 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
     dat_ts(dat_ts>1e14)=NaN;
     pts = interp_sphere(lats,lons,dat_ts, tprof.rlat, tprof.rlon, 'nearest');
    
-    tprof.spres = pps;
-    tprof.stemp = pts;  
+    tprof.spres = single(pps);
+    tprof.stemp = single(pts);  
 
     
     % wind speed at 2m
@@ -143,15 +151,20 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
     dat_w2m = sqrt(dat_u2m.^2 + dat_v2m.^2);
     w2m = interp_sphere(lats,lons,dat_w2m,tprof.rlat, tprof.rlon,'nearest'); 
 
-    tprof.wspeed = w2m;
+    tprof.wspeed = single(w2m);
 
 
-    tprof_arr(i3hours) = tprof;
+    if(n3hours>1)
+      tprof_arr(i3hours) = tprof;
+    end
 
   end
 
-  tprof = Prof_join_arr(tprof_arr);
-
+  if(n3hours>1)
+    tprof = Prof_join_arr(tprof_arr);
+    clear tprof_arr
+  end 
+  
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Fix Header and Attributes

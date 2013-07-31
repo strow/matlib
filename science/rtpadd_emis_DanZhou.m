@@ -66,24 +66,24 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,roo
   lmix = ~lland & ~lsea; % the left over
 
   % Clean up arrays 
-  prof.nemis = zeros([1, size(prof.rtime,2)]);
-  prof.efreq = zeros([100,size(prof.rtime,2)]);
-  prof.emis = zeros([100,size(prof.rtime,2)]);
+  prof.nemis = single(zeros([1, size(prof.rtime,2)]));
+  prof.efreq = single(zeros([100,size(prof.rtime,2)]));
+  prof.emis = single(zeros([100,size(prof.rtime,2)]));
 
   % Add land 
   for ifov = find(lland)
     nemis = numel(efreq);
-    prof.nemis(1,ifov) = nemis; 
-    prof.efreq(1:nemis,ifov) = efreq(1:nemis,1);
-    prof.emis(1:nemis,ifov) = emis(1:nemis,ifov);
+    prof.nemis(1,ifov) = single(nemis); 
+    prof.efreq(1:nemis,ifov) = single(efreq(1:nemis,1));
+    prof.emis(1:nemis,ifov) = single(emis(1:nemis,ifov));
   end  
        
   % Add water
   for ifov = find(lsea)
     nemis = sea_nemis(1,ifov);
-    prof.nemis(1,ifov) = nemis;
-    prof.efreq(1:nemis,ifov) = sea_efreq(1:nemis,ifov);
-    prof.emis(1:nemis,ifov) = sea_emis(1:nemis,ifov);
+    prof.nemis(1,ifov) = single(nemis);
+    prof.efreq(1:nemis,ifov) = single(sea_efreq(1:nemis,ifov));
+    prof.emis(1:nemis,ifov) = single(sea_emis(1:nemis,ifov));
   end
   
   % The mixing requires attention:
@@ -98,19 +98,20 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,roo
     iok = find(~isnan(sea_emis_on_landgrid));
     nemis_mix = numel(iok);
 
-    prof.nemis(1,ifov) = nemis_mix;
-    prof.efreq(1:nemis_mix, ifov) = efreq(iok,1);
+    prof.nemis(1,ifov) = single(nemis_mix);
+    prof.efreq(1:nemis_mix, ifov) = single(efreq(iok,1));
 
     % Mix both using landfrac
     lf = prof.landfrac(1,ifov);
     of = 1-lf;
-    prof.emis(1:nemis_mix, ifov) = of*sea_emis_on_landgrid(iok, 1) + ...
-				   lf*emis(iok,ifov);
+    prof.emis(1:nemis_mix, ifov) = single(...
+                                   of*sea_emis_on_landgrid(iok, 1) + ...
+				   lf*emis(iok,ifov));
   end
 
   % Compute Lambertian Reflectivity
-  prof.nrho = prof.nemis;
-  prof.rho = (1.0 - prof.emis)./3.14159265358979323846;
+  prof.nrho = single(prof.nemis);
+  prof.rho = single((1.0 - prof.emis)./3.14159265358979323846);
 
 
   % set an attribute string to let the rtp know what we have done
