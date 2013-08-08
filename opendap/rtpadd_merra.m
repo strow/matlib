@@ -22,6 +22,9 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
   % Data is given on 3hr files, except 'ts' which is hourly
   %
 
+  if(nargin()==4)
+    root = '/asl';
+  end
 
   % Assumptions:
   % 1. All pressure grids are the same for all 3D variables
@@ -115,7 +118,9 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
       pgas_3(ilev,:) = interp_sphere(lats, lons, dat_o3(:,:,nlevs-ilev+1), tprof.rlat, tprof.rlon,'nearest');
     end
 
-    plevs=plevs(end:-1:1)';
+    t_n = numel(plevs);
+    plevs = reshape(plevs,[t_n,1]);
+    plevs = plevs(t_n:-1:1,1);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
     % Compute Valid Levels
