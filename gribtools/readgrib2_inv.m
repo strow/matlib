@@ -30,7 +30,7 @@ d = dir(file);
 invfile = mktemp(['inv_' d.name]);
 
 % Run wgrib and create temporary inventory file
-eval(['! wgrib2 -s ' file ' | cut -f1,4,5 -d":" > ' invfile]);
+eval(['! /asl/opt/bin/wgrib2 -s ' file ' | cut -f1,4,5 -d":" > ' invfile]);
 
 % Read temporary text file
 [rec,param,level] = textread(invfile,'%n%s%s\n','delimiter',':');
