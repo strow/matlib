@@ -8,7 +8,7 @@ function make_kml(lat,lon,data,filename,marker_size)
 %  lat         - latitude
 %  lon         - longitude
 %  data        - raw data
-%  filename    - output file name
+%  filename    - output file name (must end in .kml)
 %  marker_size - google marker size (default: 0.3)
 %
 % OUTPUT:
@@ -18,6 +18,10 @@ function make_kml(lat,lon,data,filename,marker_size)
 %  make_kml(rand(10)*30,rand(10)*360,rand(10)*30+273,'test.kml')
 
 % Written by Paul Schou, March 2013
+
+if ~strcmp(filename(min(1,end-3):end),'.kml')
+  error('Filename must end in .kml')
+end
 
 if ~isequal(size(lat),size(lon))
   error('Latitude and Longitude are different dimensions')
