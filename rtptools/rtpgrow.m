@@ -18,7 +18,9 @@ function [h ha p pa] = rtpgrow(h,ha,p,pa,varargin)
 % 
 %  Examples:
 %    [h ha p pa] = rtpgrow(h,ha,p,pa);  % `grows' the rtp structure by adding missing fields
-%    [h ha p pa] = rtpgrow(h,ha,p,pa,'/asl/s2/schou/'); % looks in specified directory for parent
+%    [h ha p pa] = rtpgrow(h,ha,p,pa,'dir','/asl/s2/schou/'); % looks in specified directory for parent
+%    [h ha p pa] = rtpgrow(h,ha,p,pa,'file','/parent.rtp'); % specifies the file that was read in
+%    [h ha p pa] = rtpgrow(h,ha,p,pa,'debug'); % prints out detailed field information and stats
 %
 %  Usage note:  The rtp parent file, i, is searched in this order: 
 %      {'./i','/originalpath/i','/originialpath/i.rtpZ'}
@@ -58,17 +60,34 @@ end
 
 % just in case the file we are referenced to was also trimmed:
 if ~exist(rtpfile,'file') & exist([rtpfile 'Z'],'file')
-  disp('  RTPGROW: parent file may refer to a trimmed target')
+  disp('  RTPGROW WARNING: parent file may refer to a trimmed target')
   rtpfile = [rtpfile 'Z'];
 end
+% Test for z versus Z file
 if ~exist(rtpfile,'file') & exist([rtpfile(1:end-1) 'Z'],'file')
-  disp('  RTPGROW: parent file may refer to a trimmed target')
+  disp('  RTPGROW WARNING: parent file may refer to a trimmed target')
   rtpfile = [rtpfile(1:end-1) 'Z'];
+end
+
+% Check for rtp*_0 directory
+if ~exist(rtpfile,'file') & exist(regexprep(rtpfile,'(\/rtprod_[^/]*)\/','$1_0/'),'file')
+  disp('  RTPGROW WARNING: using parent file at older xxx_0 target')
+  rtpfile = regexprep(rtpfile,'(\/rtprod_[^/]*)\/','$1_0/');
+end
+% Check for rtp*_0 directory _Z
+if ~exist(rtpfile,'file') & exist(regexprep([rtpfile 'Z'],'(\/rtprod_[^/]*)\/','$1_0/'),'file')
+  disp('  RTPGROW WARNING: using parent file at older xxx_0 target with Z')
+  rtpfile = regexprep([rtpfile 'Z'],'(\/rtprod_[^/]*)\/','$1_0/');
+end
+% Check for rtp*_0 directory (no _Z)
+if ~exist(rtpfile,'file') & exist(regexprep(rtpfile(1:end-1),'(\/rtprod_[^/]*)\/','$1_0/'),'file')
+  disp('  RTPGROW WARNING: using parent file at older xxx_0 target without Z')
+  rtpfile = regexprep(rtpfile(1:end-1),'(\/rtprod_[^/]*)\/','$1_0/');
 end
 
 % in the case the file is actually a pair of files
 if ~exist(rtpfile,'file') & exist([rtpfile '_1'],'file')
-  disp('  RTPGROW: parent file may refer to a pair of rtp files')
+  disp('  RTPGROW WARNING: parent file may refer to a pair of rtp files')
   rtpfile = [rtpfile '_1'];
 end
 

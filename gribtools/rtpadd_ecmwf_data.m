@@ -49,11 +49,16 @@ function [head, hattr, prof, pattr] = rtpadd_ecmwf_data(head, hattr, prof, pattr
   if ~exist('fields','var')
     fields = [];
   end
-  [rtime rtime_st] = rtpdate(head,hattr,prof,pattr);
 
-  rtime = rtime(~isnan(rtime));
+  % Look for bad rtime
+  lbad = (isnan(prof.rtime) | (prof.rtime < 0)); % -9999 included here
 
-  for d = unique(sort(round([rtime(:)-.003 rtime(:) rtime(:)+.003] * rec_per_day) / rec_per_day))';
+  % Compute matlab time and only use the good times
+  [mtime mtime_st] = rtpdate(head,hattr,prof,pattr);
+
+  mtime = mtime(~lbad);
+
+  for d = unique(sort(round([mtime(:)-.003 mtime(:) mtime(:)+.003] * rec_per_day) / rec_per_day))';
     say(['reading ecmwf file for: ' datestr(d)])
     [Y M D h m s]= datevec(d);
     ename = ['/asl/data/ecmwf/' datestr(d,'yyyy/mm/') ecmwf_name(Y, M, D, h*10+m/6)];
