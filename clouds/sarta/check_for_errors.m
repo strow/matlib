@@ -1,7 +1,8 @@
-function [prof,iNotOK] = check_for_errors(pin)
+function [prof,iNotOK,ibadlist] = check_for_errors(pin)
 
 iNotOK = 0;
 prof = pin;
+ibadlist = [];
 
 %% cfrac checks
 ibad = find(prof.cfrac12 > prof.cfrac | prof.cfrac12 > prof.cfrac2);

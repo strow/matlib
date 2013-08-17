@@ -17,9 +17,11 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %                        >= 9999       : go for peak of wgt fcn of cloud ice, cloud liquid
 %     run_sarta.cfrac < 0              : use random
 %                     > 0 to < 1       : use fixed amount specified by user
-%     run_sarta.klayers_code = string to klayers
-%     run_sarta.sartaclear_code = string to sarta clear executable
-%     run_sarta.sartacloud_code = string to sarta cloud executable
+%     run_sarta.klayers_code        = string to klayers
+%     run_sarta.sartaclear_code     = string to sarta clear executable
+%     run_sarta.sartacloud_code     = string to sarta cloud executable
+%     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this 
+%        (default = -1, use ciwc/clwc structures as is)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -27,15 +29,24 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %   h.ptype = 0 (ie must be levels profile)
 %
 % Can do arbitrary levels eg ECM (91 levels) or ERA (37 levels)
+
+% can do "driver_sarta_cloud_rtp_onecldtest", but remember
+%    simplest way of turing off ice   is set p.ciwc = 0
+%    simplest way of turing off water is set p.clwc = 0,
+% and then set p.cc = 1
+
 %
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  08/15/2013 : introduced run_sarta.ice_water_separator, so that everything above certain pressure == ice; 
+%               below certain pressure = water
 %  04/22/2013 : introduced run_sarta.cfrac so that we can eg have cfrac = 1
 %  04/04/2013 : introduced/tweaked do_the_reset_cprtop_cloudOD.m
 %  04/04/2013 : mega updates in check_for_errors.m
 %  04/02/2013 : run_sarta.cumsum = N >= 9999 option allows the clouds to be placed at peak of cloud wgt fcn
-%  03/28/2013 : run_sarta.cumsum = N > 1 option allows the clouds to be placed where cumsum(OD) ~ N/100 (so if N = 100, look for where cumsum(ODcld) ~ 1)
+%  03/28/2013 : run_sarta.cumsum = N > 1 option allows the clouds to be placed where cumsum(OD) ~ N/100 (so if N = 100, 
+%               look for where cumsum(ODcld) ~ 1)
 %  03/11/2013 : run_sarta.cumsum = 0--1 option allows the clouds to be placed where cumsum(ciwc)/sum(ciwc) = X
 %                                  -1  option is to default wherever ecmwf2sarta put the cloud
 %
@@ -70,15 +81,21 @@ addpath([base_dir2 '/h4tools'])
 %% defaults
 if nargin == 4
   %% default to running sarta_cloudy
-  run_sarta.clear = -1;
-  run_sarta.cloud = +1;
-  run_sarta.cumsum = -1;
-  run_sarta.cfrac = -1;
-  %run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs';
+  run_sarta.clear               = -1;
+  run_sarta.cloud               = +1;
+  run_sarta.cumsum              = -1;
+  run_sarta.cfrac               = -1;
+  run_sarta.ice_water_separator = -1;
+
+  %run_sarta.klayers_code    = '/asl/packages/klayers/Bin/klayers_airs';
   %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-  run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
+  run_sarta.klayers_code    = '/asl/packages/klayersV205/BinV201/klayers_airs';
   run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
+
 elseif nargin == 5
+  if ~isfield(run_sarta,'ice_water_separator')
+    run_sarta.ice_water_separator = -1;
+  end
   if ~isfield(run_sarta,'clear')
     run_sarta.clear = -1;
   end
@@ -126,6 +143,11 @@ if ~isfield(p,'cfrac')
   %% need random cfracs
   disp('>>>>>>>> warning : need random cfracs .... initializing')
   p.cfrac = rand(size(p.stemp));
+end
+
+if run_sarta.ice_water_separator > 0
+  disp('>>>>>>>> warning : setting SEPARATOR for ice and water .... initializing')
+  p = convert_ice_water_separator(p,run_sarta.ice_water_separator);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

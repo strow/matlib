@@ -220,6 +220,7 @@ for iInd = 1 : iIndMax
   parname = mktemp(['pcrtm' yymmddhhstr]);
 
   ppath = '/strowdata1/s1/sergio/PCRTM_XIANGLEI/NEWVERS/PCRTM_V2.1_for_AIRS/code_changed/Run/';
+  ppath = '/asl/s1/sergio/PCRTM_XIANGLEI/NEWVERS/PCRTM_V2.1_for_AIRS/code_changed/Run/';
   parnameout = [parname '.out'];
 
   %whos P WCT ICE cc TT q o3 Ps Ts sfctype efreq emis zen_ang co2 

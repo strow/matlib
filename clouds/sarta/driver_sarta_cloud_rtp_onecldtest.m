@@ -16,6 +16,7 @@ function [prof,index] = driver_sarta_cloud_rtp_onecldtest(h,ha,p,pa,run_sarta,wa
 %     run_sarta.klayers_code = string to klayers
 %     run_sarta.sartaclear_code = string to sarta clear executable
 %     run_sarta.sartacloud_code = string to sarta cloud executable
+%     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this (default = -1, use ciwc/clwc structures as is)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -54,8 +55,12 @@ if nargin == 4
   %run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
   run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
   run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
+  run_sarta.ice_water_separator = -1;
   waterORice = +1; % keep only water clds
 elseif nargin == 5 | nargin == 6
+  if ~isfield(run_sarta,'ice_water_separator')
+    run_sarta.ice_water_separator = -1;
+  end
   if nargin == 5 
     waterORice = +1; % keep only water clds
   end
@@ -97,6 +102,17 @@ elseif ~isfield(p,'cc')
   error('driver_pcrtm_cloud_rtp.m requires cc');
 elseif h.ptype ~= 0
   error('driver_pcrtm_cloud_rtp.m requires LEVELS profiles (h.ptype = 0)');
+end
+
+if ~isfield(p,'cfrac')
+  %% need random cfracs
+  disp('>>>>>>>> warning : need random cfracs .... initializing')
+  p.cfrac = rand(size(p.stemp));
+end
+
+if run_sarta.ice_water_separator > 0
+  disp('>>>>>>>> warning : setting SEPRATOR for ice and water .... initializing')
+  p = convert_ice_water_separator(p,run_sarta.ice_water_separator);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
