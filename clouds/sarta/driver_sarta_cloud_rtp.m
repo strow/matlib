@@ -39,6 +39,7 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  08/17/2013 : making more extensive use of run_sarta.cfrac by introducing it in set_fracs_deffs.m and check_for_errors.m
 %  08/15/2013 : introduced run_sarta.ice_water_separator, so that everything above certain pressure == ice; 
 %               below certain pressure = water
 %  04/22/2013 : introduced run_sarta.cfrac so that we can eg have cfrac = 1
@@ -168,26 +169,11 @@ tic
 [prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud profile info here, using profX
                                             %% this then puts the info into "prof" by calling put_into_prof w/in routine
 
-%disp('check 1')
-%junky = 199;
-%junky
-%[prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
-%disp('check 1')
-
 prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
   prof.ctype  = double(prof.ctype);
   prof.ctype2 = double(prof.ctype2);
 
-%disp('check 2')
-%[prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
-%disp('check 2')
-
-prof = set_fracs_deffs(head,prof,profX,...
-            cmin,cngwat_max);            %% sets fracs and particle effective sizes eg cfrac2
-
-%disp('check 3')
-%[prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
-%disp('check 3')
+prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac);            %% sets fracs and particle effective sizes eg cfrac2
 
 if run_sarta.cumsum > 0 & run_sarta.cumsum <= 1
   %% set cloud top according to cumulative sum fraction of ciwc or clwc
@@ -224,10 +210,9 @@ end
 disp('---> checking cprtop vs cprbot vs spres')
 iNotOK = +1;
 iFix = 0;
-  %[prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
 while iFix < 10 & iNotOK > 0
   iFix = iFix + 1;
-  [prof,iNotOK] = check_for_errors(prof);           %% see if there are possible pitfalls x1
+  [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac);           %% see if there are possible pitfalls x1
   %[prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
   fprintf(1,' did n=%2i try at checking clouds \n',iFix)
 end

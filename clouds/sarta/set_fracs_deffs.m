@@ -1,4 +1,4 @@
-function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max);
+function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max,cfracSet);
 
 prof = pin;
 
@@ -41,6 +41,16 @@ clear iceflag tavg1 tavg2
 
 % Remove cloud fractions less than some minimum
 hcmin = 0.5*cmin;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+if cfracSet > 0
+  iPos = find(prof.cngwat > 0 & prof.cfrac > 0);
+  %plot(prof.cfrac(iPos)); disp('ret'); pause
+  prof.cfrac(iPos) = cfracSet;
+  iPos = find(prof.cngwat2 > 0 & prof.cfrac2 > 0);
+  %plot(prof.cfrac2(iPos)); disp('ret'); pause
+  prof.cfrac2(iPos) = cfracSet;
+end
 
 ix=find(prof.cfrac < cmin);
 prof.cfrac(ix)  = 0;

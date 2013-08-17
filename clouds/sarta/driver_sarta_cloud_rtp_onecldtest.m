@@ -47,6 +47,9 @@ addpath([base_dir2 '/h4tools'])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% defaults
+
+run_sarta.cfrac = 1;
+
 if nargin == 4
   run_sarta.clear = -1;
   run_sarta.cloud = +1;
@@ -137,14 +140,13 @@ prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv
   prof.ctype  = double(prof.ctype);
   prof.ctype2 = double(prof.ctype2);
 
-prof = set_fracs_deffs(head,prof,profX,...
-            cmin,cngwat_max);            %% sets fracs and particle effective sizes eg cfrac2
+prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac);            %% sets fracs and particle effective sizes eg cfrac2
 
 if run_sarta.cumsum > 0
   prof = reset_cprtop(prof);
 end
 
-prof = check_for_errors(prof);           %% see if there are possible pitfalls
+prof = check_for_errors(prof,run_sarta.cfrac);           %% see if there are possible pitfalls
 
 clear profX
 
