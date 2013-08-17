@@ -39,6 +39,7 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  08/17/2013 : if cfrac does not exist, fix random initialization so as to make sure cfrac > 0 always
 %  08/17/2013 : making more extensive use of run_sarta.cfrac by introducing it in set_fracs_deffs.m and check_for_errors.m
 %  08/15/2013 : introduced run_sarta.ice_water_separator, so that everything above certain pressure == ice; 
 %               below certain pressure = water
@@ -143,7 +144,8 @@ end
 if ~isfield(p,'cfrac')
   %% need random cfracs
   disp('>>>>>>>> warning : need random cfracs .... initializing')
-  p.cfrac = rand(size(p.stemp));
+  %% want to make sure there are NO zeros cfrac
+  p.cfrac = 0.50*(rand(size(p.stemp)) + rand(size(p.stemp))) ;
 end
 
 if run_sarta.ice_water_separator > 0
@@ -172,8 +174,12 @@ tic
 prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
   prof.ctype  = double(prof.ctype);
   prof.ctype2 = double(prof.ctype2);
+%disp('2')
+%[prof.cngwat]
 
 prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac);            %% sets fracs and particle effective sizes eg cfrac2
+%disp('3')
+%[prof.cngwat]
 
 if run_sarta.cumsum > 0 & run_sarta.cumsum <= 1
   %% set cloud top according to cumulative sum fraction of ciwc or clwc

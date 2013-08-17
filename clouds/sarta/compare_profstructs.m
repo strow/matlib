@@ -156,9 +156,12 @@ else
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-disp(' ')
-boo = [nansum(p1.sarta_lvlODice(:,iIndex)) nansum(p1.sarta_lvlODwater(:,iIndex)) p1.sarta_lvl_iceOD_1(iIndex) p1.sarta_lvl_waterOD_1(iIndex)];
-fprintf(1,'prof1 aux : lvlODice lvlODwater lvlODice1 lvlODwater1 = %8.6f %8.6f %8.6f %8.6f \n',boo);
 
-boo = [nansum(p2.sarta_lvlODice(:,iIndex)) nansum(p2.sarta_lvlODwater(:,iIndex)) p2.sarta_lvl_iceOD_1(iIndex) p2.sarta_lvl_waterOD_1(iIndex)];
-fprintf(1,'prof2 aux : lvlODice lvlODwater lvlODice1 lvlODwater1 = %8.6f %8.6f %8.6f %8.6f \n',boo);
+%{
+  disp(' ')
+  boo = [nansum(p1.sarta_lvlODice(:,iIndex)) nansum(p1.sarta_lvlODwater(:,iIndex)) p1.sarta_lvl_iceOD_1(iIndex) p1.sarta_lvl_waterOD_1(iIndex)];
+  fprintf(1,'prof1 aux : lvlODice lvlODwater lvlODice1 lvlODwater1 = %8.6f %8.6f %8.6f %8.6f \n',boo);
+
+  boo = [nansum(p2.sarta_lvlODice(:,iIndex)) nansum(p2.sarta_lvlODwater(:,iIndex)) p2.sarta_lvl_iceOD_1(iIndex) p2.sarta_lvl_waterOD_1(iIndex)];
+  fprintf(1,'prof2 aux : lvlODice lvlODwater lvlODice1 lvlODwater1 = %8.6f %8.6f %8.6f %8.6f \n',boo);
+%}

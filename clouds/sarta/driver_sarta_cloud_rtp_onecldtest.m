@@ -110,7 +110,8 @@ end
 if ~isfield(p,'cfrac')
   %% need random cfracs
   disp('>>>>>>>> warning : need random cfracs .... initializing')
-  p.cfrac = rand(size(p.stemp));
+  %% want to make sure there are NO zeros cfrac
+  p.cfrac = 0.50*(rand(size(p.stemp)) + rand(size(p.stemp))) ;
 end
 
 if run_sarta.ice_water_separator > 0

@@ -8,8 +8,8 @@ nprof = length(prof.stemp);
 
 [cfracw, cfraci] = total_cfrac(profX.plevs,profX.cc,profX.clwc,profX.ciwc);
 tcc = profX.cfrac;
-[prof.cfrac, prof.cfrac2, prof.cfrac12] = fake_cfracs(tcc, cfracw, cfraci, ...
-   prof.ctype, prof.ctype2);
+
+[prof.cfrac, prof.cfrac2, prof.cfrac12] = fake_cfracs(tcc, cfracw, cfraci, prof.ctype, prof.ctype2);
 
 prof.clwc = profX.clwc;
 prof.ciwc = profX.ciwc;
@@ -83,3 +83,4 @@ ix = find(prof.cngwat > cngwat_max);
 prof.cngwat(ix) = cngwat_max;
 ix = find(prof.cngwat2 > cngwat_max);
 prof.cngwat2(ix) = cngwat_max;
+

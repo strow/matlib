@@ -10,6 +10,10 @@ plot(sum(p00.ciwc),p00.cngwat,'.',sum(p10.ciwc),p10.cngwat,'ro',sum(p00.ciwc),p0
   title('cngwat vs ICE sum(ciwc), cngwat2 vs ICE sum(ciwc)'); 
   disp('ret to continue'); pause;
 
+plot(sum(p00.clwc)+sum(p00.ciwc),p00.cngwat+p00.cngwat2,'.',sum(p10.clwc)+sum(p10.ciwc),p10.cngwat+p10.cngwat2,'ro')
+  title('cngwat+cngwat2 vs sum(ciwc)+sum(clwc)'); 
+  disp('ret to continue'); pause;
+
 plot(sum(p00.clwc)-sum(p10.clwc),p10.cngwat,'ro')                
   title('cngwat vs WATER sum(clwc1-clwc2)'); 
   disp('ret to continue'); pause;
