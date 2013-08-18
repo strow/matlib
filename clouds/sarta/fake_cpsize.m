@@ -34,6 +34,10 @@ nwatsize = length(watsize);
 minwatsize = 13;
 maxwatsize = 26;
 
+% if randflag == 0
+%   watsize = [ 20,   20,  20];  %% keep water size at 20 um at all T
+% end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Check input
@@ -127,6 +131,37 @@ if (randflag == 1)
    cpsize = cpsize + junk;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if randflag == 0
+  disp('>>>>> WARNING : using NO randomization of dme; using PCRTM settings')
+
+  cpsizeXYZ = cpsize;
+  if nindw > 0
+    cpsize(indw) = 20;   %% fixed particle water size
+  end
+
+  if nindi > 0
+    %% need to fix ice particle sizes, according to PCRTM
+    % coefficents from S-C Ou, K-N. Liou, Atmospheric Research
+    % 35(1995):127-138.
+    % for computing ice cloud effective size
+    c0 = 326.3;
+    c1 = 12.42;
+    c2 = 0.197;
+    c3 = 0.0012;
+
+    tcld = temp(indi) - 273.16;
+    oo = find(tcld < -60);
+      tcld(oo) = -60;  % set a minimum, xianglei set -50
+    oo = find(tcld > -20);
+      tcld(oo) = -20;  % set a maximum, xianglei set -25                   
+    cldde_ice = c0 + c1 * tcld + c2 * tcld.^2 + c3 * tcld.^3 ;
+    cpsize(indi) = cldde_ice;
+  end
+  % plot(1:length(cpsize),cpsizeXYZ,1:length(cpsize),cpsize,'r')
+  % disp('ret to cont'); pause
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Apply min/max check
 ilo = indw(find(cpsize(indw) < minwatsize));

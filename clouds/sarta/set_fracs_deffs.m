@@ -1,4 +1,6 @@
-function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max,cfracSet);
+function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max,cfracSet,randomCpsize);
+
+%% before Aug 2013 randomCpsize was effectively 1
 
 prof = pin;
 
@@ -30,13 +32,13 @@ clear ibad
 iceflag = zeros(1,nprof);
 ii = find(prof.ctype == 201);
 iceflag(ii) = 1;
-prof.cpsize  = fake_cpsize(tavg1, iceflag, 1);
+prof.cpsize  = fake_cpsize(tavg1, iceflag, randomCpsize);
 %
 
 iceflag = zeros(1,nprof);
 ii = find(prof.ctype2 == 201);
 iceflag(ii) = 1;
-prof.cpsize2 = fake_cpsize(tavg2, iceflag, 1);
+prof.cpsize2 = fake_cpsize(tavg2, iceflag, randomCpsize);
 clear iceflag tavg1 tavg2
 
 % Remove cloud fractions less than some minimum

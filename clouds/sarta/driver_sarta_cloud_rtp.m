@@ -22,6 +22,8 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %     run_sarta.sartacloud_code     = string to sarta cloud executable
 %     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this 
 %        (default = -1, use ciwc/clwc structures as is)
+%     run_sarta.randomCpsize        = +1 or 0 to turn on/off randomizing of ice and water deff
+%                                      if 0, then water is ALWAYS 20 um (as in PCRTM wrapper)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -39,6 +41,8 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  08/18/2013 : introduced run_sarta.randomCpsize, default = +1 to keep randomizing deff; 
+%                                                             0 to keep ice = ice(T,pcrtm), water = 20 um
 %  08/17/2013 : if cfrac does not exist, fix random initialization so as to make sure cfrac > 0 always
 %  08/17/2013 : making more extensive use of run_sarta.cfrac by introducing it in set_fracs_deffs.m and check_for_errors.m
 %  08/15/2013 : introduced run_sarta.ice_water_separator, so that everything above certain pressure == ice; 
@@ -83,11 +87,12 @@ addpath([base_dir2 '/h4tools'])
 %% defaults
 if nargin == 4
   %% default to running sarta_cloudy
-  run_sarta.clear               = -1;
-  run_sarta.cloud               = +1;
-  run_sarta.cumsum              = -1;
-  run_sarta.cfrac               = -1;
-  run_sarta.ice_water_separator = -1;
+  run_sarta.clear               = -1;  %% do not run clear code
+  run_sarta.cloud               = +1;  %% run cloudy code
+  run_sarta.cumsum              = -1;  %% use pre-2012 cloudtop heights, without adjustments
+  run_sarta.cfrac               = -1;  %% use random (instread of fixed) cfracs
+  run_sarta.ice_water_separator = -1;  %% do not separate out ciwc and clwc by pressure; ie believe the NWP are correct
+  run_sarta.randomCpsize        = +1;  %% keep randomizing dme for ice and water
 
   %run_sarta.klayers_code    = '/asl/packages/klayers/Bin/klayers_airs';
   %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
@@ -95,6 +100,9 @@ if nargin == 4
   run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
 
 elseif nargin == 5
+  if ~isfield(run_sarta,'randomCpsize')
+    run_sarta.randomCpsize = +1;
+  end
   if ~isfield(run_sarta,'ice_water_separator')
     run_sarta.ice_water_separator = -1;
   end
@@ -124,7 +132,7 @@ elseif nargin == 5
 end
 
 % Min allowed cloud fraction
-cmin = 0.001;
+cmin = 0.0001;
 
 % Max allowed cngwat[1,2]
 cngwat_max = 500;
@@ -177,7 +185,9 @@ prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv
 %disp('2')
 %[prof.cngwat]
 
-prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac);            %% sets fracs and particle effective sizes eg cfrac2
+%% sets fracs and particle effective sizes eg cfrac2
+prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta.randomCpsize);
+
 %disp('3')
 %[prof.cngwat]
 
