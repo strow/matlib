@@ -1,4 +1,6 @@
-function [rad_allsky rad_clrsky tmpjunk] = PCRTM_compute_for_AIRS_spectra(nboxes,nlev, ncol, overlap, P, WCT, ICT, cc, TT, q, o3, Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath)
+function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS_spectra(...
+              nboxes,nlev, ncol, overlap, P, WCT, ICT, cc, TT, q, o3, ...
+              Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath)
 
 % this code is for simulating AIRS observation using changed PCRTM_V2.1 and
 % using whatever given profiles as long as the pressure levels are fixed
@@ -467,6 +469,7 @@ if exist([parname,'.out'], 'file')
   count = 0;
   PC_allsky =0;
   PC_clrsky =0;  
+
   for ibox = 1: nboxes
     % for each box, there are (PCend - PCstart)= PClen * (ucol_num(ibox) +1) PC scores  
     PCstart = count * PClen +1;
@@ -481,24 +484,41 @@ if exist([parname,'.out'], 'file')
     % calculate average PCs of the box for all condition       
     rad=zeros(PClen,1);
     for j = 1:ucol_num(ibox)
-      rad = rad +tmprad(:,j) .* ucol_num_same(ibox,j);
+      rad = rad + tmprad(:,j) .* ucol_num_same(ibox,j);
     end
     PC_allsky = reshape(rad/abs(ncol),numPC(1),numbnd);
         
     % clear sky spectra
     PC_clrsky = reshape(tmprad(:, ucol_num(ibox) +1),numPC(1), numbnd );  
         
+    % individual allsky spectra
+    for j = 1:ucol_num(ibox)
+      PC_allsky_ind(j,:,:) = reshape(tmprad(:, j),numPC(1), numbnd );  
+    end
+
     % convert PC domain to channel domain    
-    
+
     for ib =1:numbnd  % band 1 to 3
       % for all-sky
-      aa = PC_allsky(:, ib)' * reshape(PCcoef(ib, :, 1:numch(ib)), numPC(ib), numch(ib));		  
+      aa = PC_allsky(:, ib)' * reshape(PCcoef(ib, :, 1:numch(ib)), numPC(ib), numch(ib));
       rad_allsky(IDX{ib},ibox) = ((aa +1) .* Pstd(ib,1:numch(ib)))'*1e-3; % W per m^2 per sr per cm^-1
 
       %  for clear-sky
-      bb = PC_clrsky(:, ib)' * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib)); 
+      bb = PC_clrsky(:, ib)' * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
       rad_clrsky(IDX{ib},ibox) = ((bb+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
+
+      %% for individual allsky
+      for j = 1:ucol_num(ibox)
+        cc = squeeze(PC_allsky_ind(j,:,ib));
+        cc = cc * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
+        rx =  ((cc+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
+        %rad_allsky_xind(IDX{ib},ibox,j) = rx;
+        rad_allsky_xind(IDX{ib},j) = rx;
+      end    
     end  % end of bands
+    rad_allsky_mean(:,ibox) = nanmean(rad_allsky_xind');
+    rad_allsky_std(:,ibox)  = nanstd(rad_allsky_xind');
+
   end    % end of boxes
 end      % end of output file
 
