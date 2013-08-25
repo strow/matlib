@@ -4,29 +4,17 @@
 %% script is same as get_sarta_cloud except we call klayers100 and sarta100
 %% calling klayers100 means we need to specify that we want gases 201,202 to be output
 
-klayers = run_sarta.klayers_code;
 sarta   = run_sarta.sartacloud_code;
 
-if ~exist(klayers,'file')
-  error('klayers exec done not exist')
-end
 if ~exist(sarta,'file')
   error('sarta cloud exec done not exist')
 end
 
-fip = mktemp('temp.ip.rtp');
 fop = mktemp('temp.op.rtp');
 frp = mktemp('temp.rp.rtp');
-ugh1 = mktemp('ugh1');
 ugh2 = mktemp('ugh2');
 
-gas_str = 'nwant=10 listg=1,2,3,4,5,6,9,12,201,202 ';
-
-rtpwrite(fip,h,ha,prof,pa);
-klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' '  gas_str ' >& ' ugh1];
-  eval(klayerser);
-  %[hjunk,hajunk,pjunk,pajunk] = rtpread(fop);
-
+rtpwrite(fop,hX,ha,profX,pa);
 sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh2];
   eval(sartaer);
 try
@@ -38,4 +26,4 @@ catch me
   error('woof! try again!')
 end
   
-rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh1 ' ' ugh2]; eval(rmer);
+rmer = ['!/bin/rm ' fop ' ' frp ' ' ugh2]; eval(rmer);

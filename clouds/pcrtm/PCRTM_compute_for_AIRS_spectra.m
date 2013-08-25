@@ -516,9 +516,15 @@ if exist([parname,'.out'], 'file')
         rad_allsky_xind(IDX{ib},j) = rx;
       end    
     end  % end of bands
-    rad_allsky_mean(:,ibox) = nanmean(rad_allsky_xind');
-    rad_allsky_std(:,ibox)  = nanstd(rad_allsky_xind');
-
+    [mbox,nbox] = size(rad_allsky_xind);
+    fprintf(1,' finding means and stddev : mbox,nbox = %4i %4i \n',mbox,nbox);
+    if nbox == 1
+      rad_allsky_mean(:,ibox) = (rad_allsky_xind);
+      rad_allsky_std(:,ibox)  = (rad_allsky_xind);
+    else
+      rad_allsky_mean(:,ibox) = nanmean(rad_allsky_xind');
+      rad_allsky_std(:,ibox)  = nanstd(rad_allsky_xind');
+    end
   end    % end of boxes
 end      % end of output file
 

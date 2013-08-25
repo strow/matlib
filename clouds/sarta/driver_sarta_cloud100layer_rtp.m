@@ -74,8 +74,9 @@ addpath([base_dir2 '/h4tools'])
   [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
   run_sarta.clear = +1;
   run_sarta.cloud = +1;
-  run_sarta.ncol  = 10;
+  run_sarta.ncol  = 50;
   run_sarta.cfrac = 1;
+  run_sarta.ice_water_separator = 440;
   tic
   p1 = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
   toc
@@ -267,20 +268,31 @@ if run_sarta.cloud > 0
     %% all you have to do is run ONCE
     disp('running SARTA cloud ONCE')
     tic
-    get_sarta_cloud100layer;
+      get_sarta_cloud100layer;
     toc
     prof.rcalc = profRX2.rcalc;
   else
-    profNCOL = prof;
-    [mmjunk,nnjunk] = size(prof.plevs);
+    profNCOL_IP = prof;
+    h_IP        = h;
+    get_sarta_cloud100layer_klayersONLY
+    profNCOL_OP = pjunk;
+    h_OP        = hjunk;
+    [mmjunk,nnjunk] = size(profNCOL_OP.plevs);
     [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = ...
-       get_subcolumn_frac_v2(length(prof.stemp), mmjunk, run_sarta.ncol, profNCOL.cc',...
+       get_subcolumn_frac_v2(length(prof.stemp), mmjunk, run_sarta.ncol, profNCOL_OP.cc',...
                                     run_sarta.overlap);
     for iCol = 1 : run_sarta.ncol
       fprintf(1,'running SARTA cloud N times : subcol %3i out of %3i \n',iCol,run_sarta.ncol);
-      prof = profNCOL;
-      [h,prof] = do_subcol_cloudprofs(h,prof,squeeze(subcol_frac(:,iCol,:)));
-      get_sarta_cloud100layer;
+      prof = profNCOL_OP;
+      [hX,profX] = do_subcol_cloudprofs(h_OP,prof,squeeze(subcol_frac(:,iCol,:)));
+      if hX.ptype == 0
+        xciwc(iCol,:,:) = profX.ciwc;
+        xclwc(iCol,:,:) = profX.clwc;
+      else
+        xciwc(iCol,:,:) = profX.gas_201;
+        xclwc(iCol,:,:) = profX.gas_202;
+      end
+      get_sarta_cloud100layer_sartaONLY;
       junkcalc(iCol,:,:) = profRX2.rcalc;
     end
     prof.rcalc     = squeeze(nanmean(junkcalc,1));
