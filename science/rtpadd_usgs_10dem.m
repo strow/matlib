@@ -21,7 +21,7 @@ function [h ha p pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
 
   % If there's any bad GEO data, replace it by the (0,0) so not to crash
   % usgs_deg10_dem.m. 
-  ibad_geo = find(abs(p.rlat)>90 | p.rlon<-180 | p.rlon>360);
+  ibad_geo = find(abs(p.rlat)>90 | p.rlon<-180 | p.rlon>360 | isnan(p.rlat) | isnan(p.rlon));
   bad_rlat = p.rlat(ibad_geo);
   bad_rlon = p.rlon(ibad_geo);
   p.rlat(ibad_geo) = 0; 

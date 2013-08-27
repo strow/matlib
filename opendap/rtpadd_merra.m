@@ -33,7 +33,7 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Basic checks
-  if(head.ptype~=0)
+  if(isfield(head,'ptype') && head.ptype~=0)
     disp('You have an RTP file that is a level file. All previous layer information will be removed');
     while head.ngas>0
       if(isfield(prof,['gas_' num2str(head.glist(1))]))
@@ -63,6 +63,7 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
 
   threehours = round((mtimes-floor(min(mtimes)))*8); % [threehours]=3-hour long units
   u3hours = unique(threehours); % unique list of the used 3-hour intervals
+  u3hours(isnan(u3hours))=[]; % Remove NaNs that may come from mtimes==NaN
   n3hours = numel(u3hours);
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
