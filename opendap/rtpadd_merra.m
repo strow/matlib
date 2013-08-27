@@ -54,7 +54,12 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
  
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Get the data times:
-  mtimes = AirsDate(prof.rtime); % [mtimes]=days
+
+  % Compute FoVs matlab times and the reference year for TAI (used later)
+  % 
+  [mtimes mreftime] = rtpdate(prof,pattr);
+  mrefyear = str2num(datestr(mreftime,'yyyy'));
+
 
   threehours = round((mtimes-floor(min(mtimes)))*8); % [threehours]=3-hour long units
   u3hours = unique(threehours); % unique list of the used 3-hour intervals
@@ -89,9 +94,15 @@ function [head hattr prof pattr] = rtpadd_merra(head,hattr,prof,pattr,root)
     [dat_t plevs lats lons]= getdata_merra(reqtime, 't',[],root);
 
 
-    % ptime, plat and plon
+    %%%%%%%%%%%%%%%%%%%%
+    % ptime is computed by reverting mattime to TAI using the reference year above
+    reqTAI = mattime2tai(reqtime, mrefyear);
+    tprof.ptime = ones(1,nfovs).*reqTAI; % [sec]
 
-    tprof.ptime = ones(1,nfovs).*AirsDate(reqtime,-1); % [sec]
+
+    %%%%%%%%%%%%%%%%%%%%
+    % Field quantities. Use Nearest Match. 
+
     [glats glons] = meshgrid(lats,lons);
     tprof.plat = single(interp_sphere(lats, lons, glats, tprof.rlat, tprof.rlon, 'nearest'));
     tprof.plon = single(interp_sphere(lats, lons, glons, tprof.rlat, tprof.rlon, 'nearest'));
