@@ -293,10 +293,20 @@ if run_sarta.cloud > 0
         xclwc(iCol,:,:) = profX.gas_202;
       end
       get_sarta_cloud100layer_sartaONLY;
-      junkcalc(iCol,:,:) = profRX2.rcalc;
+      %% junkcalc(iCol,:,:) = profRX2.rcalc; 
+      if iCol == 1
+        [sumy,sumysqr,Nmatr] = accum_mean_std(0,0,0,profRX2.rcalc,1);
+      else
+        [sumy,sumysqr,Nmatr] = accum_mean_std(sumy,sumysqr,Nmatr,profRX2.rcalc,iCol);
+      end
     end
-    prof.rcalc     = squeeze(nanmean(junkcalc,1));
-    prof.rcalc_std = squeeze(nanstd(junkcalc,1));
+    %% prof.rcalc     = squeeze(nanmean(junkcalc,1));
+    %% prof.rcalc_std = squeeze(nanstd(junkcalc,1));
+
+    prof.rcalc = sumy./Nmatr;
+    prof.rcalc_std = sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-1));
+    prof.rcalc_std  = sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-0));
+
   end
 else
   disp('you did not ask for SARTA cloudy to be run; not changing p.rcalc')
