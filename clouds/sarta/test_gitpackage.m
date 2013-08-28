@@ -15,8 +15,8 @@ addpath /asl/matlib/gribtools/
 [h0,ha,p0,pa] = rtpadd_emis_wis(h0,ha,p0,pa);
 iJump = 1000;
 iJump = 100;
-iJump = 10;
 iJump = 25;
+iJump = 10;
 [h0,p0] = subset_rtp_clouds(h0,p0,[],[],1:iJump:length(p0.stemp));
 
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/

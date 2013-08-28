@@ -253,6 +253,9 @@ clear profX
 %% now essentially IGNORE the above and instead do the cloud PROFILES stuff
 [h,prof] = reset_cloud_slab_with_cloud_profile(h,prof,run_sarta.cfrac);
 
+%% and add on aux info, such as OD etc
+prof = cloudOD_for100layer(prof,run_sarta.cumsum/100);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 if run_sarta.clear > 0 
@@ -272,7 +275,7 @@ if run_sarta.cloud > 0
     toc
     prof.rcalc = profRX2.rcalc;
   else
-    profNCOL_IP = prof;
+    profNCOL_IP = prof;   %%%% <<<<<<<<<<<<<<<< save this, need it a lot!!!!!
     h_IP        = h;
     get_sarta_cloud100layer_klayersONLY
     profNCOL_OP = pjunk;
@@ -281,6 +284,7 @@ if run_sarta.cloud > 0
     [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = ...
        get_subcolumn_frac_v2(length(prof.stemp), mmjunk, run_sarta.ncol, profNCOL_OP.cc',...
                                     run_sarta.overlap);
+
     for iCol = 1 : run_sarta.ncol
       fprintf(1,'running SARTA cloud N times : subcol %3i out of %3i \n',iCol,run_sarta.ncol);
       prof = profNCOL_OP;
@@ -293,19 +297,27 @@ if run_sarta.cloud > 0
         xclwc(iCol,:,:) = profX.gas_202;
       end
       get_sarta_cloud100layer_sartaONLY;
-      %% junkcalc(iCol,:,:) = profRX2.rcalc; 
+      %% junkcalc(iCol,:,:) = profRX2.rcalc;    %% MEMORY HOG
       if iCol == 1
+        %% slower, but more memory efficient
         [sumy,sumysqr,Nmatr] = accum_mean_std(0,0,0,profRX2.rcalc,1);
       else
+        %% slower, but more memory efficient
         [sumy,sumysqr,Nmatr] = accum_mean_std(sumy,sumysqr,Nmatr,profRX2.rcalc,iCol);
       end
     end
+
+    prof = profNCOL_IP;
+
     %% prof.rcalc     = squeeze(nanmean(junkcalc,1));
     %% prof.rcalc_std = squeeze(nanstd(junkcalc,1));
 
     prof.rcalc = sumy./Nmatr;
-    prof.rcalc_std = sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-1));
-    prof.rcalc_std  = sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-0));
+    junk_mean = prof.rcalc;
+    %prof.rcalc_std = ...
+    %  real(sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-1)));
+    prof.rcalc_std  = ...
+      real(sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-0)));
 
   end
 else
