@@ -798,7 +798,8 @@ function gs = gstats(gtops,outfile);
     niok = length(iok);
 
     if ~exist('freq','var'); freq = head.vchan; end  % load the frequencies from the head structure
-    if ~isfield(gs.gtops,'freq'); gs.gtops.freq = (freq); end  % store the frequencies in the gtops structure
+    if ~isfield(gs.gtops,'freq'); gs.gtops.freq = freq; end  % store the frequencies in the gtops structure
+    if ~isfield(gs.gtops,'ichan'); gs.gtops.ichan = head.ichan; end  % store the ichan list in the gtops structure
     if ~isfield(gtops,'skip_calc') & ~isfield(prof,'rcalc'); error('  Stats Error: rcalc missing!'); end
 
     % use calflag to clean the data:

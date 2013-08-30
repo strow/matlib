@@ -107,9 +107,21 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
     sourcename = new_file;
   elseif ~exist(sourcename,'file')
     disp('attempting download of ECMWF file');
-    system(['cd ' getenv('SHMDIR') '/; curl -O http://cress.umbc.edu/' sourcename '.gz']);
-    new_file = [getenv('SHMDIR') '/' basename(sourcename)];
-    sourcename = new_file;
+    SHMDIR = getenv('SHMDIR');
+    if length(SHMDIR) < 3
+      SHMDIR = ['/dev/shm/' num2str(feature('getpid'))];
+      mkdir(SHMDIR);
+    end
+    %disp(['cd ' SHMDIR '/; curl -O http://cress.umbc.edu/' sourcename '.gz']);
+    system(['cd ' SHMDIR '/; curl -O http://cress.umbc.edu/' sourcename '.gz']);
+    new_file = [SHMDIR '/' basename(sourcename)];
+    %disp(['new file = ' new_file])
+    if(exist([new_file '.gz'],'file'))
+      new_file = [new_file '.gz'];
+      sourcename = keepNfiles(new_file,2);
+      unlink(new_file);
+      new_file = sourcename;
+    end
   end
 
   if ~exist(sourcename,'file')
