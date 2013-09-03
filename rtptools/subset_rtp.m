@@ -171,13 +171,13 @@ end
 if (isfield(headin,'vcmin'))
    head.vcmin=headin.vcmin;
    if (nchanin ~= nchan)
-      disp('You should verify head.vcmin is correct for the new channel set')
+      %disp('You should verify head.vcmin is correct for the new channel set')
    end
 end
 if (isfield(headin,'vcmax'))
    head.vcmax=headin.vcmax;
    if (nchanin ~= nchan)
-      disp('You should verify head.vcmax is correct for the new channel set')
+      %disp('You should verify head.vcmax is correct for the new channel set')
    end
 end
 

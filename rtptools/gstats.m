@@ -239,7 +239,10 @@ function gs = gstats(gtops,outfile);
 
   % custom filter name
   gt.filter=[];
-  gt.klayers='[head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr)';
+  gt.klayers='[head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr,gt.klayers_exec)';
+  gt.klayers_exec = '/asl/packages/klayersV205/BinV201/klayers_airs';
+  %gt.sarta='';
+  %gt.sarta_exec='';
 
   % site setup
   gt.site_bins = [];
@@ -635,14 +638,14 @@ function gs = gstats(gtops,outfile);
 	continue; 
       end
 
-      gs.gtops.rtp_sarta = get_attr(hattr,'sarta');
-      gs.gtops.rtp_sarta_exec = get_attr(hattr,'sarta_exec');
-      gs.gtops.rtp_klayers = get_attr(hattr,'klayers');
-      gs.gtops.rtp_klayers_exec = get_attr(hattr,'klayers_exec');
+      gs.gtops.sarta = get_attr(hattr,'sarta');
+      gs.gtops.sarta_exec = get_attr(hattr,'sarta_exec');
+      gs.gtops.klayers = get_attr(hattr,'klayers');
+      gs.gtops.klayers_exec = get_attr(hattr,'klayers_exec');
 
-      if length(gs.gtops.rtp_klayers_exec) == 0
+      if length(gs.gtops.klayers_exec) == 0
 	say('  WARNING: Missing klayers_exec, using airs wetwater default');
-	gs.gtops.rtp_klayers_exec = '/asl/packages/klayersV205/BinV201/klayers_airs';
+	gs.gtops.klayers_exec = '/asl/packages/klayersV205/BinV201/klayers_airs';
       end
 
       if isfield(prof,'rcalc') & isfield(prof,'robs1') & size(prof.rcalc,2) ~= size(prof.robs1,2)
@@ -795,7 +798,8 @@ function gs = gstats(gtops,outfile);
     niok = length(iok);
 
     if ~exist('freq','var'); freq = head.vchan; end  % load the frequencies from the head structure
-    if ~isfield(gs.gtops,'freq'); gs.gtops.freq = (freq); end  % store the frequencies in the gtops structure
+    if ~isfield(gs.gtops,'freq'); gs.gtops.freq = freq; end  % store the frequencies in the gtops structure
+    if ~isfield(gs.gtops,'ichan'); gs.gtops.ichan = head.ichan; end  % store the ichan list in the gtops structure
     if ~isfield(gtops,'skip_calc') & ~isfield(prof,'rcalc'); error('  Stats Error: rcalc missing!'); end
 
     % use calflag to clean the data:
@@ -1310,5 +1314,5 @@ function val = amax(vec)
     return; 
   end
   [val i] = nanmax(abs(vec),[],1);
-  val = vec(i);
+%  val = vec(i);
 end

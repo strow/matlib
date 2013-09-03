@@ -27,7 +27,12 @@ function isgood = lockfile(fname,failtime)
   if exist(lockname,'file') % if the file already exists, test to see if the age is old:
     g=dir(lockname); if now-g.datenum < failtime; isgood = 0; return; end
   end
-  fh=fopen(lockname,'w');fclose(fh);  % create an empty lock file
+  fh=fopen(lockname,'w');
+  if fh > 0;
+    fclose(fh);
+  else
+    disp(['  LOCKFILE WARNING: File not writeable ' fname])
+  end  % create an empty lock file
   isgood = 1;
 
   c = onCleanup(@()unlink(lockname));

@@ -17,6 +17,7 @@ function [isiteind, isitenum] = fixedsite(lat, lon, range_km);
 % Created: 11 April 2007, Scott Hannon
 % Update: 20 April 2007, S.Hannon - fix "dist" conversion to km (was mm)
 % Update:  3 March 2011, Paul Schou - added extra sites
+%            2013.05.08, B.I. - removed extra sites (LLS request)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -45,8 +46,8 @@ SiteLatLon=[ ...
     31.05   57.65];% 21 = LUT Desert
 
 % include global view sites
-load gvsites.mat
-SiteLatLon(101:100+length(gv_lat),:)=[gv_lat gv_lon];
+% load gvsites.mat
+% SiteLatLon(101:100+length(gv_lat),:)=[gv_lat gv_lon];
 
 
 % Convert Longitudes from 0:360 into -180:180

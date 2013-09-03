@@ -1,7 +1,10 @@
-function [head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr)
-%function [head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr)
+function [head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr, klayers_exec)
+%function [head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr, klayers_exec)
 %
 %  A simple function to run klayers on a file and return the result
+%  Exacutable is in pattr field "klayers_exec".
+%
+% klayers_exec (optional) name of the executable - overrides pattr field.
 
 %if isfield(head,'gunit') && head.gunit(1) == 1
 if head.ptype > 0
@@ -18,7 +21,9 @@ head.nchan = 1;
 head.vchan = 1;
 head.ichan = 1;
 
-klayers_exec = get_attr(hattr,'klayers_exec');
+if(nargin()<5)
+  klayers_exec = get_attr(hattr,'klayers_exec');
+end
 
 if ~isempty(klayers_exec)
   tmp1 = mktemp();
@@ -31,7 +36,11 @@ if ~isempty(klayers_exec)
   [head, hattr, prof, pattr] = rtpread(tmp2);
   delete(tmp2)
 else
-  error('Cannot run klayers as klayers_exec variable is missing from hattr.')
+  if(nargin()<5)
+    error('Cannot run klayers as klayers_exec variable is missing from hattr.')
+  else
+    error('Cannot run klayers as klayers_exec input argument is empty.')
+  end
 end
 
 head.pfields = h.pfields;
