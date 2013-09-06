@@ -185,21 +185,21 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
 
   nprof = length(prof.rlat);
   if (length(prof.rlon) ~= nprof)
-     say('Error: lon and lat are different sizes!');
+     error('Error: lon and lat are different sizes!');
      farewell(rn);
      return
   end
 
   % Latitude must be between -90 (south pole) to +90 (north pole)
   if any(prof.rlat < -90 | prof.rlat > 90);
-     say('Error: latitude out of range!')
+     error('Error: latitude out of range!')
      farewell(rn);
      return
   end
 
   % Note: longitude can be either 0 to 360 or -180 to 180 
   if any(prof.rlon < -180 | prof.rlon > 360);
-     say('Error: longitude out of range!')
+     error('Error: longitude out of range!')
      farewell(rn);
      return
   end

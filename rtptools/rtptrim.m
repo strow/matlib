@@ -143,7 +143,7 @@ if exist(rtpfile,'file');
     if debug == 1;disp(['[ Checking field ' f{i} ' ( ' num2str(g.bytes) ' bytes) ]']);end
     
 
-    if all(size(val0(:,sel)) == size(val)) & all(all(val0(:,sel) == val))
+    if all(size(val0(:,sel)) == size(val)) & all(all(isequalwithequalnans(val0(:,sel), val)))
       p = rmfield(p,f{i});
       if debug == 1;disp(['  - removing']);end
       trimmed_bytes = trimmed_bytes + g.bytes;
