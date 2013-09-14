@@ -22,8 +22,10 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %     run_sarta.sartacloud_code     = string to sarta cloud executable
 %     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this 
 %        (default = -1, use ciwc/clwc structures as is)
-%     run_sarta.randomCpsize        = +1 or 0 to turn on/off randomizing of ice and water deff
-%                                      if 0, then water is ALWAYS 20 um (as in PCRTM wrapper)
+%     run_sarta.randomCpsize        = +1 (default) to randomize BOTH ice (based on Tcld) and water deff
+%                                      20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
+%                                      (based on Tcld)
+%                                      -1, then water is MODIS dme, random ice (based on Tcld)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -41,8 +43,9 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
-%  08/18/2013 : introduced run_sarta.randomCpsize, default = +1 to keep randomizing deff; 
-%                                                             0 to keep ice = ice(T,pcrtm), water = 20 um
+%  08/18/2013 : introduced run_sarta.randomCpsize, default = +1  to keep randomizing deff; 
+%                                                             20 to keep ice = ice(T,pcrtm), water = 20 um
+%                                                             -1 to use MODIS water DME
 %  08/17/2013 : if cfrac does not exist, fix random initialization so as to make sure cfrac > 0 always
 %  08/17/2013 : making more extensive use of run_sarta.cfrac by introducing it in set_fracs_deffs.m and check_for_errors.m
 %  08/15/2013 : introduced run_sarta.ice_water_separator, so that everything above certain pressure == ice; 

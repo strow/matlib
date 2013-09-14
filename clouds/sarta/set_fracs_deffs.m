@@ -1,6 +1,9 @@
 function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max,cfracSet,randomCpsize);
 
 %% before Aug 2013 randomCpsize was effectively 1
+%% randomCpsize = 1    ==> random dme_water (centered about 20 um), dme_ice = based on Tcld, randomized
+%%                20   ==> dme_water FIXED at 20 um, dme_ice = based on Tcld, randomized
+%%                -1   ==> dme_water based on MODIS climatology, dme_ice = based on Tcld, randomized
 
 prof = pin;
 
@@ -28,12 +31,12 @@ pavg(ibad) = 500; % safe dummy value
 tavg2 = rtp_t_at_p(pavg, head, prof);
 clear ibad
 
+%%%% >>>>>>>>>>>>>>>>>>>>>>>>> guts of cpsize setting >>>>>>>>>>>>>>>>>>>>>>>>>
 % Replace cpsize and cpsize2
 iceflag = zeros(1,nprof);
 ii = find(prof.ctype == 201);
 iceflag(ii) = 1;
 prof.cpsize  = fake_cpsize(tavg1, iceflag, randomCpsize);
-%
 
 iceflag = zeros(1,nprof);
 ii = find(prof.ctype2 == 201);
@@ -41,10 +44,15 @@ iceflag(ii) = 1;
 prof.cpsize2 = fake_cpsize(tavg2, iceflag, randomCpsize);
 clear iceflag tavg1 tavg2
 
+if (randomCpsize == -1)
+  disp('>>>>>>> resetting water dme according to water climatology')
+  prof = modisL3_map_rtp(prof);
+end
+%%%% >>>>>>>>>>>>>>>>>>>>>>>>> guts of cpsize setting >>>>>>>>>>>>>>>>>>>>>>>>>
+
 % Remove cloud fractions less than some minimum
 hcmin = 0.5*cmin;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
 if cfracSet > 0
   iPos = find(prof.cngwat > 0 & prof.cfrac > 0);
   %plot(prof.cfrac(iPos)); disp('ret'); pause
