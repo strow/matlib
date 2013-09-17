@@ -1,9 +1,10 @@
 function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max,cfracSet,randomCpsize);
 
 %% before Aug 2013 randomCpsize was effectively 1
-%% randomCpsize = 1    ==> random dme_water (centered about 20 um), dme_ice = based on Tcld, randomized
-%%                20   ==> dme_water FIXED at 20 um, dme_ice = based on Tcld, randomized
-%%                -1   ==> dme_water based on MODIS climatology, dme_ice = based on Tcld, randomized
+%% randomCpsize = 1    ==> random dme_water (centered about 20 um), dme_ice = based on Scott Tcld, randomized
+%%                20   ==> dme_water FIXED at 20 um, dme_ice = based on KNLiou Tcld, randomized
+%%                -1   ==> dme_water based on MODIS climatology, dme_ice = based on Scott Tcld, randomized
+%%              9999   ==> dme water based on MODIS climatology, dme_ice = based on KNLiou Tcld
 
 prof = pin;
 
@@ -44,7 +45,7 @@ iceflag(ii) = 1;
 prof.cpsize2 = fake_cpsize(tavg2, iceflag, randomCpsize);
 clear iceflag tavg1 tavg2
 
-if (randomCpsize == -1)
+if (randomCpsize == -1) | (randomCpsize == +9999)
   disp('>>>>>>> resetting water dme according to water climatology')
   prof = modisL3_map_rtp(prof);
 end

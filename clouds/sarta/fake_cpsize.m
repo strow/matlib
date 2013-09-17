@@ -16,9 +16,10 @@ function [cpsize] = fake_cpsize(temp, iceflag, randomCpsize);
 %    cpsize  = [1 x n] particle size(diameter) {um}
 %
 %
-% randomCpsize   = 1 ==> random dme_water (centered about 20 um), dme_ice = based on Tcld, randomized
-%                 20 ==> dme_water FIXED at 20 um, dme_ice = based on Tcld, randomized
-%               -1 ==> dme_water based on MODIS climatology, dme_ice = based on Tcld, randomized
+% randomCpsize   = 1  ==> random dme_water (centered about 20 um), dme_ice = based on Scott Tcld, randomized
+%                 20  ==> dme_water FIXED at 20 um, dme_ice = based on KN Liou Tcld, randomized
+%                 -1  ==> dme_water based on MODIS climatology, dme_ice = based on Scott Tcld, randomized
+%               +9999 ==> dme_water based on MODIS climatology, dme_ice = based on KN Liou Tcld, randomized
 
 % Created: 05 Mar 2009, Scott Hannon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,12 +139,11 @@ if (randomCpsize == 1)
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if randomCpsize == 20
-  disp('>>>>> WARNING : reset all dme using PCRTM settings')
-  disp('>>>>>         : water all set at 20 um, while ice uses PCRTM parameters')
+if randomCpsize == 20 | randomCpsize == 9999
+  disp('>>>>> WARNING : reset ice dme using PCRTM settings')
 
   cpsizeXYZ = cpsize;
-  if nindw > 0
+  if nindw > 0 & randomCpsize == 20
     cpsize(indw) = 20;   %% fixed particle water size
   end
 
@@ -169,10 +169,6 @@ if randomCpsize == 20
   % disp('ret to cont'); pause
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if randomCpsize == -1
-  disp('>>>> will reset water dme to MODIS climatology in routine separate from fake_cpsize.m')
-end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Apply min/max check

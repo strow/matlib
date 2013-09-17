@@ -26,6 +26,7 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %                                      20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
 %                                      (based on Tcld)
 %                                      -1, then water is MODIS dme, random ice (based on Tcld)
+%                                      9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc

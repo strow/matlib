@@ -19,6 +19,10 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h,ha,p0ALL,pa,run_sarta)
 %     run_sarta.klayers_code = string to klayers executable
 %     run_sarta.sartaclear_code = string to sarta clear executable
 %     run_sarta.sartacloud_code = string to sarta cloud executable
+%     run_sarta.randomCpsize        = +1 to randomize BOTH ice (based on Tcld) and water deff
+%                                      20 (DEFAULT) then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
+%                                      (based on Tcld)
+%                                      +9999, then water is MODIS dme, random ice (based on KN Liou Tcld)
 %
 % Requirements : 
 %   p0ALL must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -107,10 +111,11 @@ overlap = 2;   %% switch for random overlap
 overlap = 3;   %% switch for maximum random overlap
 
 if nargin == 4
-  run_sarta.clear = -1;
-  run_sarta.cloud = -1;
-  run_sarta.ncol0 = 50;
-  run_sarta.overlap = 3;
+  run_sarta.clear         = -1;
+  run_sarta.cloud         = -1;
+  run_sarta.ncol0         = 50;
+  run_sarta.overlap       = 3;
+  run_sarta.randomCpsize = +20;  %% keep Xiangle's ice dme parmerization (based on KN Liou) and 20 um water dme
 elseif nargin == 5
   if ~isfield(run_sarta,'clear')
     run_sarta.clear = -1;
@@ -120,6 +125,9 @@ elseif nargin == 5
   end
   if ~isfield(run_sarta,'overlap')
     run_sarta.overlap = 3;
+  end
+  if ~isfield(run_sarta,'randomCpsize')
+    run_sarta.randomCpsize = +20;
   end
   if ~isfield(run_sarta,'ncol0')
     run_sarta.ncol0 = 50;
@@ -133,6 +141,7 @@ elseif nargin == 5
   end
   if ~isfield(run_sarta,'sartacloud_code')
     %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
+    %run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
     run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
   end
 end
@@ -159,6 +168,12 @@ p1ALL = p0ALL;
 p0ALLX = p0ALL;
 
 [yy,mm,dd,hh] = tai2utc(p0ALL.rtime);
+
+if run_sarta.randomCpsize == +9999
+  modis_waterDME = modisL3_map_rtp_cloudprofile(p0ALLX);
+else
+  modis_waterDME = [];
+end
 
 iIndMax = ceil(length(p0ALL.xtrack)/iChunk);
 
@@ -230,7 +245,8 @@ for iInd = 1 : iIndMax
                                     PCRTM_compute_for_AIRS_spectra(nboxes,nlev, ncol, overlap, ...
                                                            P, WCT, ICT, cc, TT, q, o3, Ps, Ts, ...
                                                            sfctype,efreq,emis, ...
-                                                           zen_ang,co2, parname,ppath);
+                                                           zen_ang,co2, parname,ppath, ...
+                                                           run_sarta.randomCpsize, modis_waterDME(inds));
 %    [rad_allsky2 rad_clrsky tmpjunk2] = PCRTM_compute_for_AIRS_spectra_V2(nboxes,nlev, ncol, overlap, ...
 %                                                           P, WCT, ICT, cc, TT, q, o3, Ps, Ts, ...
 %                                                           sfctype,efreq,emis, ...

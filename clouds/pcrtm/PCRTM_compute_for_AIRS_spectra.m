@@ -1,6 +1,7 @@
 function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS_spectra(...
               nboxes,nlev, ncol, overlap, P, WCT, ICT, cc, TT, q, o3, ...
-              Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath)
+              Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath, ...
+              randomCpsize,modis_waterDME)
 
 % this code is for simulating AIRS observation using changed PCRTM_V2.1 and
 % using whatever given profiles as long as the pressure levels are fixed
@@ -29,9 +30,12 @@ function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS
 % co2            co2 volume mixing ratio (ppmv)            
 % parname        name of the input file for PCRTM
 % ppath          the path where the PCRTM excutable file is
+% randomCpsize   if +20, use what Xianglei gave (20 um for water, and KN Liou param for ice)
+%                if +9999, use MODIS for water, Scott for ice
+% modis_waterDME = [] if randomCpsize, else have set it from the modis climatology
 
 % error checking
-if nargin ~= 20
+if nargin ~= 22
   disp('wrong number of inputs');
   return;
 end
@@ -227,7 +231,13 @@ for ibox =1:nboxes
     end
                       
     cldde_ice(ilev) = c0 + c1 * tcld + c2 * tcld^2 + c3 * tcld^3 ;
-    cldde_liq(ilev) = 20; % Diameter in PCRTM
+    if randomCpsize == 20
+      cldde_liq(ilev) = 20; % Diameter in PCRTM
+    elseif randomCpsize == 9999
+      cldde_liq(ilev) = modis_waterDME(ibox); % Diameter in PCRTM from MODIS
+    else
+      error('PCRTM wrapper only handles randomCpsize = +20 or +9999')
+    end
 
     % cloud phase and cloud effective size  in  micron
     if cldpres_layer(ilev) <= 440
