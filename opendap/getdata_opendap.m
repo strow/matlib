@@ -125,15 +125,16 @@ for i=1:100
         var_store{count} = 'block';
 
         dims = cellfun(@(i) str2num(i{1}),regexp(str,'= (\d)*]','tokens'));
-	var_dims{count} = dims;
-
-        for j = 1:length(in_names)
+        if count <= length(in_names)
+          for j = 1:length(in_names)
             if strcmp(var_names{count},in_names{j})
-                if ~isequal(dims, in_dims{j})
-                    error(['dimension mismatch ' num2str(var_dims{count}) ' and ' num2str(dims)])
-                end
+              if ~isequal(dims, in_dims{j})
+                error(['dimension mismatch ' num2str(in_dims{j}) ' and ' num2str(dims)])
+              end
             end
+          end
         end
+        var_dims{count} = dims;
 
         count = count + 1;
     end
@@ -160,7 +161,7 @@ for i = 1:length(var_store)
     if strcmp(var_store{i},'block')
         dims = fread(h,2,'int32');
 
-	dbg(dims)
+    dbg(dims)
 
         if dims(1) ~= dims(2)
           % A weird thing in OpenDAP, that two 0 bytes get inserted in the binary stream...
@@ -214,10 +215,10 @@ for i = 1:length(var_store)
 
     elseif strcmp(var_store{i},'struct')
       if ~isequal(fread(h,4,'uint8')',[90 0 0 0])
-	fseek(h,-2,0);
-	if ~isequal(fread(h,4,'uint8')',[90 0 0 0])
-	  error(['getdata_opendap:  Field ''' var_names{i} ''' binary start is not a structure format.']);
-	end
+        fseek(h,-2,0);
+        if ~isequal(fread(h,4,'uint8')',[90 0 0 0])
+          error(['getdata_opendap:  Field ''' var_names{i} ''' binary start is not a structure format.']);
+        end
       end
       fseek(h,-4,0);
 
@@ -226,7 +227,7 @@ for i = 1:length(var_store)
 
       %reshape(data(4+(1:4),:),1,[])
       if ~isequal(unique(data((1:4),:)','rows'),[90 0 0 0])
-	error(['getdata_opendap:  Field ''' var_names{i} ''' binary is not a structure.']);
+        error(['getdata_opendap:  Field ''' var_names{i} ''' binary is not a structure.']);
       end
       varargout{i} = swapbytes(typecast(reshape(uint8(data(4+(1:typesize),:)),1,[]),type));
       fread(h,4,'uint8');
@@ -243,10 +244,11 @@ end
 fclose(h);
 delete(t);
 
-% Order the data in the request order for parsing
-%[a b] = ismember(in_names,var_names);
-%keyboard
-%varargout = varargout(b);
+if i == length(in_names)
+  % Order the data in the request order for parsing
+  [a b] = ismember(in_names,var_names);
+  varargout = varargout(b);
+end
 
 end
 
