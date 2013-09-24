@@ -65,13 +65,17 @@ for i=1:100
         var_store{count} = 'block';
 
         dims = cellfun(@(i) str2num(i{1}),regexp(str,'= (\d)*]','tokens'));
-        for j = 1:length(in_names)
+				if count <= length(in_names)
+          for j = 1:length(in_names)
             if strcmp(var_names{count},in_names{j})
                 if ~isequal(dims, in_dims{j})
                     error(['dimension mismatch ' num2str(var_dims{count}) ' and ' num2str(dims)])
                 end
                 var_dims{count} = dims;
             end
+          end
+        else
+					var_dims{count} = dims;
         end
 
         count = count + 1;
@@ -156,6 +160,8 @@ end
 fclose(h);
 delete(t);
 
-% Order the data in the request order for parsing
-[a b] = ismember(in_names,var_names);
-varargout = varargout(b);
+if i == length(in_names)
+  % Order the data in the request order for parsing
+  [a b] = ismember(in_names,var_names);
+  varargout = varargout(b);
+end

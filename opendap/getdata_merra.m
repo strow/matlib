@@ -53,11 +53,13 @@ function [dat levels lats lons merra_str] = getdata_merra(time, field, level)
       filename = ['/asl/data/merra/' datestr(time(1),'yyyy/mm/dd') '/MAI3CPASM_' field '_' datestr(round(time(1)*8)/8,'yyyymmdd-HHMMSS') '.mat'];
   end
 
-  try
-    mkdirs(dirname(filename));
-  catch
-    disp(['Cannot create ' dirname(filename)]);
-    return
+  if ~exist(dirname(filename),'dir')
+	  try
+ 	  	mkdirs(dirname(filename));
+  	catch
+    	disp(['Cannot create ' dirname(filename)]);
+    	return
+  	end
   end
 
 
