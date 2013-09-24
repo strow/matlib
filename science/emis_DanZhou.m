@@ -1,6 +1,6 @@
-function [efreq,emis] = emis_DanZhou(lat,lon,rtime,taiyear);
+function [efreq,emis] = emis_DanZhou(lat,lon,rtime,taiyear, root);
 
-% function [efreq,emis] = emis_DanZhou(lat,lon,rtime,taiyear);
+% function [efreq,emis] = emis_DanZhou(lat,lon,rtime,taiyear, root);
 %
 % Read Dan Zhous IASI emissivity database for 2007/07 to 2008/06
 % and interpolate it for time of year and reduced the frequency
@@ -12,7 +12,7 @@ function [efreq,emis] = emis_DanZhou(lat,lon,rtime,taiyear);
 %    lon = [1 x nobs] longitude {-180 to 360 degrees}
 %    rtime = [1 x nobs] TAI time {double seconds since taiyear}
 %    taiyear = [1 x 1] TAI year {1993 or 2000}
-%
+%    root = root location (optional) Default = '/asl'
 % Output:
 %    efreq = [npts x 1] emissivity frequency points {wavenumber}
 %    emis  = [npts x nobs] emissivity points {0 to 1, -999 if no data}
@@ -23,6 +23,12 @@ function [efreq,emis] = emis_DanZhou(lat,lon,rtime,taiyear);
 
 %addpath /asl/matlab/iasi/utils  % emis_iasi_DanZhou2
 %addpath /asl/matlab/science     % utc2tai & tai2utc
+
+if(nargin()==5)
+  loc = [root '/data/iremis/DanZhou/Modified/'];
+else
+  loc = '/asl/data/iremis/DanZhou/Modified/';
+end
 
 % The portion of Daniel Zhou (NASA Langley) database we have spans
 % 2007/07 to 2008/06 with one file per month.  Interpolate across
@@ -46,7 +52,7 @@ efreq = efreq'; %' [npts x 1]
 inde = round(4*(efreq - 645) + 1);  % exact integers
 nemis = length(inde);
 
-if (nargin ~= 4)
+if (nargin ~= 5)
    error('unexpected number of input arguments')
 end
 d = size(lat);
@@ -111,8 +117,8 @@ if (np > 0)
 disp('early jan')
    clo = center(12) - 1;
    chi = center(1);
-   [elo] = emis_iasi_DanZhou2(yyyymm(12),lat(ip),lon(ip),inde);
-   [ehi] = emis_iasi_DanZhou2(yyyymm(1 ),lat(ip),lon(ip),inde);
+   [elo] = emis_iasi_DanZhou2(yyyymm(12),lat(ip),lon(ip),inde, loc);
+   [ehi] = emis_iasi_DanZhou2(yyyymm(1 ),lat(ip),lon(ip),inde, loc);
    ilo = find(elo(1,:) > 0);
    ihi = find(ehi(1,:) > 0);
    ionly = setdiff(ilo, ihi); % good elo & bad ehi
@@ -131,8 +137,8 @@ if (np > 0)
 disp('late dec')
    clo = center(12);
    chi = 1 + center(1);
-   [elo] = emis_iasi_DanZhou2(yyyymm(12),lat(ip),lon(ip),inde);
-   [ehi] = emis_iasi_DanZhou2(yyyymm(1 ),lat(ip),lon(ip),inde);
+   [elo] = emis_iasi_DanZhou2(yyyymm(12),lat(ip),lon(ip),inde, loc);
+   [ehi] = emis_iasi_DanZhou2(yyyymm(1 ),lat(ip),lon(ip),inde, loc);
    ilo = find(elo(1,:) > 0);
    ihi = find(ehi(1,:) > 0);
    ionly = setdiff(ilo, ihi); % good elo & bad ehi
@@ -152,8 +158,8 @@ for ii=1:11
    np = length(ip);
    if (np > 0)
 %disp(['between months ' int2str(ii) ' and ' int2str(ii+1)])
-      [elo] = emis_iasi_DanZhou2(yyyymm(ii  ),lat(ip),lon(ip),inde);
-      [ehi] = emis_iasi_DanZhou2(yyyymm(ii+1),lat(ip),lon(ip),inde);
+      [elo] = emis_iasi_DanZhou2(yyyymm(ii  ),lat(ip),lon(ip),inde, loc);
+      [ehi] = emis_iasi_DanZhou2(yyyymm(ii+1),lat(ip),lon(ip),inde, loc);
       ilo = find(elo(1,:) > 0);
       ihi = find(ehi(1,:) > 0);
       ionly = setdiff(ilo, ihi); % good elo & bad ehi

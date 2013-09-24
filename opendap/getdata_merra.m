@@ -1,5 +1,5 @@
-function [dat levels lats lons merra_str] = getdata_merra(time, field, level)
-%function [dat levels lats lons merra_str] = getdata_merra(time, field, level)
+function [dat levels lats lons merra_str] = getdata_merra(time, field, level, root)
+%function [dat levels lats lons merra_str] = getdata_merra(time, field, level, root)
 %
 %
 %  Inputs:
@@ -8,7 +8,9 @@ function [dat levels lats lons merra_str] = getdata_merra(time, field, level)
 %	level - data level, level field has dimensions: 1:17
 % 	        Note, if level field is omitted or empty then 
 %               all levels are retrieved
-% 
+%       root  - root directory of the data (usually /asl) - optional
+%       
+%  Output
 %       merra_str - a string with data file information
 %
 % 3D Fields available are:
@@ -39,18 +41,30 @@ function [dat levels lats lons merra_str] = getdata_merra(time, field, level)
 % 1Hr files for surface skin temperature
 %	http://goldsmr2.sci.gsfc.nasa.gov/opendap/MERRA/MAT1NXSLV.5.2.0/YYYY/MM/MERRA300.prod.assim.tavg1_2d_slv_Nx.YYYYMMDD.hdf
 
+  if(nargin==2)
+    level=[];
+    root='/asl';
+  end
+  if(nargin==3)
+    if(isstr(level))
+      root = level;
+      level = [];
+    else 
+      root = '/asl';
+    end
+  end
 
 
   switch field
     case {'ts','u2m','v2m'}
       % Call for the surface skin temperature 
       dattime_1h = round(  (time(1) - datenum(1979,1,1,0,30,0))*24 );
-      filename = ['/asl/data/merra/' datestr(time(1),'yyyy/mm/dd') '/MAT1NXSLV_' field '_' datestr(round(time(1)*24)/24,'yyyymmdd-HHMMSS') '.mat'];
+      filename = [root '/data/merra/' datestr(time(1),'yyyy/mm/dd') '/MAT1NXSLV_' field '_' datestr(round(time(1)*24)/24,'yyyymmdd-HHMMSS') '.mat'];
 
     otherwise
       % Call for other field variables
       dattime = round((time(1) - datenum(1979,1,1,0,0,0)) * 8);
-      filename = ['/asl/data/merra/' datestr(time(1),'yyyy/mm/dd') '/MAI3CPASM_' field '_' datestr(round(time(1)*8)/8,'yyyymmdd-HHMMSS') '.mat'];
+      filename = [root '/data/merra/' datestr(time(1),'yyyy/mm/dd') '/MAI3CPASM_' field '_' datestr(round(time(1)*8)/8,'yyyymmdd-HHMMSS') '.mat'];
   end
 
   if ~exist(dirname(filename),'dir')
@@ -67,7 +81,7 @@ function [dat levels lats lons merra_str] = getdata_merra(time, field, level)
   if exist(filename,'file')
       levels = [];
       load(filename)
-      if nargin == 2 || length(level) == 0
+      if length(level) == 0
 	return
       end
       dat = dat(:,:,level);
@@ -94,9 +108,10 @@ function [dat levels lats lons merra_str] = getdata_merra(time, field, level)
     otherwise
       [dat x levels lats lons]=getdata_opendap('http://goldsmr3.sci.gsfc.nasa.gov/dods/MAI3CPASM', ...
 	[field '[' num2str(dattime) ':1:' num2str(dattime) '][0:1:41][0:1:143][0:1:287]']);
+	
       save(filename,'dat','levels','lats','lons');
 
-      if nargin == 2 || length(level) == 0
+      if length(level) == 0
 	return
       end
       dat = dat(:,:,level);
