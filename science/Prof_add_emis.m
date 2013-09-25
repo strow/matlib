@@ -53,6 +53,17 @@ function [prof_out Qflag models ]=Prof_add_emis(prof_in, year, month, day, inter
 % of land and sea emissivity.   
 %
 %----------------------------------------------------------------------------
+% Ice:
+% 	The Wisconsin data has no provision for frozen ocean.
+% According to http://www.csgnetwork.com/h2ofreezecalc.html,
+% the ocean water freezing point is 271.2K 
+% (given salinity=35PSU and pressure of 1000 mbar) 
+% We will test for lat>60N and stemp<271.2, and replace the ocean 
+% emissivity by a "standard" Ice emissivity, taken from the South Pole.
+%
+%   B.I. - 2013.09.24
+%
+%----------------------------------------------------------------------------
 % IRemis data files located at: /carrot/s1/imbiriba/SPECIALRTPFILES/iremis
 %
 % Breno Imbiriba - 2007.09.11
@@ -253,6 +264,8 @@ end
     ifovs=[1:length(estr.landfrac)];
   end
 
+
+
 prof_out=prof_in;
 
 prof_out.nemis(1,ifovs)=nemis(1,ifovs);
@@ -269,6 +282,28 @@ for i=1:length(nemis_s)
   prof_out.efreq(1:nemis_s(i),ifovs(inemis))=efreq(1:nemis_s(i),ifovs(inemis));
   prof_out.emis(1:nemis_s(i),ifovs(inemis))=emis(1:nemis_s(i), ifovs(inemis));
 end
+
+
+%------------------------------------------
+% Test for ICE conditions:
+% Iceman data:
+% http://www.icess.ucsb.edu/modis/EMIS/html/ice.html
+
+i_npole_ice = find(prof_in.stemp<271.3 & prof_in.rlat>60 & prof_in.landfrac<.001);
+Modis_iceman01 = ...
+	[0.9414 0.9324 0.9299 0.9295 0.9315 0.9364 0.9441 0.9541 0.9644 0.9771 0.9885 0.9945 0.9959 0.9932 0.9895 0.9872 0.9857 0.9858 0.9842 0.9835 0.9831 0.9827 0.9811 0.9799 0.9800 0.9800 0.9796 0.9805 0.9802 0.9807 0.9817 0.9802 0.9802 0.9795 0.9775 0.9772 0.9755 0.9741 0.9767 0.9783 0.9778 0.9796 0.9800 0.9813 0.9823 0.9836 0.9835 0.9838 0.9826 0.9828 0.9834 0.9846 0.9843 0.9832 0.9851 0.9849 0.9822 0.9827 0.9821 0.9803 0.9809 0.9792 0.9792 0.9780 0.9743 0.9752 0.9777 0.9786 0.9808 0.9791 0.9812 0.9807 0.9826 0.9803 0.9846 0.9834 0.9847 0.9829 0.9795 0.9817 0.9814 0.9812 0.9796 0.9780 0.9804 0.9777 0.9766 0.9776 0.9737 0.9720 0.9781 0.9724 0.9692 0.9724 0.9702 0.9677 0.9655 0.9617 0.9578 0.9547];
+Modis_iceman01_efreq = 1000*...
+	[0.6870 0.7103 0.7337 0.7570 0.7804 0.8037 0.8271 0.8504 0.8737 0.8971 0.9204 0.9438 0.9671 0.9905 1.0138 1.0372 1.0605 1.0838 1.1072 1.1305 1.1539 1.1772 1.2006 1.2239 1.2472 1.2706 1.2939 1.3173 1.3406 1.3640 1.3873 1.4106 1.4340 1.4573 1.4807 1.5040 1.5274 1.5507 1.5741 1.5974 1.6207 1.6441 1.6674 1.6908 1.7141 1.7375 1.7608 1.7841 1.8075 1.8308 1.8542 1.8775 1.9009 1.9242 1.9475 1.9709 1.9942 2.0176 2.0409 2.0643 2.0876 2.1109 2.1343 2.1576 2.1810 2.2043 2.2277 2.2510 2.2744 2.2977 2.3210 2.3444 2.3677 2.3911 2.4144 2.4378 2.4611 2.4844 2.5078 2.5311 2.5545 2.5778 2.6012 2.6245 2.6478 2.6712 2.6945 2.7179 2.7412 2.7646 2.7879 2.8113 2.8346 2.8579 2.8813 2.9046 2.9280 2.9513 2.9747 2.9980];
+
+for ifov=1:numel(i_npole_ice)
+  prof_out.nemis(:,i_npole_ice(ifov)) = 100;
+  prof_out.efreq(1:100,i_npole_ice(ifov)) = Modis_iceman01_efreq;
+  prof_out.emis(1:100,i_npole_ice(ifov)) = Modis_iceman01;
+end
+if(numel(i_npole_ice)>0)
+  models = [models ' ice(Ts<271.3,Lat>60,Sea = Modis_iceman01)'];
+end
+%------------------------------------------
 
 
 prof_out.nrho= prof_out.nemis;
