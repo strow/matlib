@@ -172,7 +172,9 @@ p0ALLX = p0ALL;
 if run_sarta.randomCpsize == +9999
   modis_waterDME = modisL3_map_rtp_cloudprofile(p0ALLX);
 else
+  run_sarta.randomCpsize
   modis_waterDME = [];
+  modis_waterDME = -9999 * ones(size(p0ALL.stemp));
 end
 
 iIndMax = ceil(length(p0ALL.xtrack)/iChunk);
