@@ -241,10 +241,12 @@ for ibox =1:nboxes
 
     % cloud phase and cloud effective size  in  micron
     if cldpres_layer(ilev) <= 440
-      cldphase_layer(ilev) = 2;  % cirrus cloud
+      %% cldphase_layer(ilev) = 2;  % cirrus cloud  WRONG BEFORE OCT 2012
+      cldphase_layer(ilev) = 1;  % cirrus cloud FIXED OCT 2012
       cldde_layer(ilev) = cldde_ice(ilev);
     else
-      cldphase_layer(ilev) = 1;  % water cloud
+      %% cldphase_layer(ilev) = 1;  % water cloud  WRONG BEFORE OCT 2012
+      cldphase_layer(ilev) = 2;  % water cloud  FIXED OCT 2012
       cldde_layer(ilev) = cldde_liq(ilev);
     end
               
