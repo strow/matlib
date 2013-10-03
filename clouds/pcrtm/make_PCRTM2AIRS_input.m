@@ -46,7 +46,8 @@ end
 
 
 if sfctype<=0
-    idx = find(isnan(sfcemis)==0);  
+   %% idx = find(isnan(sfcemis)==0);          %% OLD, used before Oct 2013
+   idx = find(isnan(sfcemis)==0 & sfcfreq>0); %% NEW, fixed Oct 2013
 
    if ~isempty(idx)
         fprintf (wid, '%d \n', length(idx));

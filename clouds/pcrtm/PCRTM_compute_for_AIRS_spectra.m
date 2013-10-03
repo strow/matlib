@@ -3,6 +3,13 @@ function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS
               Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath, ...
               randomCpsize,modis_waterDME)
 
+% this git package code is an amalgalm between PCRTM_compute_for_AIRS_spectra.m and
+% /asl/s1/sergio/PCRTM_XIANGLEI/NEWVERS/PCRTM2AIRS_spec/PCRTM_compute_for_AIRS_spectra_V2.m
+
+% the version V2 is based on version 1, change fixed P(nlev) to un-fixed
+% P(nlev,nboxes), add ucol_num_same, cld_qw, cld_qi to the input of make_PCRTM2AIRS_input_v2
+% although these three parameters are not used in PCRTM
+
 % this code is for simulating AIRS observation using changed PCRTM_V2.1 and
 % using whatever given profiles as long as the pressure levels are fixed
 % for each profile
@@ -24,7 +31,7 @@ function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS
 % Ps             surface pressure in hPa
 % Ts             surface temperature in k
 % sfctype        the surface type of each boxes
-% emis           the surface emissiviyt
+% emis           the surface emissivity
 % if sfctype<=0  emis is used, otherwise use default surface emissivity of 18 IGBP types
 % zen_ang        viewing zenith angle in degree
 % co2            co2 volume mixing ratio (ppmv)            
@@ -109,14 +116,14 @@ newozone = zeros(1,101);
 
 mod_default_profile = load('Modtran_standard_profiles.mat');
 
-def_P = mod_default_profile.Pres(:, ATMno);
-def_T = mod_default_profile.T_z(:, ATMno +1);
+def_P   = mod_default_profile.Pres(:, ATMno);
+def_T   = mod_default_profile.T_z(:, ATMno +1);
 def_h2o = mod_default_profile.h2o(:, ATMno);
-def_o3 = mod_default_profile.o3(:, ATMno);
+def_o3  = mod_default_profile.o3(:, ATMno);
 % convert default h2o from ppmv to g/kg
-def_h2o  = def_h2o *1e-3 *18/28.96;
+def_h2o = def_h2o *1e-3 *18/28.96;
 
-endsign=0;
+endsign = 0;
 
 tstart = tic;
 iMOD0 = 25;
@@ -135,9 +142,9 @@ for ibox =1:nboxes
   end
   % parameters for default models in upper atmosphere
   for ilev = 1: indU(end)
-    newT(ilev) = interp1(log(def_P), def_T, log(Pres(ilev)));                    
-    newh2o(ilev) = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev))));         
-    newozone(ilev) = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev)))); 
+    newT(ilev)     = interp1(log(def_P), def_T, log(Pres(ilev)));
+    newh2o(ilev)   = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev))));
+    newozone(ilev) = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev))));
   end
 
   endsign = 0;
@@ -169,8 +176,7 @@ for ibox =1:nboxes
   idc = find(cc(:,ibox)>0.001);  
         
   % convert pressure level to altitude level
-  Z = zeros(nlev,1);
-         
+  Z = zeros(nlev,1);         
   Px = P(:,ibox);
   for ilev = length(Px)-1:-1:1
     Ttmp = (TT(ilev,ibox) + TT(ilev+1,ibox))/2;
@@ -211,7 +217,7 @@ for ibox =1:nboxes
   sergio_ice_opt(1:nlev)   = 0;
   sergio_water_opt(1:nlev) = 0;
 
-  for i = 1: length(idc)
+  for i = 1 : length(idc)
             
     ilev = idc(i);
     %############################################################
@@ -242,11 +248,11 @@ for ibox =1:nboxes
     % cloud phase and cloud effective size  in  micron
     if cldpres_layer(ilev) <= 440
       %% cldphase_layer(ilev) = 2;  % cirrus cloud  WRONG BEFORE OCT 2012
-      cldphase_layer(ilev) = 1;  % cirrus cloud FIXED OCT 2012
+      cldphase_layer(ilev) = 1;     % cirrus cloud FIXED OCT 2012
       cldde_layer(ilev) = cldde_ice(ilev);
     else
       %% cldphase_layer(ilev) = 1;  % water cloud  WRONG BEFORE OCT 2012
-      cldphase_layer(ilev) = 2;  % water cloud  FIXED OCT 2012
+      cldphase_layer(ilev) = 2;     % water cloud  FIXED OCT 2012
       cldde_layer(ilev) = cldde_liq(ilev);
     end
               
@@ -255,7 +261,7 @@ for ibox =1:nboxes
       %    vol. 97, pp. 3831-3836.
       qi = ICT(ilev,ibox)/ TT(ilev,ibox) *P(ilev,ibox)*100/R *1e3;  %change ice water content from kg/kg to g/m^3  
       ice_opt =  (0.003448 + 2.431/cldde_ice(ilev))*qi/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3; 
-        % * 0.5 * (P(ilev)+P(max(ilev-1,1)))/g *1e4;
+                      % * 0.5 * (P(ilev)+P(max(ilev-1,1)))/g *1e4;
     else
       ice_opt =0;
       qi = 0;
@@ -267,6 +273,10 @@ for ibox =1:nboxes
 
     sub_opt(ilev) = ice_opt + water_opt;  %%% <<<<<<<<<<<<<<<<<<-- should we do this??? SSM 03/28/2013
          
+    % cloud amount in g/m2  
+    sub_qi(ilev) = qi/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3;
+    sub_qw(ilev) = qw/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3;
+
     sergio_ice_opt(ilev)   = ice_opt;
     sergio_water_opt(ilev) = water_opt;
 
@@ -287,8 +297,11 @@ for ibox =1:nboxes
   cld_id = zeros(ucol_num(ibox),nlev);
   cldnum = zeros(1,ucol_num(ibox));
     
+  cld_qw = zeros(ucol_num(ibox),nlev);
+  cld_qi = zeros(ucol_num(ibox),nlev);
   usrstr = ['box',int2str(ibox)];
-  for icol =1:ucol_num(ibox)  
+
+  for icol = 1:ucol_num(ibox)  
 
     % find cloud levels over unique sub-column
     idx = find (unique_col_frac(ibox,icol,:) ==1);
@@ -302,14 +315,17 @@ for ibox =1:nboxes
         cldde(icol,ic) = cldde_layer(idx(ic));
         cld_id(icol,ic) = idp(idx(ic));
         % cloud optical depth
-        cldopt(icol,ic) = sub_opt(idx(ic));       
+        cldopt(icol,ic) = sub_opt(idx(ic));
+        % cloud amount in g/m2
+        cld_qw(icol,ic) = sub_qw(idx(ic));
+        cld_qi(icol,ic) = sub_qi(idx(ic));
       end % cloud layers
     end
   end % unique cloud profile
 
   pcrtm_cloud_stats    %% sets most of "tmpjunk" here
 
-%  ibotmpjunk.
+%  ibox
 %  tmpjunk    
 %%%% gets dumped out in tmp.in as 
 %%%%    0 = start cloud info
@@ -328,10 +344,21 @@ for ibox =1:nboxes
     endsign=1;     
   end   
 
-  make_PCRTM2AIRS_input(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
-                        ucol_num(ibox),cldnum,cld_id, cldpres, cldopt, cldde, cldphase, ...
-                        sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
-                        parname, usrstr, endsign);
+  % should call this, since this code is amalgalm between PCRTM_compute_for_AIRS_spectra.m and 
+  % PCRTM_compute_for_AIRS_spectra_V2
+
+  %used after Oct 2013
+  make_PCRTM2AIRS_input_V2(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
+                           ucol_num(ibox),ucol_num_same(ibox,:), cldnum, cld_id,...
+                           cldpres, cldopt, cldde, cldphase, cld_qw, cld_qi,...
+                           sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
+                           parname, usrstr, endsign);
+
+  %used prior to Oct 2013
+  %make_PCRTM2AIRS_input(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
+  %                      ucol_num(ibox),cldnum,cld_id, cldpres, cldopt, cldde, cldphase, ...
+  %                      sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
+  %                      parname, usrstr, endsign);
     
 end
 
