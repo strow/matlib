@@ -21,6 +21,7 @@ try
   [headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
 catch me
   me
+  fprintf(1,'oops : error running sarta cloudy, look at ip/op rtp files %s %s \n',fip,fop)
   fprintf(1,'oops : error running sarta cloudy, look at error log %s \n',ugh2);
   %keyboard
   error('woof! try again!')
