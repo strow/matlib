@@ -9,7 +9,8 @@ iAA = 1;  %% after  Jan 2013
 for icol = iAA:ucol_num(ibox)
   clear da_w da_i
 
-  da_w = find(cldphase(icol,:) == 1); 
+  da_w = find(cldphase(icol,:) == 1);   %% water cloud  WRONG BEFORE OCT 2012
+  da_w = find(cldphase(icol,:) == 2);   %% water cloud  FIXED OCT 2012
   if length(da_w) > 1
     totalODwater(icol) = sum(cldopt(icol,da_w));   %% only uses lower clouds
     totalODwaterX(icol) = sum(sergio_water_opt);   %% new 03/29/2013, uses ALL
@@ -27,7 +28,8 @@ for icol = iAA:ucol_num(ibox)
     maxCTOPwater(icol) = NaN;
   end
 
-  da_i = find(cldphase(icol,:) == 2); 
+  da_i = find(cldphase(icol,:) == 2);           %% cirrus cloud  WRONG BEFORE OCT 2012
+  da_i = find(cldphase(icol,:) == 1);           %% cirrus cloud FIXED OCT 2012
   if length(da_i) > 1
     totalODice(icol) = sum(cldopt(icol,da_i));  %% only uses higher clouds
     totalODiceX(icol) = sum(sergio_ice_opt);    %% new 03/29/2013, uses ALL

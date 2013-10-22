@@ -1,4 +1,11 @@
-function make_PCRTM2AIRS_input(sfcp, sfcT,newP, newT, newh2o, newo3,ncol_cld,cldnum, cld_id,cldpres, cldopt, cldde, cldphase, sfctype, sfcfreq,sfcemis,zenang, newco2, parname, usrstr, endsign)
+function make_PCRTM2AIRS_input_V2(sfcp, sfcT,newP, newT, newh2o, newo3,ncol_cld,ncol_cld_same,cldnum, cld_id,cldpres, cldopt, cldde, cldphase, cldqw, cldqi, sfctype, sfcfreq,sfcemis,zenang, newco2, parname, usrstr, endsign)
+
+% this version is based on version 1, add three parameters: ncol_cld_same, cldqw, cldqi to the PCRTM
+% input file
+% ncol_cld_same is the number of the same cloud profiles
+% cldqw if the cloud amount of water clouds in g/m2
+% cldqi if the cloud amount of ice clouds in g/m2
+% these three parameters are not used in PCRTM
 
 % this code is to make input files for PCRTM over each grid-box, 
 % all-sky(totally ncol_cld) + % clear-sky (totally 1)
@@ -26,7 +33,7 @@ function make_PCRTM2AIRS_input(sfcp, sfcT,newP, newT, newh2o, newo3,ncol_cld,cld
 % endsign           a flag to indicate whether is the end of input or not
 
 % error checking
-if nargin ~= 21
+if nargin ~= 24
 	disp('wrong number of inputs');
 	return;
 end
@@ -69,11 +76,11 @@ end
  
 for icol = 1:ncol_cld
     
-    fprintf (wid,'%d \n', cldnum(icol));
+    fprintf (wid,'%d %5d \n', cldnum(icol), ncol_cld_same(icol));
     
     for  i=1:cldnum(icol)
       
-        fprintf (wid, '%3d %8.2f %8.4f %8.2f %2d \n', cld_id(icol,i), cldpres (icol,i), cldopt(icol,i), cldde(icol,i), cldphase(icol,i));
+        fprintf (wid, '%3d %8.2f %8.4f %8.2f %2d %12.5e %12.5e\n', cld_id(icol,i), cldpres (icol,i), cldopt(icol,i), cldde(icol,i), cldphase(icol,i), cldqw(icol,i), cldqi(icol,i));
     end
 end
 

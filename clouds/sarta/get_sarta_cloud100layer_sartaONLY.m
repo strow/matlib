@@ -1,26 +1,20 @@
 %% these are required but user needs to add them before using this code
 %% addpath /asl/matlib/aslutil/
 
-klayers = run_sarta.klayers_code;
+%% script is same as get_sarta_cloud except we call klayers100 and sarta100
+%% calling klayers100 means we need to specify that we want gases 201,202 to be output
+
 sarta   = run_sarta.sartacloud_code;
 
-if ~exist(klayers,'file')
-  error('klayers exec done not exist')
-end
 if ~exist(sarta,'file')
   error('sarta cloud exec done not exist')
 end
 
-fip = mktemp('temp.ip.rtp');
 fop = mktemp('temp.op.rtp');
 frp = mktemp('temp.rp.rtp');
-ugh1 = mktemp('ugh1');
 ugh2 = mktemp('ugh2');
 
-rtpwrite(fip,h,ha,prof,pa);
-klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh1];
-  eval(klayerser);
-
+rtpwrite(fop,hX,ha,profX,pa);
 sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh2];
   eval(sartaer);
 try
@@ -33,4 +27,4 @@ catch me
   error('woof! try again!')
 end
   
-rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh1 ' ' ugh2]; eval(rmer);
+rmer = ['!/bin/rm ' fop ' ' frp ' ' ugh2]; eval(rmer);
