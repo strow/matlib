@@ -360,6 +360,10 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
       % Parameter "CLWC" cloud liquid water content kg/kg 
       case 'CLWC'; if ~isfield(prof,'clwc') | size(prof.clwc,1) ~= nlev; prof.clwc = nan(nlev,nprof,'single'); end
 	prof.clwc(find(levs == level(irec)),idate) = d(iprof(idate));
+
+      otherwise
+  if ~isfield(prof,['grib_' param{irec}]) | size(prof.(['grib_' param{irec}]),1) ~= nlev; prof.(['grib_' param{irec}]) = nan(nlev,nprof,'single'); end
+	prof.(['grib_' param{irec}])(find(levs == level(irec)),idate) = d(iprof(idate));
     end
   end
 
