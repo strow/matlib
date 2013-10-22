@@ -33,6 +33,13 @@ plot(water_prof,p_prof,'b',...
      xwater,p_prof,'b--',...
      xice,p_prof,'r--','linewidth',2);
 
+plot(water_prof,p_prof,'b',...
+     ice_prof,p_prof,'r','linewidth',2);
+
+y.water_prof = water_prof;
+y.ice_prof   = ice_prof;
+y.plevs      = p_prof;
+
 if p.cngwat(ii) > 0
   line([0 p.cngwat(ii)/norm],[p.cprtop(ii) p.cprtop(ii)],'color',color1)
   line([0 p.cngwat(ii)/norm],[p.cprbot(ii) p.cprbot(ii)],'color',color1)
@@ -54,12 +61,14 @@ if p.cngwat2(ii) > 0
 end
 
 set(gca,'ydir','reverse');
+
 %hl = legend('water','ice','waterslab','iceslab');
 hl = legend('water','ice');
 set(hl,'fontsize',12)
 
-xlabel('mixing ratio g/g','fontsize',10); ylabel('pressure (mb)','fontsize',10)
-set(gca,'fontsize',10)
+xlabel('mixing ratio g/g','fontsize',10); 
+ylabel('pressure (mb)','fontsize',10)
+%set(gca,'fontsize',10)
 
 hx = axis;
 axis([hx(1) hx(2) 100 1000]);

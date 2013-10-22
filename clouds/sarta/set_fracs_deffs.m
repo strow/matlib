@@ -1,4 +1,10 @@
-function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max);
+function prof = set_fracs_deffs(head,pin,profX,cmin,cngwat_max,cfracSet,randomCpsize);
+
+%% before Aug 2013 randomCpsize was effectively 1
+%% randomCpsize = 1    ==> random dme_water (centered about 20 um), dme_ice = based on Scott Tcld, randomized
+%%                20   ==> dme_water FIXED at 20 um, dme_ice = based on KNLiou Tcld, randomized
+%%                -1   ==> dme_water based on MODIS climatology, dme_ice = based on Scott Tcld, randomized
+%%              9999   ==> dme water based on MODIS climatology, dme_ice = based on KNLiou Tcld
 
 prof = pin;
 
@@ -8,8 +14,8 @@ nprof = length(prof.stemp);
 
 [cfracw, cfraci] = total_cfrac(profX.plevs,profX.cc,profX.clwc,profX.ciwc);
 tcc = profX.cfrac;
-[prof.cfrac, prof.cfrac2, prof.cfrac12] = fake_cfracs(tcc, cfracw, cfraci, ...
-   prof.ctype, prof.ctype2);
+
+[prof.cfrac, prof.cfrac2, prof.cfrac12] = fake_cfracs(tcc, cfracw, cfraci, prof.ctype, prof.ctype2);
 
 prof.clwc = profX.clwc;
 prof.ciwc = profX.ciwc;
@@ -26,21 +32,36 @@ pavg(ibad) = 500; % safe dummy value
 tavg2 = rtp_t_at_p(pavg, head, prof);
 clear ibad
 
+%%%% >>>>>>>>>>>>>>>>>>>>>>>>> guts of cpsize setting >>>>>>>>>>>>>>>>>>>>>>>>>
 % Replace cpsize and cpsize2
 iceflag = zeros(1,nprof);
 ii = find(prof.ctype == 201);
 iceflag(ii) = 1;
-prof.cpsize  = fake_cpsize(tavg1, iceflag, 1);
-%
+prof.cpsize  = fake_cpsize(tavg1, iceflag, randomCpsize);
 
 iceflag = zeros(1,nprof);
 ii = find(prof.ctype2 == 201);
 iceflag(ii) = 1;
-prof.cpsize2 = fake_cpsize(tavg2, iceflag, 1);
+prof.cpsize2 = fake_cpsize(tavg2, iceflag, randomCpsize);
 clear iceflag tavg1 tavg2
+
+if (randomCpsize == -1) | (randomCpsize == +9999)
+  disp('>>>>>>> resetting water dme according to water climatology')
+  prof = modisL3_map_rtp(prof);
+end
+%%%% >>>>>>>>>>>>>>>>>>>>>>>>> guts of cpsize setting >>>>>>>>>>>>>>>>>>>>>>>>>
 
 % Remove cloud fractions less than some minimum
 hcmin = 0.5*cmin;
+
+if cfracSet > 0
+  iPos = find(prof.cngwat > 0 & prof.cfrac > 0);
+  %plot(prof.cfrac(iPos)); disp('ret'); pause
+  prof.cfrac(iPos) = cfracSet;
+  iPos = find(prof.cngwat2 > 0 & prof.cfrac2 > 0);
+  %plot(prof.cfrac2(iPos)); disp('ret'); pause
+  prof.cfrac2(iPos) = cfracSet;
+end
 
 ix=find(prof.cfrac < cmin);
 prof.cfrac(ix)  = 0;
@@ -73,3 +94,4 @@ ix = find(prof.cngwat > cngwat_max);
 prof.cngwat(ix) = cngwat_max;
 ix = find(prof.cngwat2 > cngwat_max);
 prof.cngwat2(ix) = cngwat_max;
+

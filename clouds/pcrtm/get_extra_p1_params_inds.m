@@ -56,6 +56,8 @@ if run_sarta.cloud > 0
 end
 
 p1ALL.rad_allsky(:,inds)  = rad_allsky(h.ichan,:)*1000;
+p1ALL.rad_allsky_std(:,inds)  = rad_allsky_std(h.ichan,:)*1000;
+
 p1ALL.rad_clrsky(:,inds)  = rad_clrsky(h.ichan,:)*1000;
 
 p1ALL.ncol(inds)                = ones(size(p0ALL.stemp(inds)))*ncol0;

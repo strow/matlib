@@ -1,4 +1,14 @@
-function [rad_allsky rad_clrsky tmpjunk] = PCRTM_compute_for_AIRS_spectra(nboxes,nlev, ncol, overlap, P, WCT, ICT, cc, TT, q, o3, Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath)
+function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS_spectra(...
+              nboxes,nlev, ncol, overlap, P, WCT, ICT, cc, TT, q, o3, ...
+              Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath, ...
+              randomCpsize,modis_waterDME)
+
+% this git package code is an amalgalm between PCRTM_compute_for_AIRS_spectra.m and
+% /asl/s1/sergio/PCRTM_XIANGLEI/NEWVERS/PCRTM2AIRS_spec/PCRTM_compute_for_AIRS_spectra_V2.m
+
+% the version V2 is based on version 1, change fixed P(nlev) to un-fixed
+% P(nlev,nboxes), add ucol_num_same, cld_qw, cld_qi to the input of make_PCRTM2AIRS_input_v2
+% although these three parameters are not used in PCRTM
 
 % this code is for simulating AIRS observation using changed PCRTM_V2.1 and
 % using whatever given profiles as long as the pressure levels are fixed
@@ -21,15 +31,18 @@ function [rad_allsky rad_clrsky tmpjunk] = PCRTM_compute_for_AIRS_spectra(nboxes
 % Ps             surface pressure in hPa
 % Ts             surface temperature in k
 % sfctype        the surface type of each boxes
-% emis           the surface emissiviyt
+% emis           the surface emissivity
 % if sfctype<=0  emis is used, otherwise use default surface emissivity of 18 IGBP types
 % zen_ang        viewing zenith angle in degree
 % co2            co2 volume mixing ratio (ppmv)            
 % parname        name of the input file for PCRTM
 % ppath          the path where the PCRTM excutable file is
+% randomCpsize   if +20, use what Xianglei gave (20 um for water, and KN Liou param for ice)
+%                if +9999, use MODIS for water, Scott for ice
+% modis_waterDME = [] if randomCpsize, else have set it from the modis climatology
 
 % error checking
-if nargin ~= 20
+if nargin ~= 22
   disp('wrong number of inputs');
   return;
 end
@@ -103,14 +116,14 @@ newozone = zeros(1,101);
 
 mod_default_profile = load('Modtran_standard_profiles.mat');
 
-def_P = mod_default_profile.Pres(:, ATMno);
-def_T = mod_default_profile.T_z(:, ATMno +1);
+def_P   = mod_default_profile.Pres(:, ATMno);
+def_T   = mod_default_profile.T_z(:, ATMno +1);
 def_h2o = mod_default_profile.h2o(:, ATMno);
-def_o3 = mod_default_profile.o3(:, ATMno);
+def_o3  = mod_default_profile.o3(:, ATMno);
 % convert default h2o from ppmv to g/kg
-def_h2o  = def_h2o *1e-3 *18/28.96;
+def_h2o = def_h2o *1e-3 *18/28.96;
 
-endsign=0;
+endsign = 0;
 
 tstart = tic;
 iMOD0 = 25;
@@ -129,9 +142,9 @@ for ibox =1:nboxes
   end
   % parameters for default models in upper atmosphere
   for ilev = 1: indU(end)
-    newT(ilev) = interp1(log(def_P), def_T, log(Pres(ilev)));                    
-    newh2o(ilev) = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev))));         
-    newozone(ilev) = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev)))); 
+    newT(ilev)     = interp1(log(def_P), def_T, log(Pres(ilev)));
+    newh2o(ilev)   = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev))));
+    newozone(ilev) = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev))));
   end
 
   endsign = 0;
@@ -163,8 +176,7 @@ for ibox =1:nboxes
   idc = find(cc(:,ibox)>0.001);  
         
   % convert pressure level to altitude level
-  Z = zeros(nlev,1);
-         
+  Z = zeros(nlev,1);         
   Px = P(:,ibox);
   for ilev = length(Px)-1:-1:1
     Ttmp = (TT(ilev,ibox) + TT(ilev+1,ibox))/2;
@@ -205,7 +217,7 @@ for ibox =1:nboxes
   sergio_ice_opt(1:nlev)   = 0;
   sergio_water_opt(1:nlev) = 0;
 
-  for i = 1: length(idc)
+  for i = 1 : length(idc)
             
     ilev = idc(i);
     %############################################################
@@ -225,14 +237,22 @@ for ibox =1:nboxes
     end
                       
     cldde_ice(ilev) = c0 + c1 * tcld + c2 * tcld^2 + c3 * tcld^3 ;
-    cldde_liq(ilev) = 20; % Diameter in PCRTM
+    if randomCpsize == 20
+      cldde_liq(ilev) = 20; % Diameter in PCRTM
+    elseif randomCpsize == 9999
+      cldde_liq(ilev) = modis_waterDME(ibox); % Diameter in PCRTM from MODIS
+    else
+      error('PCRTM wrapper only handles randomCpsize = +20 or +9999')
+    end
 
     % cloud phase and cloud effective size  in  micron
     if cldpres_layer(ilev) <= 440
-      cldphase_layer(ilev) = 2;  % cirrus cloud
+      %% cldphase_layer(ilev) = 2;  % cirrus cloud  WRONG BEFORE OCT 2012
+      cldphase_layer(ilev) = 1;     % cirrus cloud FIXED OCT 2012
       cldde_layer(ilev) = cldde_ice(ilev);
     else
-      cldphase_layer(ilev) = 1;  % water cloud
+      %% cldphase_layer(ilev) = 1;  % water cloud  WRONG BEFORE OCT 2012
+      cldphase_layer(ilev) = 2;     % water cloud  FIXED OCT 2012
       cldde_layer(ilev) = cldde_liq(ilev);
     end
               
@@ -241,7 +261,7 @@ for ibox =1:nboxes
       %    vol. 97, pp. 3831-3836.
       qi = ICT(ilev,ibox)/ TT(ilev,ibox) *P(ilev,ibox)*100/R *1e3;  %change ice water content from kg/kg to g/m^3  
       ice_opt =  (0.003448 + 2.431/cldde_ice(ilev))*qi/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3; 
-        % * 0.5 * (P(ilev)+P(max(ilev-1,1)))/g *1e4;
+                      % * 0.5 * (P(ilev)+P(max(ilev-1,1)))/g *1e4;
     else
       ice_opt =0;
       qi = 0;
@@ -253,6 +273,10 @@ for ibox =1:nboxes
 
     sub_opt(ilev) = ice_opt + water_opt;  %%% <<<<<<<<<<<<<<<<<<-- should we do this??? SSM 03/28/2013
          
+    % cloud amount in g/m2  
+    sub_qi(ilev) = qi/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3;
+    sub_qw(ilev) = qw/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3;
+
     sergio_ice_opt(ilev)   = ice_opt;
     sergio_water_opt(ilev) = water_opt;
 
@@ -273,8 +297,11 @@ for ibox =1:nboxes
   cld_id = zeros(ucol_num(ibox),nlev);
   cldnum = zeros(1,ucol_num(ibox));
     
+  cld_qw = zeros(ucol_num(ibox),nlev);
+  cld_qi = zeros(ucol_num(ibox),nlev);
   usrstr = ['box',int2str(ibox)];
-  for icol =1:ucol_num(ibox)  
+
+  for icol = 1:ucol_num(ibox)  
 
     % find cloud levels over unique sub-column
     idx = find (unique_col_frac(ibox,icol,:) ==1);
@@ -288,14 +315,17 @@ for ibox =1:nboxes
         cldde(icol,ic) = cldde_layer(idx(ic));
         cld_id(icol,ic) = idp(idx(ic));
         % cloud optical depth
-        cldopt(icol,ic) = sub_opt(idx(ic));       
+        cldopt(icol,ic) = sub_opt(idx(ic));
+        % cloud amount in g/m2
+        cld_qw(icol,ic) = sub_qw(idx(ic));
+        cld_qi(icol,ic) = sub_qi(idx(ic));
       end % cloud layers
     end
   end % unique cloud profile
 
   pcrtm_cloud_stats    %% sets most of "tmpjunk" here
 
-%  ibotmpjunk.
+%  ibox
 %  tmpjunk    
 %%%% gets dumped out in tmp.in as 
 %%%%    0 = start cloud info
@@ -314,10 +344,21 @@ for ibox =1:nboxes
     endsign=1;     
   end   
 
-  make_PCRTM2AIRS_input(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
-                        ucol_num(ibox),cldnum,cld_id, cldpres, cldopt, cldde, cldphase, ...
-                        sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
-                        parname, usrstr, endsign);
+  % should call this, since this code is amalgalm between PCRTM_compute_for_AIRS_spectra.m and 
+  % PCRTM_compute_for_AIRS_spectra_V2
+
+  %used after Oct 2013
+  make_PCRTM2AIRS_input_V2(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
+                           ucol_num(ibox),ucol_num_same(ibox,:), cldnum, cld_id,...
+                           cldpres, cldopt, cldde, cldphase, cld_qw, cld_qi,...
+                           sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
+                           parname, usrstr, endsign);
+
+  %used prior to Oct 2013
+  %make_PCRTM2AIRS_input(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
+  %                      ucol_num(ibox),cldnum,cld_id, cldpres, cldopt, cldde, cldphase, ...
+  %                      sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
+  %                      parname, usrstr, endsign);
     
 end
 
@@ -467,6 +508,7 @@ if exist([parname,'.out'], 'file')
   count = 0;
   PC_allsky =0;
   PC_clrsky =0;  
+
   for ibox = 1: nboxes
     % for each box, there are (PCend - PCstart)= PClen * (ucol_num(ibox) +1) PC scores  
     PCstart = count * PClen +1;
@@ -481,24 +523,47 @@ if exist([parname,'.out'], 'file')
     % calculate average PCs of the box for all condition       
     rad=zeros(PClen,1);
     for j = 1:ucol_num(ibox)
-      rad = rad +tmprad(:,j) .* ucol_num_same(ibox,j);
+      rad = rad + tmprad(:,j) .* ucol_num_same(ibox,j);
     end
     PC_allsky = reshape(rad/abs(ncol),numPC(1),numbnd);
         
     % clear sky spectra
     PC_clrsky = reshape(tmprad(:, ucol_num(ibox) +1),numPC(1), numbnd );  
         
+    % individual allsky spectra
+    for j = 1:ucol_num(ibox)
+      PC_allsky_ind(j,:,:) = reshape(tmprad(:, j),numPC(1), numbnd );  
+    end
+
     % convert PC domain to channel domain    
-    
+
     for ib =1:numbnd  % band 1 to 3
       % for all-sky
-      aa = PC_allsky(:, ib)' * reshape(PCcoef(ib, :, 1:numch(ib)), numPC(ib), numch(ib));		  
+      aa = PC_allsky(:, ib)' * reshape(PCcoef(ib, :, 1:numch(ib)), numPC(ib), numch(ib));
       rad_allsky(IDX{ib},ibox) = ((aa +1) .* Pstd(ib,1:numch(ib)))'*1e-3; % W per m^2 per sr per cm^-1
 
       %  for clear-sky
-      bb = PC_clrsky(:, ib)' * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib)); 
+      bb = PC_clrsky(:, ib)' * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
       rad_clrsky(IDX{ib},ibox) = ((bb+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
+
+      %% for individual allsky
+      for j = 1:ucol_num(ibox)
+        cc = squeeze(PC_allsky_ind(j,:,ib));
+        cc = cc * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
+        rx =  ((cc+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
+        %rad_allsky_xind(IDX{ib},ibox,j) = rx;
+        rad_allsky_xind(IDX{ib},j) = rx;
+      end    
     end  % end of bands
+    [mbox,nbox] = size(rad_allsky_xind);
+    fprintf(1,' finding means and stddev : mbox,nbox = %4i %4i \n',mbox,nbox);
+    if nbox == 1
+      rad_allsky_mean(:,ibox) = (rad_allsky_xind);
+      rad_allsky_std(:,ibox)  = (rad_allsky_xind)*0;
+    else
+      rad_allsky_mean(:,ibox) = nanmean(rad_allsky_xind');
+      rad_allsky_std(:,ibox)  = nanstd(rad_allsky_xind');
+    end
   end    % end of boxes
 end      % end of output file
 
