@@ -171,18 +171,25 @@ head  = h;
 nlev     = ceil(mean(p.nlevs));
 nlev_std = (std(double(p.nlevs)));
 
-if nlev_std > 1e-3
-  error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
-end
-
 if h.ptype ~= 0
   error('need levels input!')
 end
 
+%if nlev_std > 1e-3
+%  error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
+%end
+
 tic
-[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
-                  %% profile info here, using profX
-                  %% this then puts the info into "prof" by calling put_into_prof w/in routine
+if nlev_std <= 1e-3
+  [prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
+                    %% profile info here, using profX
+                    %% this then puts the info into "prof" by calling put_into_prof w/in routine
+else
+  disp('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model, need to use varying levels (MERRA??)')
+  [prof,profX] = ecmwfcld2sartacld_varNlev(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
+                    %% profile info here, using profX
+                    %% this then puts the info into "prof" by calling put_into_prof w/in routine
+end
 
 prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
   prof.ctype  = double(prof.ctype);
