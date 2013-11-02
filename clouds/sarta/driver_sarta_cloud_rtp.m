@@ -245,8 +245,8 @@ while iFix < 12 & iNotOK > 0
   fprintf(1,' did n=%2i try at checking clouds \n',iFix)
 end
 if iFix >= 12 & iNotOK > 0
-  disp('oops, could not fix cprtop vs cprbot vs spres')
-keyboard
+  %disp('oops, could not fix cprtop vs cprbot vs spres')
+  %keyboard
   error('oops, could not fix cprtop vs cprbot vs spres')
 end
 
