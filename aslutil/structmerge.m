@@ -62,6 +62,8 @@ for i = 1:length(fields)
     t = [];
   elseif ischar(getfield(dat(1),fields{i}))
     t = char(zeros(count,'uint8'));
+  elseif islogical(getfield(dat(1),fields{i}))
+    t = false(count);
   else
     %fields{i}
     %class(getfield(dat(1),fields{i}))
