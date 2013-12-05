@@ -1,4 +1,5 @@
 function [h ha p pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
+% Add USGS land fraction and surface altitude to an RTP structure.
 % function [h,ha,p,pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
 %
 %   Add or replace "landfrac" and "salti" profile fields using the
@@ -8,7 +9,10 @@ function [h ha p pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
 % 
 %   root - optional: root directory (usually /asl) of where to find 
 %                    the USGS data file. 
-%
+%          None - /asl/data/usgs/world_grid_deg10_v2.mat
+%          dir  - dir/data/usgs/world_grid_deg10_v2.mat
+%          mfile - use the matfile "mfile" as the usgs database.
+% 
 %   Default USGS matlab file: /asl/data/usgs/world_grid_deg10_v2.mat
 %
 % Add surface altitude and land fraction based on the usgs_10dem.m data.
@@ -20,8 +24,12 @@ function [h ha p pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
 
   if(~exist('root','var'))
     wgf = '/asl/data/usgs/world_grid_deg10_v2.mat'
+  elseif(exist(root,'dir'))
+    wgf = [root '/data/usgs/world_grid_deg10_v2.mat'];
+  elseif(exist(root,'file'))
+    wgf = root;
   else
-    wgf = [root '/data/usgs/world_grid_deg10.mat'];
+    error(['Your "root" argument is invalid: ' root ]);
   end
 
   disp(['rtpadd_usgs_10dem.m: Using ' wgf ' as landfrac/salti database.']);
