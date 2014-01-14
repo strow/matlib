@@ -9,24 +9,24 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %
 % run_sarta = optional structure argument that says
 % >>> options for SARTA runs
-%     run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc
-%     run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc
-%     run_sarta.cumsum = < 0           : just go with "ecmwf2sarta" results (default before March 2012)
+%     run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc (DEFAULT -1)
+%     run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc     (DEFAULT +1)
+%     run_sarta.cumsum = < 0           : DEFAULT go with "ecmwf2sarta" results (default before March 2012)
 %                        0 -- 1        : set cloud pressure based on cumulative sum of p.ciwc and p.clwc, 
 %                        >  1--9998    : go for where cumsum(cloudOD) ~ N/100 (if that can be found)
 %                        >= 9999       : go for peak of wgt fcn of cloud ice, cloud liquid
-%     run_sarta.cfrac < 0              : use random
+%     run_sarta.cfrac < 0              : use random (DEFAULT)
 %                     > 0 to < 1       : use fixed amount specified by user
 %     run_sarta.klayers_code        = string to klayers
 %     run_sarta.sartaclear_code     = string to sarta clear executable
 %     run_sarta.sartacloud_code     = string to sarta cloud executable
 %     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this 
-%        (default = -1, use ciwc/clwc structures as is)
-%     run_sarta.randomCpsize        = +1 (default) to randomize BOTH ice (based on Tcld) and water deff
-%                                      20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
-%                                      (based on Tcld)
-%                                      -1, then water is MODIS dme, random ice (based on Tcld)
-%                                      9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
+%                                     (DEFAULT = -1, use ciwc/clwc structures as is)
+%     run_sarta.randomCpsize        = +1 (DEFAULT) to randomize BOTH ice (based on Tcld) and water deff
+%                                     20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
+%                                           (based on Tcld)
+%                                     -1, then water is MODIS dme, random ice (based on Tcld)
+%                                     9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
