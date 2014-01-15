@@ -1,6 +1,6 @@
-function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind);
+function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind,loc);
 
-% function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind);
+% function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind,loc);
 %
 % Return emissivity for IASI as determined by Dan Zhou (NASA Langley).
 % Based on Dans "emis_sample_reader.f" given to L.Strow circa 2 August 2010
@@ -10,6 +10,8 @@ function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind);
 %    rlat   - [1 x nobs] latitude {degrees -90 to 90}
 %    rlon   - [1 x nobs] longitude {degrees -180 to 360}
 %    ind    - [npts x 1] desired IASI channel indices (in 1:8461)
+%    loc    - Location of data file (optional dir string)
+%             (default='/asl/data/iremis/DanZhou/Modified/')
 %
 % Output:
 %    emis   - [npts x nobs] emissivity; -999 if no data
@@ -21,6 +23,7 @@ function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind);
 % Update: 22 Dec 2010, S.Hannon - add missing "fclose" for ret file
 % Update: 23 Dec 2010, S.Hannon - switch to "Modified" database
 % Update: 24 Mar 2011, P.Schou - updated directory to /asl/data/iremis/DanZhou/
+% Updade: 02 Jul 2013, B.Imbiriba - updatede location 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Edit this section as needed
 
@@ -34,7 +37,11 @@ nother = 5;      % number of other values preceeding coefs in ret file
 % Data files
 %datadir = '/home/strow/Transfer/DanZ/';
 %datadir = '/asl/data/IASI/Emis_DanZhou/';
-datadir = '/asl/data/iremis/DanZhou/Modified/';
+if(nargin()==5)
+  datadir = loc;
+else
+  datadir = '/asl/data/iremis/DanZhou/Modified/';
+end
 evname = 'IASI_B_EV_FUNC_GLOBAL_V3.bin';  % eigenvector file name
 retprefix = 'IASI_LAND_eFEOFA_';          % coef file prefix
 retsuffix = '_0.5DEG_1SIGMA.bin';         % coef file suffix
@@ -42,7 +49,7 @@ retsuffix = '_0.5DEG_1SIGMA.bin';         % coef file suffix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Check input
-if (nargin ~= 4)
+if (nargin ~= 5)
    error('unexpected number of input arguments')
 end
 d = size(yyyymm);

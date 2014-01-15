@@ -26,7 +26,7 @@ function [salti, landfrac] = usgs_degN(lat, lon, deg_step);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-dem_file='/asl/data/usgs/world_grid_deg10.mat';
+dem_file='/asl/data/usgs/world_grid_deg10_v2.mat';
 % Note: dem_file must contain fields landfrac and salti
 % Note: DEM is structured
 %    Loop lon = 0.05 : 0.10 : 359.95

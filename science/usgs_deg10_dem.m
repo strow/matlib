@@ -1,6 +1,6 @@
-function [salti, landfrac] = usgs_deg10_dem(lat, lon);
+function [salti, landfrac] = usgs_deg10_dem(lat, lon, wgf);
 
-% function [salti, landfrac] = usgs_deg10_dem(lat, lon);
+% function [salti, landfrac] = usgs_deg10_dem(lat, lon, wgf);
 %
 % Return surface altitude and land fraction for the nearest
 % point in the 10 points per degree lookup table.
@@ -9,7 +9,8 @@ function [salti, landfrac] = usgs_deg10_dem(lat, lon);
 % Input:
 %    lat : [1 x nobs ] latitude (degrees)
 %    lon : [1 x nobs ] longitude (degrees)
-%
+%    wgf : matlab World grid file [optional]
+% 
 % Output:
 %    salti    : [1 x nobs] surface altitude (meters)
 %    landfrac : [1 x nobs] land fraction
@@ -30,7 +31,11 @@ function [salti, landfrac] = usgs_deg10_dem(lat, lon);
 
 
 % Load ECMWF Digital Elevation Map file
-load /asl/data/usgs/world_grid_deg10.mat
+if(exist('wgf','var'))
+  load(wgf)
+else
+  load /asl/data/usgs/world_grid_deg10_v2.mat
+end
 
 
 % Check input
