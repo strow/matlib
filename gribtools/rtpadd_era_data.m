@@ -49,11 +49,20 @@ function [head, hattr, prof, pattr] = rtpadd_era_data(head, hattr, prof, pattr, 
 
   days_to_test = unique(sort(floor(rtime * rec_per_day + .5) / rec_per_day));
   for d = days_to_test
-    say(['reading era file for: ' datestr(d)])
+    say(['Looking for ERA files for: ' datestr(d)])
     ename_lev = ['/asl/data/era/' datestr(d,'yyyy/mm') '/' datestr(d,'yyyymmdd') '_lev.grib'];
     ename_sfc = ['/asl/data/era/' datestr(d,'yyyy/mm') '/' datestr(d,'yyyymmdd') '_sfc.grib'];
     say(['  ' ename_lev])
     say(['  ' ename_sfc])
+
+    % If files don't exist, try to download them using "getera"
+    if(~exist(ename_lev,'file') | ~exist(ename_sfc))
+      disp(['ERA files not found. Attempt download...']);
+      cmd=['/asl/opt/bin/getera ' datestr(d,'yyyymmdd')];
+      disp(['  ' cmd]);
+      system(cmd);
+    end
+
     if ~exist(ename_lev,'file')
       error(['Missing era file: ' ename_lev])
     end

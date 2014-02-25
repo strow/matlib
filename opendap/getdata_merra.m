@@ -105,6 +105,11 @@ function [dat levels lats lons merra_str] = getdata_merra(time, field, level, ro
       levels = [];
       save(filename,'dat','lats','lons');
 
+    case {'phis','sgh','frlake','frland','frlandice','frocean'}
+      [dat x lats lons] = getdata_opendap('http://goldsmr2.sci.gsfc.nasa.gov/dods/MAC0NXASM',[field '[0][0:360][0:539]']);
+      levels=[];
+      save(filename,'dat','lats','lons');
+
     otherwise
       [dat x levels lats lons]=getdata_opendap('http://goldsmr3.sci.gsfc.nasa.gov/dods/MAI3CPASM', ...
 	[field '[' num2str(dattime) ':1:' num2str(dattime) '][0:1:41][0:1:143][0:1:287]']);
