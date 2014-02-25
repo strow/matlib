@@ -25,7 +25,7 @@ oo = find(xpS.ctype2 == 201);  %% ice
   boo3(oo) = xpS.cfrac2(oo);  
     xcfracS2  = [xcfracS2 boo3];
   boo4(oo) = xpS.cpsize2(oo); 
-    xcpsize2 = [xcpsize2 boo5];
+    xcpsize2 = [xcpsize2 boo4];
   if isfield(xpS,'sarta_lvlODice')
     boo5(oo) = boo5(oo) + nansum(xpS.sarta_lvlODice(:,oo)); 
     xsumODS2 = [xsumODS2 boo5];
@@ -58,7 +58,7 @@ oo = find(xpS.ctype2 == 101);  %% water
   boo3(oo) = xpS.cfrac2(oo);  
     xcfracS1  = [xcfracS1 boo3];
   boo4(oo) = xpS.cpsize2(oo); 
-    xcpsize1 = [xcpsize1 boo5];
+    xcpsize1 = [xcpsize1 boo4];
   if isfield(xpS,'sarta_lvlODwater')
     boo5(oo) = boo5(oo) + nansum(xpS.sarta_lvlODwater(:,oo)); 
     xsumODS1 = [xsumODS1 boo5];

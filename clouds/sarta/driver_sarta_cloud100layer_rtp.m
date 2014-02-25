@@ -241,13 +241,12 @@ prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta
 disp('---> checking cprtop vs cprbot vs spres')
 iNotOK = +1;
 iFix = 0;
-while iFix < 10 & iNotOK > 0
+while iFix < 12 & iNotOK > 0
   iFix = iFix + 1;
-  [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac);           %% see if there are possible pitfalls x1
-  %[prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
+  [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac,iFix);           %% see if there are possible pitfalls x1
   fprintf(1,' did n=%2i try at checking clouds \n',iFix)
 end
-if iFix > 10 & iNotOK > 0
+if iFix >= 12 & iNotOK > 0
   error('oops, could not fix cprtop vs cprbot vs spres')
 end
 

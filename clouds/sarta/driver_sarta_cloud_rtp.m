@@ -9,24 +9,24 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %
 % run_sarta = optional structure argument that says
 % >>> options for SARTA runs
-%     run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc
-%     run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc
-%     run_sarta.cumsum = < 0           : just go with "ecmwf2sarta" results (default before March 2012)
+%     run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc (DEFAULT -1)
+%     run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc     (DEFAULT +1)
+%     run_sarta.cumsum = < 0           : DEFAULT go with "ecmwf2sarta" results (default before March 2012)
 %                        0 -- 1        : set cloud pressure based on cumulative sum of p.ciwc and p.clwc, 
 %                        >  1--9998    : go for where cumsum(cloudOD) ~ N/100 (if that can be found)
 %                        >= 9999       : go for peak of wgt fcn of cloud ice, cloud liquid
-%     run_sarta.cfrac < 0              : use random
+%     run_sarta.cfrac < 0              : use random (DEFAULT)
 %                     > 0 to < 1       : use fixed amount specified by user
 %     run_sarta.klayers_code        = string to klayers
 %     run_sarta.sartaclear_code     = string to sarta clear executable
 %     run_sarta.sartacloud_code     = string to sarta cloud executable
 %     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this 
-%        (default = -1, use ciwc/clwc structures as is)
-%     run_sarta.randomCpsize        = +1 (default) to randomize BOTH ice (based on Tcld) and water deff
-%                                      20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
-%                                      (based on Tcld)
-%                                      -1, then water is MODIS dme, random ice (based on Tcld)
-%                                      9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
+%                                     (DEFAULT = -1, use ciwc/clwc structures as is)
+%     run_sarta.randomCpsize        = +1 (DEFAULT) to randomize BOTH ice (based on Tcld) and water deff
+%                                     20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
+%                                           (based on Tcld)
+%                                     -1, then water is MODIS dme, random ice (based on Tcld)
+%                                     9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -171,18 +171,25 @@ head  = h;
 nlev     = ceil(mean(p.nlevs));
 nlev_std = (std(double(p.nlevs)));
 
-if nlev_std > 1e-3
-  error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
-end
-
 if h.ptype ~= 0
   error('need levels input!')
 end
 
+%if nlev_std > 1e-3
+%  error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
+%end
+
 tic
-[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
-                  %% profile info here, using profX
-                  %% this then puts the info into "prof" by calling put_into_prof w/in routine
+if nlev_std <= 1e-3
+  [prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
+                    %% profile info here, using profX
+                    %% this then puts the info into "prof" by calling put_into_prof w/in routine
+else
+  disp('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model, need to use varying levels (MERRA??)')
+  [prof,profX] = ecmwfcld2sartacld_varNlev(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
+                    %% profile info here, using profX
+                    %% this then puts the info into "prof" by calling put_into_prof w/in routine
+end
 
 prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
   prof.ctype  = double(prof.ctype);
@@ -238,8 +245,8 @@ while iFix < 12 & iNotOK > 0
   fprintf(1,' did n=%2i try at checking clouds \n',iFix)
 end
 if iFix >= 12 & iNotOK > 0
-  disp('oops, could not fix cprtop vs cprbot vs spres')
-keyboard
+  %disp('oops, could not fix cprtop vs cprbot vs spres')
+  %keyboard
   error('oops, could not fix cprtop vs cprbot vs spres')
 end
 
