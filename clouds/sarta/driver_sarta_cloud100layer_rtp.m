@@ -82,7 +82,7 @@ addpath([base_dir2 '/h4tools'])
   run_sarta.cfrac = 1;
   run_sarta.ice_water_separator = 440;
   tic
-  p1 = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
+  p1 = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta);
   toc
   rtpwrite('/asl/data/rtprod_airs/2012/05/01/pcrtm_cld_ecm_41ch.airs_ctr.2012.05.01.10_sarta.rtp',h,ha,p1,pa);
 %}
