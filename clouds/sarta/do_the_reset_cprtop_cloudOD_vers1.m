@@ -17,6 +17,9 @@ for oo = 1 : length(ice)
   od = ODice(:,ice(oo)); 
   plevs = p1.plevs(:,ice(oo));
   peakindex = p1.sarta_index_wgtpeakI(ice(oo));  %% use one index above this for actual top
+  if peakindex < 2
+    peakindex = 2;
+  end
   cldthick = p1.cprbot(ice(oo)) - p1.cprtop(ice(oo));
   p1.cprtop(ice(oo)) = max(10,p1.plevs(peakindex-1));
   p1.cprbot(ice(oo)) = p1.cprtop(ice(oo)) + cldthick;
@@ -30,6 +33,9 @@ for oo = 1 : length(ice)
   od = ODice(:,ice(oo)); 
   plevs = p1.plevs(:,ice(oo));
   peakindex = p1.sarta_index_wgtpeakI(ice(oo));  %% use one index above this for actual top
+  if peakindex < 2
+    peakindex = 2;
+  end
   cldthick = p1.cprbot2(ice(oo)) - p1.cprtop2(ice(oo));
   p1.cprtop2(ice(oo)) = max(10,p1.plevs(peakindex-1));
   p1.cprbot2(ice(oo)) = p1.cprtop2(ice(oo)) + cldthick;
@@ -43,6 +49,9 @@ for oo = 1 : length(ice)
   od = ODice(:,ice(oo)); 
   plevs = p1.plevs(:,ice(oo));
   peakindex = p1.sarta_index_wgtpeakI(ice(oo));  %% use one index above this for actual top
+  if peakindex < 2
+    peakindex = 2;
+  end
   cldthick = p1.cprbot(ice(oo)) - p1.cprtop(ice(oo));
   p1.cprtop(ice(oo)) = max(10,p1.plevs(peakindex-1));
   p1.cprbot(ice(oo)) = p1.cprtop(ice(oo)) + cldthick;
@@ -58,6 +67,9 @@ for oo = 1 : length(water)
   od = ODwater(:,water(oo)); 
   plevs = p1.plevs(:,water(oo));
   peakindex = p1.sarta_index_wgtpeakW(water(oo));  %% use one index above this for actual top
+  if peakindex < 2
+    peakindex = 2;
+  end
   cldthick = p1.cprbot(water(oo)) - p1.cprtop(water(oo));
   p1.cprtop(water(oo)) = max(10,p1.plevs(peakindex-1));
   p1.cprbot(water(oo)) = p1.cprtop(water(oo)) + cldthick;
@@ -71,6 +83,9 @@ for oo = 1 : length(water)
   od = ODwater(:,water(oo)); 
   plevs = p1.plevs(:,water(oo));
   peakindex = p1.sarta_index_wgtpeakW(water(oo));  %% use one index above this for actual top
+  if peakindex < 2
+    peakindex = 2;
+  end
   cldthick = p1.cprbot(water(oo)) - p1.cprtop(water(oo));
   p1.cprtop2(water(oo)) = max(10,p1.plevs(peakindex-1));
   p1.cprbot2(water(oo)) = p1.cprtop2(water(oo)) + cldthick;
@@ -84,6 +99,9 @@ for oo = 1 : length(water)
   od = ODwater(:,water(oo)); 
   plevs = p1.plevs(:,water(oo));
   peakindex = p1.sarta_index_wgtpeakW(water(oo));  %% use one index above this for actual top
+  if peakindex < 2
+    peakindex = 2;
+  end
   cldthick = p1.cprbot(water(oo)) - p1.cprtop(water(oo));
   p1.cprtop(water(oo)) = max(10,p1.plevs(peakindex-1));
   p1.cprbot(water(oo)) = p1.cprtop(water(oo)) + cldthick;
