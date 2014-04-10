@@ -50,7 +50,7 @@ function [h ha p pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
 
   % Check if pre-existig salti or landfrac are present:
   lsalti = false;
-  llandfra = false;
+  llandfrac = false;
   if(isfield(p,'salti'))
     lsalti = p.salti>-100 & ~isnan(p.salti);
   end 

@@ -23,9 +23,10 @@ ugh2 = mktemp('ugh2');
 gas_str = 'nwant=10 listg=1,2,3,4,5,6,9,12,201,202 ';
 
 rtpwrite(fip,h,ha,prof,pa);
+klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' '  gas_str];
 klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' '  gas_str ' >& ' ugh1];
   eval(klayerser);
-  %[hjunk,hajunk,pjunk,pajunk] = rtpread(fop);
+  [hjunk,hajunk,pjunk,pajunk] = rtpread(fop);
 
 sartaer = ['!' sarta ' fin=' fop ' fout=' frp ' >& ' ugh2];
   eval(sartaer);

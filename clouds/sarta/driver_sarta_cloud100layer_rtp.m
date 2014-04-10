@@ -82,7 +82,7 @@ addpath([base_dir2 '/h4tools'])
   run_sarta.cfrac = 1;
   run_sarta.ice_water_separator = 440;
   tic
-  p1 = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
+  p1 = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta);
   toc
   rtpwrite('/asl/data/rtprod_airs/2012/05/01/pcrtm_cld_ecm_41ch.airs_ctr.2012.05.01.10_sarta.rtp',h,ha,p1,pa);
 %}
@@ -241,13 +241,12 @@ prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta
 disp('---> checking cprtop vs cprbot vs spres')
 iNotOK = +1;
 iFix = 0;
-while iFix < 10 & iNotOK > 0
+while iFix < 12 & iNotOK > 0
   iFix = iFix + 1;
-  [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac);           %% see if there are possible pitfalls x1
-  %[prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
+  [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac,iFix);           %% see if there are possible pitfalls x1
   fprintf(1,' did n=%2i try at checking clouds \n',iFix)
 end
-if iFix > 10 & iNotOK > 0
+if iFix >= 12 & iNotOK > 0
   error('oops, could not fix cprtop vs cprbot vs spres')
 end
 
