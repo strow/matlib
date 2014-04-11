@@ -90,7 +90,7 @@ function gs = gstats(gtops,outfile);
 %       I don't know why these three variables are not empty as the other ones.
 % 0.2 - User specific requirements - look at the user provided 'gtops' array.
 %       **look at 'inc_fields' - if empty, populate with rcalc, robs1, stemp_avg, rtime_avg** I don't want this!!
-%	>> Fixed - not it errors out!!
+%        >> Fixed - not it errors out!!
 % 0.3 - Loop over provided gtops to process it's fields - print fields, copy to 'gt'
 %
 % 1.  - Index and fold the bins - the 1st heart of the routine
@@ -239,10 +239,7 @@ function gs = gstats(gtops,outfile);
 
   % custom filter name
   gt.filter=[];
-  gt.klayers='[head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr,gt.klayers_exec)';
-  gt.klayers_exec = '/asl/packages/klayersV205/BinV201/klayers_airs';
-  %gt.sarta='';
-  %gt.sarta_exec='';
+  gt.klayers='[head, hattr, prof, pattr] = rtpklayers_keepfields(head, hattr, prof, pattr)';
 
   % site setup
   gt.site_bins = [];
@@ -264,8 +261,8 @@ function gs = gstats(gtops,outfile);
   gt.solzen_bins = [];
 
   % latitude & longitude selection
-  gt.rlat_bins = [];
-  gt.rlon_bins = [];
+  gt.rlat_bins = [-90 90];
+  gt.rlon_bins = [-180 180];
   gt.xtrack_bins = [];
   gt.atrack_bins = [];
   gt.xtrack_eo_bins = [];
@@ -343,28 +340,28 @@ function gs = gstats(gtops,outfile);
       vname = optvar{i};
       if isfield(gt, vname) | strcmp(vname(max(1,end-4):end),'_bins') % if in gt or ends on a _bins
 
-	if ~isfield(gt, vname); 
-	  disp(['  setting non standard field ' vname]); 
-	end
+        if ~isfield(gt, vname); 
+          disp(['  setting non standard field ' vname]); 
+        end
 
-	gt.(vname) = trim(getfield(gtops, vname)); % copy field from gtops into gt.
+        gt.(vname) = trim(getfield(gtops, vname)); % copy field from gtops into gt.
 
-	% Display fields:
-	if (strcmp(vname,'iok'))
-	  disp(['gtops.iok: length=' int2str(length(gt.iok)) ...
-	  ', min=' int2str(min(gt.iok)) ', max=' int2str(max(gt.iok))])
-	elseif isnumeric(getfield(gt, vname))
-	  disp(['gt.' vname ' = ' num2str(getfield(gt, vname))])
-	else
-	  disp(['gt.' vname ' = '])
-	  if isstruct(getfield(gt, vname))
-	    getfield(gt, vname)
-	  else
-	    disp(strvcat(getfield(gt, vname)))
-	  end
-	end
+        % Display fields:
+        if (strcmp(vname,'iok'))
+          disp(['gtops.iok: length=' int2str(length(gt.iok)) ...
+          ', min=' int2str(min(gt.iok)) ', max=' int2str(max(gt.iok))])
+        elseif isnumeric(getfield(gt, vname))
+          disp(['gt.' vname ' = ' num2str(getfield(gt, vname))])
+        else
+          disp(['gt.' vname ' = '])
+          if isstruct(getfield(gt, vname))
+            getfield(gt, vname)
+          else
+            disp(strvcat(getfield(gt, vname)))
+          end
+        end
       else
-	say(['Warning::  Unknown option or range ' vname ]);
+        say(['Warning::  Unknown option or range ' vname ]);
       end
       % small pause to ease cluster work
       pause(0.2)
@@ -423,7 +420,9 @@ function gs = gstats(gtops,outfile);
     if len > 2
       fold = fold + 1;
       say(sprintf('(%d)%22s = %d',fold,['number of ' sel_names{isel}(1:end-5) ' bins'], len-1));
-      inc_fields = union(inc_fields,[sel_names{isel}(1:end-5) '_avg']); % make sure we are returning all subsets
+      if ~ismember(sel_names{isel}(1:end-5),inc_fields) % make sure we don't count twice!
+        inc_fields = union(inc_fields,[sel_names{isel}(1:end-5) '_avg']); % make sure we are returning all subsets
+      end
     end
   end
   say('\-----------------------------/')
@@ -514,39 +513,39 @@ function gs = gstats(gtops,outfile);
 
     if(match==1)
       if isfield(gs2,'gtops') & isstruct(gs2.gtops) & isfield(gs2.gtops,'file_modified') & isequal(gs.gtops.file_modified,gs2.gtops.file_modified)
-	gt_fields = union(fieldnames(gtops),fieldnames(gs2.gtops));
+        gt_fields = union(fieldnames(gtops),fieldnames(gs2.gtops));
 
-	for igtf = 1:length(gt_fields)
-	  fname = gt_fields{igtf};
-	  if ~isfield(gtops,fname) & strcmp(fname(max(1,end-4):end),'_bins'); 
-	    say(['  Bin criteria changed: new gtops does not have ' fname ' will regenerate']); 
-	    match = 0; 
-	    continue; 
-	  end
-	  if ~isfield(gs2.gtops,fname) & strcmp(fname(max(1,end-4):end),'_bins'); 
-	    say(['  Bin criteria changed: old gtops does not have ' fname ' will regenerate']); 
-	    match = 0; 
-	    continue; 
-	  end
-	  if ~isfield(gtops,fname); 
-	    say(['new gtops does not have ' fname]); 
-	    continue;
-	  end
-	  if ~isfield(gs2.gtops,fname); 
-	    say(['old gtops does not have ' fname]); 
-	    continue; 
-	  end
-	  if ~isequalwithequalnans(getfield(gtops,fname),getfield(gs2.gtops,fname))
-	    say(['  Fields mismatch in ' fname ' will regenerate'])
-	    match = 0; 
-	  end
+        for igtf = 1:length(gt_fields)
+          fname = gt_fields{igtf};
+          if ~isfield(gtops,fname) & strcmp(fname(max(1,end-4):end),'_bins'); 
+            say(['  Bin criteria changed: new gtops does not have ' fname ' will regenerate']); 
+            match = 0; 
+            continue; 
+          end
+          if ~isfield(gs2.gtops,fname) & strcmp(fname(max(1,end-4):end),'_bins'); 
+            say(['  Bin criteria changed: old gtops does not have ' fname ' will regenerate']); 
+            match = 0; 
+            continue; 
+          end
+          if ~isfield(gtops,fname); 
+            say(['new gtops does not have ' fname]); 
+            continue;
+          end
+          if ~isfield(gs2.gtops,fname); 
+            say(['old gtops does not have ' fname]); 
+            continue; 
+          end
+          if ~isequalwithequalnans(getfield(gtops,fname),getfield(gs2.gtops,fname))
+            say(['  Fields mismatch in ' fname ' will regenerate'])
+            match = 0; 
+          end
 
-	end
-	if match == 1
-	  say('The gtops have not changed, so skip updating the stats');
-	  farewell(rn);
-	  exit  
-	end
+        end
+        if match == 1
+          say('The gtops have not changed, so skip updating the stats');
+          farewell(rn);
+          exit  
+        end
       end
       say('Unmatched, continuing to create new stat file')
     end
@@ -581,8 +580,8 @@ function gs = gstats(gtops,outfile);
     try % 
       est_time = '00:00:00  EST_TIME  REMAINING_TIME';
       if(i > 1) est_time = [datestr(d_time,13) '  ' ...
-		  datestr(d_time/cur_bytes*(total_bytes),13) '  ' ...
-		  datestr(d_time/cur_bytes*(total_bytes - cur_bytes),13)];
+                  datestr(d_time/cur_bytes*(total_bytes),13) '  ' ...
+                  datestr(d_time/cur_bytes*(total_bytes - cur_bytes),13)];
       end
     catch err; 
       %Etc_show_error(err); % No need for error checking this--- Just avoiding 1/0.
@@ -609,57 +608,57 @@ function gs = gstats(gtops,outfile);
 
   %%XXXXXXXXXXXXX HACKS FOR BAD FILES
       if strcmp(rtpfile,'rtpname')
-	say('  WARNING XXX resetting parent for missing rtpfile variable in rtp file');
-	bn=basename(fname);
-	dn=dirname(fname);
-	rtpfile = [dn bn(9:end)];
-	hattr = set_attr(hattr,'rtpfile',rtpfile);
+        say('  WARNING XXX resetting parent for missing rtpfile variable in rtp file');
+        bn=basename(fname);
+        dn=dirname(fname);
+        rtpfile = [dn bn(9:end)];
+        hattr = set_attr(hattr,'rtpfile',rtpfile);
       end
 
       if length(rtpfile) == 0
-	say('  WARNING XXX resetting parent for missing string in rtp file');
-	bn=basename(fname);
-	dn=dirname(fname);
-	hattr = set_attr(hattr,'rtpfile',['/asl/data/rtprod_airs/' dn(31:end) '/' bn(6:end-1)]);
+        say('  WARNING XXX resetting parent for missing string in rtp file');
+        bn=basename(fname);
+        dn=dirname(fname);
+        hattr = set_attr(hattr,'rtpfile',['/asl/data/rtprod_airs/' dn(31:end) '/' bn(6:end-1)]);
       end
 
       if strcmp(rtpfile(1:min(end,8)),'/scratch')
-	say('  WARNING XXX resetting parent for bad rtp file');
-	bn=basename(fname);
-	dn=dirname(fname);
-	hattr = set_attr(hattr,'rtpfile',[dn '/' bn(9:end-1)]);
+        say('  WARNING XXX resetting parent for bad rtp file');
+        bn=basename(fname);
+        dn=dirname(fname);
+        hattr = set_attr(hattr,'rtpfile',[dn '/' bn(9:end-1)]);
       end
   %%XXXXXXXXXXXXX HACKS FOR BAD FILES END
 
       [head, hattr, prof, pattr] = rtpgrow(head, hattr, prof, pattr,dirname(fname));
 
       if ~isfield(prof,'robs1'); 
-	say(['  Missing robs1 - skipping ' fname]); 
-	continue; 
+        say(['  Missing robs1 - skipping ' fname]); 
+        continue; 
       end
 
-      gs.gtops.sarta = get_attr(hattr,'sarta');
-      gs.gtops.sarta_exec = get_attr(hattr,'sarta_exec');
-      gs.gtops.klayers = get_attr(hattr,'klayers');
-      gs.gtops.klayers_exec = get_attr(hattr,'klayers_exec');
+      gs.gtops.rtp_sarta = get_attr(hattr,'sarta');
+      gs.gtops.rtp_sarta_exec = get_attr(hattr,'sarta_exec');
+      gs.gtops.rtp_klayers = get_attr(hattr,'klayers');
+      gs.gtops.rtp_klayers_exec = get_attr(hattr,'klayers_exec');
 
-      if length(gs.gtops.klayers_exec) == 0
-	say('  WARNING: Missing klayers_exec, using airs wetwater default');
-	gs.gtops.klayers_exec = '/asl/packages/klayersV205/BinV201/klayers_airs';
+      if length(gs.gtops.rtp_klayers_exec) == 0
+        say('  WARNING: Missing klayers_exec, using airs wetwater default');
+        gs.gtops.rtp_klayers_exec = '/asl/packages/klayersV205/BinV201/klayers_airs';
       end
 
       if isfield(prof,'rcalc') & isfield(prof,'robs1') & size(prof.rcalc,2) ~= size(prof.robs1,2)
-	say('  ERROR:  rcalc and robs1 have different nfov');
-	continue;
+        say('  ERROR:  rcalc and robs1 have different nfov');
+        continue;
       end
 
     catch err % I/O try 
       Etc_show_error(err);
    
       say(['Error reading or growing file: ' fname]);
-	 failed = fopen(['~/badfiles.txt'],'a');
-	 fwrite(failed,[fname 10],'char');
-	 fclose(failed);
+         failed = fopen(['~/badfiles.txt'],'a');
+         fwrite(failed,[fname 10],'char');
+         fclose(failed);
       continue
     end  % I/O try
    
@@ -668,12 +667,12 @@ function gs = gstats(gtops,outfile);
     % Remove gas numbers if they don't exist in the profile structure
     if isfield(head,'glist')
       for gnum = head.glist'
-	if ~isfield(prof,['gas_' num2str(gnum)])
-	  say(['Warning: `prof` does not have gas ' num2str(gnum) '. Fix original RTP file: ' fname '! Adjusting local `head` to match `prof`.']);
-	  head.gunit = head.gunit(head.glist ~= gnum);
-	  head.glist = head.glist(head.glist ~= gnum);
-	  head.ngas = head.ngas - 1;
-	end
+        if ~isfield(prof,['gas_' num2str(gnum)])
+          say(['Warning: `prof` does not have gas ' num2str(gnum) '. Fix original RTP file: ' fname '! Adjusting local `head` to match `prof`.']);
+          head.gunit = head.gunit(head.glist ~= gnum);
+          head.glist = head.glist(head.glist ~= gnum);
+          head.ngas = head.ngas - 1;
+        end
       end
     end
 
@@ -716,21 +715,21 @@ function gs = gstats(gtops,outfile);
       before_nobs = length(prof.rtime);
       clear new_prof;
       for i = 1:length(gt.site_bins)-1
-	s_dist = distance(slat(gt.site_bins(i)),slon(gt.site_bins(i)),prof.rlat,prof.rlon);
-	plist = find(s_dist <= gt.siterad_bins(end));
+        s_dist = distance(slat(gt.site_bins(i)),slon(gt.site_bins(i)),prof.rlat,prof.rlon);
+        plist = find(s_dist <= gt.siterad_bins(end));
 
-	% skip site if no data
-	if length(plist) == 0; %disp('    no fovs left');
-	  continue; end
+        % skip site if no data
+        if length(plist) == 0; %disp('    no fovs left');
+          continue; end
 
-	% setup the site rtp fields
-	[tmp_head, tmp_prof]=subset_rtp(head, prof, [], [], plist);
-	tmp_prof.site = repmat(double(gt.site_bins(i)),[1 length(plist)]);
-	tmp_prof.siterad = s_dist(plist);
+        % setup the site rtp fields
+        [tmp_head, tmp_prof]=subset_rtp(head, prof, [], [], plist);
+        tmp_prof.site = repmat(double(gt.site_bins(i)),[1 length(plist)]);
+        tmp_prof.siterad = s_dist(plist);
 
-	% merge the results
-	new_prof(i) = tmp_prof;
-	clear tmp_prof;
+        % merge the results
+        new_prof(i) = tmp_prof;
+        clear tmp_prof;
       end
 
       if ~exist('new_prof','var'); disp('    no profiles left'); continue; end
@@ -752,10 +751,17 @@ function gs = gstats(gtops,outfile);
 
     % klayers filter
     %ud = prof.udef;
-    if ~isfield(gtops,'skip_calc') & mod(head.pfields,2) == 1 & ~isempty(gt.klayers)
+
+    if (~isfield(gtops,'skip_calc') | isfield(gtops,'run_klayers') ) & mod(head.pfields,2) == 1 & ~isempty(gt.klayers)
+
+      % Just in case, set klayers exec attribute before callinng klayers
+      hattr = set_attr(hattr,'klayers_exec',gs.gtops.rtp_klayers_exec);
 
       say(['  running klayers filter: ' gt.klayers]);
+      say(['  with rtp_klayers_exec = ' gs.gtops.rtp_klayers_exec ]);
+
       eval([gt.klayers ';']);
+
       %[head, hattr, prof, pattr] = rtpklayers(head, hattr, prof, pattr);
       prof.gtotal = single(totalgas_rtp(head.glist, head, prof));
     end
@@ -798,42 +804,41 @@ function gs = gstats(gtops,outfile);
     niok = length(iok);
 
     if ~exist('freq','var'); freq = head.vchan; end  % load the frequencies from the head structure
-    if ~isfield(gs.gtops,'freq'); gs.gtops.freq = freq; end  % store the frequencies in the gtops structure
-    if ~isfield(gs.gtops,'ichan'); gs.gtops.ichan = head.ichan; end  % store the ichan list in the gtops structure
+    if ~isfield(gs.gtops,'freq'); gs.gtops.freq = (freq); end  % store the frequencies in the gtops structure
     if ~isfield(gtops,'skip_calc') & ~isfield(prof,'rcalc'); error('  Stats Error: rcalc missing!'); end
 
     % use calflag to clean the data:
     if isfield(prof,'robs1') 
       if isfield(prof,'calflag') & ~isnan(gt.calflag_bit)
-	prof.robs1(prof.robs1 < -100) = nan;
-	
-	% trim down the calflag if it's dimensions are larger than robs1
-	if size(prof.calflag,1) > size(prof.robs1,1)
-	  prof.calflag=prof.calflag(1:size(prof.robs1,1),:);
-	end
-	
-	% filtering by calflag if the calflag attributes have bits1-4 assigned by Scott's calnum
-	if isequal(size(prof.calflag),size(prof.robs1));
-	  cf_attr = get_attr(pattr,'calflag');
-	  if strcmp(cf_attr(1:min(end:5)),'image')
-	    say('  skipping calflag as it is an image');
-	  elseif strcmp(cf_attr(1:min(end,10)),'bits1-4=NE')
-	    prof.robs1(prof.calflag >= 64) = nan; 
-	    say('  filtering by calflag >= 64')
-	  elseif isfield(gtops,'nocalflag')
-	    say('  skipping calflag bit')
-	  else
-	    prof.robs1(prof.calflag ~= gt.calflag_bit) = nan; 
-	    say('  filtering by calflag bit')
-	  end
-	else
-	  size(prof.calflag)
-	  size(prof.robs1)
-	  error('  GSTATS: sizes differ between calflag and robs1')
-	end
+        prof.robs1(prof.robs1 < -100) = nan;
+        
+        % trim down the calflag if it's dimensions are larger than robs1
+        if size(prof.calflag,1) > size(prof.robs1,1)
+          prof.calflag=prof.calflag(1:size(prof.robs1,1),:);
+        end
+        
+        % filtering by calflag if the calflag attributes have bits1-4 assigned by Scott's calnum
+        if isequal(size(prof.calflag),size(prof.robs1));
+          cf_attr = get_attr(pattr,'calflag');
+          if strcmp(cf_attr(1:min(end:5)),'image')
+            say('  skipping calflag as it is an image');
+          elseif strcmp(cf_attr(1:min(end,10)),'bits1-4=NE')
+            prof.robs1(prof.calflag >= 64) = nan; 
+            say('  filtering by calflag >= 64')
+          elseif isfield(gtops,'nocalflag')
+            say('  skipping calflag bit')
+          else
+            prof.robs1(prof.calflag ~= gt.calflag_bit) = nan; 
+            say('  filtering by calflag bit')
+          end
+        else
+          size(prof.calflag)
+          size(prof.robs1)
+          error('  GSTATS: sizes differ between calflag and robs1')
+        end
       elseif ~exist('warn_robs_calflag') % we really should be using the calflag
-	say('  Warning: robs1 requested, but no calflag filter used.')
-	warn_robs_calflag = 1; % supress further warnings
+        say('  Warning: robs1 requested, but no calflag filter used.')
+        warn_robs_calflag = 1; % supress further warnings
       end
       prof.robs1(prof.robs1 == 0 | (prof.robs1 < -100)) = nan;  % what to do with fake channels
 
@@ -863,126 +868,126 @@ function gs = gstats(gtops,outfile);
       % fill in needed missing fields based on calculations
       gt_fields = union(fieldnames(gt),inc_fields);
       for i = 1:length(gt_fields);
-	field = gt_fields{i}; 
-	if length(field) > 5 && strcmp(field(end-4:end),'_bins'); 
-	  % if a bin selection is not in the gtops or it is empty lets continue
-	  if ~isfield(gt,field) | isempty(getfield(gt,field)); 
-	    continue; 
+        field = gt_fields{i}; 
+        if length(field) > 5 && strcmp(field(end-4:end),'_bins'); 
+          % if a bin selection is not in the gtops or it is empty lets continue
+          if ~isfield(gt,field) | isempty(getfield(gt,field)); 
+            continue; 
           end
-	  field = field(1:end-5); % remove the _bins from the name
-	end
-	if length(field) > 4 && strcmp(field(end-3:end),'_avg'); field = field(1:end-4); end
-	if isfield(prof,field); 
-	  continue; 
+          field = field(1:end-5); % remove the _bins from the name
+        end
+        if length(field) > 4 && strcmp(field(end-3:end),'_avg'); field = field(1:end-4); end
+        if isfield(prof,field); 
+          continue; 
         end  % if we already have this field, then let's continue
 
-	if field(end) >= '0' & field(end) <= '9'
-	  if strcmp(field(1:min(8,end)),'robs1_id')
-	    prof.(field) = reshape(prof.robs1(str2num(field(9:end)),:),1,[]);
-	  elseif strcmp(field(1:min(8,end)),'rcalc_id')
-	    prof.(field) = reshape(prof.rcalc(str2num(field(9:end)),:),1,[]);
-	  elseif strcmp(field(1:min(6,end)),'bto_id')
-	    prof.(field) = reshape(rad2bt(head.vchan(str2num(field(7:end))),prof.robs1(str2num(field(7:end)),:)),1,[]);
-	  elseif strcmp(field(1:min(6,end)),'btc_id')
-	    prof.(field) = reshape(rad2bt(head.vchan(str2num(field(7:end))),prof.rcalc(str2num(field(7:end)),:)),1,[]);
-	  elseif strcmp(field(1:min(6,end)),'dbt_id')
-	    prof.(field) = reshape(rad2bt(head.vchan(str2num(field(7:end))),prof.robs1(str2num(field(7:end)),:)) - ...
-	      rad2bt(head.vchan(str2num(field(7:end))),prof.rcalc(str2num(field(7:end)),:)),1,[]);
-	  end
-	end
+        if field(end) >= '0' & field(end) <= '9'
+          if strcmp(field(1:min(8,end)),'robs1_id')
+            prof.(field) = reshape(prof.robs1(str2num(field(9:end)),:),1,[]);
+          elseif strcmp(field(1:min(8,end)),'rcalc_id')
+            prof.(field) = reshape(prof.rcalc(str2num(field(9:end)),:),1,[]);
+          elseif strcmp(field(1:min(6,end)),'bto_id')
+            prof.(field) = reshape(rad2bt(head.vchan(str2num(field(7:end))),prof.robs1(str2num(field(7:end)),:)),1,[]);
+          elseif strcmp(field(1:min(6,end)),'btc_id')
+            prof.(field) = reshape(rad2bt(head.vchan(str2num(field(7:end))),prof.rcalc(str2num(field(7:end)),:)),1,[]);
+          elseif strcmp(field(1:min(6,end)),'dbt_id')
+            prof.(field) = reshape(rad2bt(head.vchan(str2num(field(7:end))),prof.robs1(str2num(field(7:end)),:)) - ...
+              rad2bt(head.vchan(str2num(field(7:end))),prof.rcalc(str2num(field(7:end)),:)),1,[]);
+          end
+        end
 
-	switch field
-	  % brightness temperatures calculations
-	  case 'btobs1'; if isfield(prof,'robs1'); prof.btobs1 = real(rad2bt(freq, prof.robs1)); end
+        switch field
+          % brightness temperatures calculations
+          case 'btobs1'; if isfield(prof,'robs1'); prof.btobs1 = real(rad2bt(freq, prof.robs1)); end
 
-	  case 'btcalc'; if isfield(prof,'rcalc'); prof.btcalc = real(rad2bt(freq, prof.rcalc)); end
+          case 'btcalc'; if isfield(prof,'rcalc'); prof.btcalc = real(rad2bt(freq, prof.rcalc)); end
 
-	  case 'dbt'; if isfield(prof,'rcalc') & isfield(prof,'robs1')
-	    if ~isfield(prof,'btcalc') & length(freq) == size(prof.rcalc,1);
-	      prof.btcalc = real(rad2bt(freq, prof.rcalc)); end
-	    if ~isfield(prof,'btobs1'); prof.btobs1 = real(rad2bt(freq, prof.robs1)); end
-	    prof.dbt = prof.btobs1 - prof.btcalc; end
+          case 'dbt'; if isfield(prof,'rcalc') & isfield(prof,'robs1')
+            if ~isfield(prof,'btcalc') & length(freq) == size(prof.rcalc,1);
+              prof.btcalc = real(rad2bt(freq, prof.rcalc)); end
+            if ~isfield(prof,'btobs1'); prof.btobs1 = real(rad2bt(freq, prof.robs1)); end
+            prof.dbt = prof.btobs1 - prof.btcalc; end
 
-	  case 'reason';
-	    reason = getudef(prof,pattr,'reason');
-	    if ~isempty(reason); prof.reason = reason; clear reason; end
-	    if ~isfield(prof,'reason')
-	      if isfield(prof,'iudef') & any(prof.iudef(1,:) > 0);
-		say('  Warning: Using iudef(1,:) for reason');
-		prof.reason = prof.iudef(1,:);
-	      elseif isfield(prof,'udef')
-		say('  Warning: using udef(1,:) instead of iudef for reason');
-		prof.reason = prof.udef(1,:);
-	      else
-		say('  Warning: no reason bin, but reason binning was requested');
-		farewell(rn);
-		exit;
-	      end
-	    end
-	    prof.reason(prof.reason < 0) = 0; % clear out the negatives
-	    if any(isnan(prof.reason(:))) | any(double(prof.reason(:)) < 0)
-	      error('  Reason bin has non valid values, are you sure you want to bin by reason?');
-	    end
-	    if isfield(gt,'reason_bins') & length(gt.reason_bins) == 1
-	      prof.reason = bitget(double(prof.reason),double(gt.reason_bins))*double(gt.reason_bins);
-	    end
+          case 'reason';
+            reason = getudef(prof,pattr,'reason');
+            if ~isempty(reason); prof.reason = reason; clear reason; end
+            if ~isfield(prof,'reason')
+              if isfield(prof,'iudef') & any(prof.iudef(1,:) > 0);
+                say('  Warning: Using iudef(1,:) for reason');
+                prof.reason = prof.iudef(1,:);
+              elseif isfield(prof,'udef')
+                say('  Warning: using udef(1,:) instead of iudef for reason');
+                prof.reason = prof.udef(1,:);
+              else
+                say('  Warning: no reason bin, but reason binning was requested');
+                farewell(rn);
+                exit;
+              end
+            end
+            prof.reason(prof.reason < 0) = 0; % clear out the negatives
+            if any(isnan(prof.reason(:))) | any(double(prof.reason(:)) < 0)
+              error('  Reason bin has non valid values, are you sure you want to bin by reason?');
+            end
+            if isfield(gt,'reason_bins') & length(gt.reason_bins) == 1
+              prof.reason = bitget(double(prof.reason),double(gt.reason_bins))*double(gt.reason_bins);
+            end
 
-	  case 'xtrack_eo'
-	    prof.xtrack_eo = mod(prof.xtrack,2);
+          case 'xtrack_eo'
+            prof.xtrack_eo = mod(prof.xtrack,2);
 
-	  case 'transcom'
-	    load TranscomRegionMatrix
-	    ii = sub2ind(size(RegionMatrix),max(1,min(180,round(-prof.rlat+89.5))),mod(round(prof.rlon-0.5),360)+1);
-	    prof.transcom = RegionMatrix(ii);
+          case 'transcom'
+            load TranscomRegionMatrix
+            ii = sub2ind(size(RegionMatrix),max(1,min(180,round(-prof.rlat+89.5))),mod(round(prof.rlon-0.5),360)+1);
+            prof.transcom = RegionMatrix(ii);
 
-	  case 'emismin'; 
-	    if isfield(prof,'emis')
-	      prof.emismin = min(prof.emis,[],1);
-	    else
-	      say('  Warning: emismin requested but emis doesn''t exist in rtp file');
-	    end
+          case 'emismin'; 
+            if isfield(prof,'emis')
+              prof.emismin = min(prof.emis,[],1);
+            else
+              say('  Warning: emismin requested but emis doesn''t exist in rtp file');
+            end
 
-	  case 'secang';
-	    if isfield(prof,'satzen')
-	      % Check satzen is plausible
-	      if any(prof.satzen(:) > 90.001)
-		say('RTP file contains invalid prof.satzen data, skipping...')
-		continue;
-	      end
-	      prof.secang = 1.0./cos(prof.satzen*pi/180); % convert satzen to secang
-	    end
+          case 'secang';
+            if isfield(prof,'satzen')
+              % Check satzen is plausible
+              if any(prof.satzen(:) > 90.001)
+                say('RTP file contains invalid prof.satzen data, skipping...')
+                continue;
+              end
+              prof.secang = 1.0./cos(prof.satzen*pi/180); % convert satzen to secang
+            end
 
-	  case 'mmw'
-	    % water selection
-	    if (isfield(gt,'mmw_udef') & gt.mmw_udef > 0) % & gt.mmw_udef <= head.nudef)
-	      if ~isempty(gt.mmw_bins)
-		iwat = find(head.glist == 1);
-		nlevs = 91;
-		if gt.mmw_udef > 0 & isfield(prof,'udef')
-		  prof.mmw = prof.udef(gt.mmw_udef,:);
-		elseif (isfield(prof,'gtotal'))
-		  prof.mmw = prof.gtotal(iwat,:);
-		else
-		  prof.mmw = 20*ones(1,length(prof.rtime));
-		end
-	      end
-	    else
-	      % Run klayers and then calc total water
-	      prof.mmw = mmwater_rtp(head,prof);
-	    end
+          case 'mmw'
+            % water selection
+            if (isfield(gt,'mmw_udef') & gt.mmw_udef > 0) % & gt.mmw_udef <= head.nudef)
+              if ~isempty(gt.mmw_bins)
+                iwat = find(head.glist == 1);
+                nlevs = 91;
+                if gt.mmw_udef > 0 & isfield(prof,'udef')
+                  prof.mmw = prof.udef(gt.mmw_udef,:);
+                elseif (isfield(prof,'gtotal'))
+                  prof.mmw = prof.gtotal(iwat,:);
+                else
+                  prof.mmw = 20*ones(1,length(prof.rtime));
+                end
+              end
+            else
+              % Run klayers and then calc total water
+              prof.mmw = mmwater_rtp(head,prof);
+            end
 
-	  otherwise
-	    if ~strcmp(field(max(1,end-3):end),'_sel') & ...
-		 ~strcmp(field(max(1,end-3):end),'_bit')
-	      tmp = getudef(prof,pattr,field);
-	      if ~isempty(tmp);
-		prof.(field) = tmp;
-		clear tmp;
-	      else
-		say(['  Warning: Unknown field, ' field]);
-	      end
-	    end
-	end
+          otherwise
+            if ~strcmp(field(max(1,end-3):end),'_sel') & ...
+                 ~strcmp(field(max(1,end-3):end),'_bit')
+              tmp = getudef(prof,pattr,field);
+              if ~isempty(tmp);
+                prof.(field) = tmp;
+                clear tmp;
+              else
+                say(['  Warning: Unknown field, ' field]);
+              end
+            end
+        end
       end
     catch err; % Main calculation try
       Etc_show_error(err);
@@ -1033,55 +1038,55 @@ function gs = gstats(gtops,outfile);
       % 2. Test if field exists in 'gt' - if not, just ignore it and move to the next
       if isfield(gt,this_gtfield_name) && ~isempty(getfield(gt,this_gtfield_name))
 
-	% 3. Get the actuall field value from prof and from 'gt'
-	this_pfield = getfield(prof,this_pfield_name);
+        % 3. Get the actuall field value from prof and from 'gt'
+        this_pfield = getfield(prof,this_pfield_name);
         this_gtfield= getfield(gt, this_gtfield_name);
 
-	% 4. If this_pfield is MxNfovs, get only the maximum values (M entry) for each FoV
-	mthis_pfield = amax(this_pfield);
+        % 4. If this_pfield is MxNfovs, get only the maximum values (M entry) for each FoV
+        mthis_pfield = amax(this_pfield);
 
-	% 5. Bin mthis_pfield using the bins provided by this_gtfield. 
-	%    I'm not interested in the actual count in each bin (first return of histc),
-	%    but in the index of which bin a FoV is in (the second argument)
-	%    
-	[junkbin tmpbinidx] = histc(mthis_pfield, this_gtfield);
+        % 5. Bin mthis_pfield using the bins provided by this_gtfield. 
+        %    I'm not interested in the actual count in each bin (first return of histc),
+        %    but in the index of which bin a FoV is in (the second argument)
+        %    
+        [junkbin tmpbinidx] = histc(mthis_pfield, this_gtfield);
 
-	% 6. If this_gtfield is not empty (i.e. it's a requested, non-empty field - sanity test)
-	%    Find bad FoVs (looking for mthis_pfield==-9999), and mark its bin as 1 - the leftmost bin.
-	if(length(this_gtfield)>0)
-	  ibad_fovs = find(abs(mthis_pfield)>=9999);
+        % 6. If this_gtfield is not empty (i.e. it's a requested, non-empty field - sanity test)
+        %    Find bad FoVs (looking for mthis_pfield==-9999), and mark its bin as 1 - the leftmost bin.
+        if(length(this_gtfield)>0)
+          ibad_fovs = find(abs(mthis_pfield)>=9999);
           tmpbinidx(ibad_fovs) = 1;
-	end
+        end
 
 
-	% 7. Add the vector of bins as a new line in 'ibin' 
-	ibin(end+1,:) = min(tmpbinidx,nbins);
-	%ibin = [ibin;min(tmpbinidx,nbins)];
+        % 7. Add the vector of bins as a new line in 'ibin' 
+        ibin(end+1,:) = min(tmpbinidx,nbins);
+        %ibin = [ibin;min(tmpbinidx,nbins)];
 
-	% 8. Add the vector of selection bins as a new line in 'gtbin'
-	gtbin(end+1,:) = getfield(gt, [this_pfield_name '_sel']);
-	% gtbin = [gtbin;getfield(gt,[all_fields{j} '_sel'])];
+        % 8. Add the vector of selection bins as a new line in 'gtbin'
+        gtbin(end+1,:) = getfield(gt, [this_pfield_name '_sel']);
+        % gtbin = [gtbin;getfield(gt,[all_fields{j} '_sel'])];
 
-	% 9. Look at the last line of 'ibin' (i.e. tmpbinidx) and find out if
-	%    1. not any (none) fov got selected - show message
-	%    2. not all (some) fov got selected - compute number and show message
-	if ~any(ibin(end,:)); 
-	  disp(['  Warning: ' this_pfield_name '_bins selected no data']); 
-	elseif ~all(ibin(end,:)); 
-	  disp(sprintf('  Warning: %s_bins selection excluded %d profs',this_pfield_name,sum(ibin(end,:) == 0)));
-	elseif all(ibin(end,:));
-	  %disp(sprintf('  N.B.   : %s_bins selection included ALL profs',this_pfield_name));
-	end
+        % 9. Look at the last line of 'ibin' (i.e. tmpbinidx) and find out if
+        %    1. not any (none) fov got selected - show message
+        %    2. not all (some) fov got selected - compute number and show message
+        if ~any(ibin(end,:)); 
+          disp(['  Warning: ' this_pfield_name '_bins selected no data']); 
+        elseif ~all(ibin(end,:)); 
+          disp(sprintf('  Warning: %s_bins selection excluded %d profs',this_pfield_name,sum(ibin(end,:) == 0)));
+        elseif all(ibin(end,:));
+          %disp(sprintf('  N.B.   : %s_bins selection included ALL profs',this_pfield_name));
+        end
 
-	% 10. For each fov, if it fall outside of a particular bin, it will be marked with a 0 bin
-	%     Then we know that this fov won't enter the final calculation.
-	%     1. Find out if (for each fov) all bins are valid
+        % 10. For each fov, if it fall outside of a particular bin, it will be marked with a 0 bin
+        %     Then we know that this fov won't enter the final calculation.
+        %     1. Find out if (for each fov) all bins are valid
         lvalid_bins = all(ibin,1);
         %     2. If there are no valid bins, warn that the selection killed aol fovs.
-	%        none(lvalid_bins)
-	if ~any(lvalid_bins); 
-	  disp(['  Warning: After indexing ' all_fields{j} ' all ' num2str(size(ibin,2)) ' bins are now empty']); 
-	  break; 
+        %        none(lvalid_bins)
+        if ~any(lvalid_bins); 
+          disp(['  Warning: After indexing ' all_fields{j} ' all ' num2str(size(ibin,2)) ' bins are now empty']); 
+          break; 
         end
       end
     end
@@ -1134,34 +1139,47 @@ function gs = gstats(gtops,outfile);
 
       % should we skip doing a std?
       do_std = true;
-      if length(field) > 4 && strcmp(field(end-3:end),'_avg'); do_std = false; field = field(1:end-4); end
+      if strcmp(field(max(1,end-3):end),'_avg'); do_std = false; field = field(1:end-4); end
+
+      % should we do skewness and kurtosis?
+      do_sk = false;
+      if strcmp(field(max(1,end-2):end),'_sk'); do_sk = true; field = field(1:end-3); do_std = true; end
+
+      % should we keep min and max?
+      do_minmax = false;
+      if strcmp(field(max(1,end-3):end),'_min'); do_min = true; field = field(1:end-4); do_minmax = true; end
+      if strcmp(field(max(1,end-3):end),'_max'); do_min = true; field = field(1:end-4); do_minmax = true; end
 
       if strcmp(field,'jac')
-	pnum = find(s);
-	for j = 1:length(pnum)
-	  % jacobian calculations
-	  tmp = reshape(compute_jacs(gt.jac,head,structfun(@(x) ( x(:,pnum(j)) ),prof, 'UniformOutput', false)),[],1);
-	  first_dim = size(tmp,1);
-	  if ~exist([field '_sum'])
-	    eval(sprintf('%s_sum = zeros([first_dim nbins]);',field))
-	    eval(sprintf('%s_count = zeros([first_dim nbins],''uint16'');',field))
-	    if do_std; eval(sprintf('%s_sum2 = zeros([first_dim nbins]);',field)); end
-	  end
-	  jac_sum(:,pset(j)) = jac_sum(:,pset(j)) + t;
-	  jac_sum2(:,pset(j)) = jac_sum2(:,pset(j)) + tmp .^ 2;
-	  jac_count(:,pset(j)) = jac_count(:,pset(j)) + 1;
-	end
-	continue 
+        pnum = find(s);
+        for j = 1:length(pnum)
+          % jacobian calculations
+          tmp = reshape(compute_jacs(gt.jac,head,structfun(@(x) ( x(:,pnum(j)) ),prof, 'UniformOutput', false)),[],1);
+          first_dim = size(tmp,1);
+          if ~exist([field '_sum'])
+            eval(sprintf('%s_sum = zeros([first_dim nbins]);',field))
+            eval(sprintf('%s_count = zeros([first_dim nbins],''uint16'');',field))
+            if do_std; eval(sprintf('%s_sum2 = zeros([first_dim nbins]);',field)); end
+            if do_sk; eval(sprintf('%s_sum3 = zeros([first_dim nbins]);',field)); end
+            if do_sk; eval(sprintf('%s_sum4 = zeros([first_dim nbins]);',field)); end
+            if do_minmax; eval(sprintf('%s_min = zeros([first_dim nbins]);',field)); end
+            if do_minmax; eval(sprintf('%s_max = zeros([first_dim nbins]);',field)); end
+          end
+          jac_sum(:,pset(j)) = jac_sum(:,pset(j)) + t;
+          jac_sum2(:,pset(j)) = jac_sum2(:,pset(j)) + tmp .^ 2;
+          jac_count(:,pset(j)) = jac_count(:,pset(j)) + 1;
+        end
+        continue 
       end
       clear tmp
 
       % if a field is missing, lets skip over it and go to the next
       if ~isfield(prof,field) 
-	if ~exist(['warn_' field],'var')
-	  disp(['  Warning: Field ' field ' does not exist in rtp file, skipping field and further warnings supressed.']);
-	  eval(['warn_' field '=1;']) % supress further warnings
-	end
-	continue
+        if ~exist(['warn_' field],'var')
+          disp(['  Warning: Field ' field ' does not exist in rtp file, skipping field and further warnings supressed.']);
+          eval(['warn_' field '=1;']) % supress further warnings
+        end
+        continue
       end
 
       % Handle the summations:
@@ -1174,40 +1192,64 @@ function gs = gstats(gtops,outfile);
 
       % If field is a summation, allocate space for the field_sum variables
       if ~exist([field '_sum'])
-	eval(sprintf('%s_sum = zeros([first_dim nbins],''single'');',field))
-	eval(sprintf('%s_count = zeros([first_dim nbins],''uint16'');',field))
-	if do_std; eval(sprintf('%s_sum2 = zeros([first_dim nbins],''single'');',field)); end
+        eval(sprintf('%s_sum = zeros([first_dim nbins],''single'');',field))
+        eval(sprintf('%s_count = zeros([first_dim nbins],''uint16'');',field))
+        if do_std; eval(sprintf('%s_sum2 = zeros([first_dim nbins],''single'');',field)); end
+        if do_sk; eval(sprintf('%s_sum3 = zeros([first_dim nbins],''single'');',field)); end
+        if do_sk; eval(sprintf('%s_sum4 = zeros([first_dim nbins],''single'');',field)); end
+        if do_minmax; eval(sprintf('%s_min = zeros([first_dim nbins],''single'');',field)); end
+        if do_minmax; eval(sprintf('%s_max = zeros([first_dim nbins],''single'');',field)); end
       end
 
       try
 
-	if strcmp(field,'rlon')
-	  rlon_sum = rlon_sum + accumarray(pset,exp(t*pi/180*img),[nbins first_dim],@nansum)';
-	elseif first_dim == 1
-	  eval(sprintf('%s_sum = %s_sum + accumarray(pset,t,[nbins first_dim],@nansum)'';', ...
-	    field,field))
-	  if do_std; 
-	    eval(sprintf('%s_sum2 = %s_sum2 + accumarray(pset,t.^2,[nbins first_dim],@nansum)'';', ...
-	      field,field))
-	  end
-	  eval(sprintf('%s_count = %s_count + uint16(accumarray(pset,~isnan(t),[nbins first_dim],@nansum))'';', ...
-	      field,field))
-	else
-	  for p_ind = 1:length(pset)
-	    eval(sprintf('%s_sum(:,pset(p_ind)) = nansum([%s_sum(:,pset(p_ind)),t(:,p_ind)],2);', ...
-	      field,field))
-	    if do_std; 
-	      eval(sprintf('%s_sum2(:,pset(p_ind)) = nansum([%s_sum2(:,pset(p_ind)),t(:,p_ind).^2],2);', ...
-		field,field))
-	    end
-	    eval(sprintf('%s_count(:,pset(p_ind)) = nansum([%s_count(:,pset(p_ind)),uint16(~isnan(t(:,p_ind)))],2);', ...
-		field,field))
-	  end
-	end
+        if strcmp(field,'rlon')
+          rlon_sum = rlon_sum + accumarray(pset,exp(t*pi/180*img),[nbins first_dim],@nansum)';
+        elseif first_dim == 1
+          eval(sprintf('%s_sum = %s_sum + accumarray(pset,t,[nbins first_dim],@nansum)'';', ...
+            field,field))
+          if do_std; 
+            eval(sprintf('%s_sum2 = %s_sum2 + accumarray(pset,t.^2,[nbins first_dim],@nansum)'';', ...
+              field,field))
+          end
+          if do_sk; 
+            eval(sprintf('%s_sum3 = %s_sum3 + accumarray(pset,t.^3,[nbins first_dim],@nansum)'';', ...
+              field,field))
+            eval(sprintf('%s_sum4 = %s_sum4 + accumarray(pset,t.^4,[nbins first_dim],@nansum)'';', ...
+              field,field))
+          end
+          if do_minmax;  % XXX not implemented yet!
+%            eval(sprintf('%s_min = min(%s_min,  + accumarray(pset,t.^2,[nbins first_dim],@nansum)'';', ...
+%              field,field))
+          end
+          eval(sprintf('%s_count = %s_count + uint16(accumarray(pset,~isnan(t),[nbins first_dim],@nansum))'';', ...
+              field,field))
+        else
+          for p_ind = 1:length(pset)
+            eval(sprintf('%s_sum(:,pset(p_ind)) = nansum([%s_sum(:,pset(p_ind)),t(:,p_ind)],2);', ...
+              field,field))
+            if do_std; 
+              eval(sprintf('%s_sum2(:,pset(p_ind)) = nansum([%s_sum2(:,pset(p_ind)),t(:,p_ind).^2],2);', ...
+                field,field))
+            end
+            if do_sk; 
+              eval(sprintf('%s_sum3(:,pset(p_ind)) = nansum([%s_sum3(:,pset(p_ind)),t(:,p_ind).^3],2);', ...
+                field,field))
+              eval(sprintf('%s_sum4(:,pset(p_ind)) = nansum([%s_sum4(:,pset(p_ind)),t(:,p_ind).^4],2);', ...
+                field,field))
+            end
+            if do_minmax;  % XXX not implemented yet!
+%              eval(sprintf('%s_min = min(%s_min,  + accumarray(pset,t.^2,[nbins first_dim],@nansum)'';', ...
+%                field,field))
+            end
+            eval(sprintf('%s_count(:,pset(p_ind)) = nansum([%s_count(:,pset(p_ind)),uint16(~isnan(t(:,p_ind)))],2);', ...
+                field,field))
+          end
+        end
       catch err
-	Etc_show_error(err); 
-	disp(['error point 2 ' outfile])
-	continue
+        Etc_show_error(err); 
+        disp(['error point 2 ' outfile])
+        continue
       end  
 
     end % inc_fields loop
@@ -1253,14 +1295,22 @@ function gs = gstats(gtops,outfile);
     %if eval(['isreal(gs.' field '_avg)']); eval(sprintf('gs.%s_avg = trimbits(gs.%s_avg,8);',field,field)); end
     if exist([field '_sum2'])
       if strcmp(field,'rlon')
-	gs.rlon_std = acos(abs(rlon_sum)/rlon_count)*180/pi;
+        gs.rlon_std = acos(abs(rlon_sum)/rlon_count)*180/pi;
       else
-	eval(sprintf('n = double(%s_count);',field))
-	eval(sprintf('nm1 = max(0,double(%s_count-1));',field))
-	eval(sprintf('gs.%s_std = single(sqrt(abs(%s_sum2./nm1 - %s_sum.*%s_sum./(n.*nm1))));', ...
-	  field,field,field,field))
-	%if eval(['isreal(gs.' field '_std)']); eval(sprintf('gs.%s_std = trimbits(gs.%s_std,8);',field,field)); end
-	clear([field '_sum2'],'n','nm1')
+        eval(sprintf('n = double(%s_count);',field))
+        eval(sprintf('nm1 = max(0,double(%s_count-1));',field))
+        eval(sprintf('x2 = abs(%s_sum2./nm1 - %s_sum.*%s_sum./(n.*nm1));',field,field,field))
+        eval(sprintf('gs.%s_std = single(sqrt(x2));',field))
+        if exist([field '_sum3'])
+          eval(sprintf('x3 = abs(%s_sum3./nm1 - %s_sum %s_sum.^3./(n.*n.*nm1));',field,field,field))
+          eval(sprintf('x3 = abs(%s_sum3./nm1 - %s_sum.*%s_sum./(n.*nm1));',field,field,field))
+          eval(sprintf('gs.%s_skw = single(sqrt(abs(%s_sum3./nm1 + 2* %s_sum.^3.*%s_sum./(n.*nm1))));', ...
+            field,field,field,field))
+          eval(sprintf('gs.%s_krt = single(sqrt(abs(%s_sum2./nm1 - %s_sum.*%s_sum./(n.*nm1))));', ...
+            field,field,field,field))
+        end
+        %if eval(['isreal(gs.' field '_std)']); eval(sprintf('gs.%s_std = trimbits(gs.%s_std,8);',field,field)); end
+        clear([field '_sum2'],'n','nm1')
       end
     end
     clear([field '_sum'])
@@ -1314,5 +1364,5 @@ function val = amax(vec)
     return; 
   end
   [val i] = nanmax(abs(vec),[],1);
-%  val = vec(i);
+  val = vec(i);
 end
