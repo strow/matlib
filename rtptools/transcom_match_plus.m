@@ -55,14 +55,14 @@ function [site str] = transcom_match_plus(lat, lon)
 % Call Base trasncom_match.m routine
 site = transcom_match(lat, lon);
 
-% Add Arctic Lands as region 23
-site(site==0 & lat> 57) = 23;
-% Add Antartica as region 24
-site(site==0 & lat<-60) = 24;
-% Add Mediterranean region as region 25
-site(site==0 & lon>-20 & lon<70 & lat>0 & lat<60) = 25;
-% Add Great Lakes as region 26
-site(site==0 & lon>-150 & lon<-50) = 26;
+%% Add Arctic Lands as region 23
+%site(site==0 & lat> 57) = 23;
+%% Add Antartica as region 24
+%site(site==0 & lat<-60) = 24;
+%% Add Mediterranean region as region 25
+%site(site==0 & lon>-20 & lon<70 & lat>0 & lat<60) = 25;
+%% Add Great Lakes as region 26
+%site(site==0 & lon>-150 & lon<-50) = 26;
 
 % Now we have TransCom regions from 0 to 26 (Ignore 0 for now)
 
