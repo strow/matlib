@@ -101,7 +101,7 @@ if (zsum == zsumabs & zsum == 0)
   end
 
 if sumYmax >= 6 & iFound < 0
-  disp(' simplifying more than 5 maxima')
+  % disp(' simplifying more than 5 maxima')
   if iDoPlot > 0
     plot(1:length(yIN),yIN); grid
     end
@@ -365,7 +365,7 @@ if sumYmax == 4
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if sumYmax == 5
-  disp('oh oh  .. too lazy to handle 5 maxima properly -- reset to 4')
+  % disp('oh oh  .. too lazy to handle 5 maxima properly -- reset to 4')
   N = 4;
   yOUT = zeros(1,length(yIN));
 
@@ -483,7 +483,7 @@ if sumYmax == 5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if sumYmax >= 6
-  disp('oh oh  .. too lazy to handle >= 6 maxima properly -- reset to 4')
+  % disp('oh oh  .. too lazy to handle >= 6 maxima properly -- reset to 4')
   N = 4;
   yOUT = zeros(1,length(yIN));
 
