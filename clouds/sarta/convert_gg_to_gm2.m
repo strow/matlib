@@ -1,4 +1,4 @@
-function [cngwat_sarta] = convert_gg_to_gm2(cT,cB,cngwat_ecmwf,rlevs,tlevs) 
+function [cngwat_sarta] = convert_gg_to_gm2(cT,cB,cngwat_ecmwf,rlevs,tlevs,airslevels,airsheights) 
 
 %% changes the [cT,cB,cngwat_ecmwf,rlevs,tlevs] from ECMWF (in kg/kg) to g/m2
 %% where cT,cB         = level number for cloud tops, cloud bottoms
@@ -57,7 +57,7 @@ kAvogadro = 6.022142E+26;  %molecules per kilomole
 T0 = 273.15;
 P0 = 1013.5;
 
-load airslevels.dat
+% load airslevels.dat
 
 MDAIR = 28.966; % g/mol
 MASSF = 18;     % g/mol for both water and ice!
@@ -93,8 +93,8 @@ for ii = 1 : length(cT)
       slope = (tB-tT)/(log(pB)-log(pT));
       Tnew = tB - slope*(log(pB)-log(pnew));
 
-      hB = p2h(pB);
-      hT = p2h(pT);
+      hB = p2hFAST(pB,airslevels,airsheights);
+      hT = p2hFAST(pTairslevels,airsheights);
       dz = (hT - hB)*100;
 
       ppmv = mr * (MDAIR/MASSF)*1E+6;
@@ -119,8 +119,8 @@ for ii = 1 : length(cT)
   Tnew = tB - slope*(log(pB)-log(pnew));
   [tT tB Told Tnew];
 
-  hB = p2h(pB);
-  hT = p2h(pT);
+  hB = p2hFAST(pB,airslevels,airsheights);
+  hT = p2hFAST(pT,airslevels,airsheights);
   dz = (hT - hB)*100;
 
   ppmv = mr * (MDAIR/MASSF)*1E+6;

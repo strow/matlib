@@ -200,9 +200,12 @@ if h.ptype ~= 0
   error('need levels input!')
 end
 
+load airsheights.dat
+load airslevels.dat
+
 tic
 %% run_sarta.cumsum == -1
-[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
+[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum,airslevels,airsheights);   %% figure the two slab cloud 
                   %% profile info here, using profX
                   %% this then puts the info into "prof" by calling put_into_prof w/in routine
 
@@ -257,7 +260,7 @@ clear profX
 [h,prof] = reset_cloud_slab_with_cloud_profile(h,prof,run_sarta.cfrac);
 
 %% and add on aux info, such as OD etc
-prof = cloudOD_for100layer(prof,run_sarta.cumsum/100);
+prof = cloudOD_for100layer(prof,run_sarta.cumsum/100,airslevels,airsheights);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 

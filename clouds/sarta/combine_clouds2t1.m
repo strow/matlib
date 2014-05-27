@@ -1,4 +1,4 @@
-function [cN,cOUT,cT,cB,cPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs)
+function [cN,cOUT,cT,cB,cPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights)
 
 % this takes in ICE  parameters iN,iOUT,iT,iB,iPeak,plevs
 % checks it ; if there are iN = 2, then it combines the two clouds to make

@@ -1,4 +1,4 @@
-function p1 = reset_cprtop_cloudOD(p0,cumsumOD);
+function p1 = reset_cprtop_cloudOD(p0,cumsumOD,airslevels,airsheights);
 
 %% computes cloud ODs based on formulas given by Xianglei and Xiuhong
 %% see PCRTM_compute_for_AIRS_spectra.m
@@ -57,7 +57,7 @@ for ii = 1 : length(p0.stemp)
   diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
 
   %% bugfix on 6.3.2013 ... this was mistakenly ptemp before early June, 2013
-  Z = p2h(press)/1000;
+  Z = p2hFAST(press,airslevels,airsheights)/1000;
   diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
 
   % compute ice cloud optical depth from Ebert and Curry (1992, J. Geophys. Res.,  

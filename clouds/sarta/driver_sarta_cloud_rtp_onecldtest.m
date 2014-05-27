@@ -139,8 +139,12 @@ if h.ptype ~= 0
   error('need levels input!')
 end
 
+load airsheights.dat
+load airslevels.dat
+
 tic
-[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud profile info here, using profX
+[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum,airslevels,airsheights);   
+                                            %% figure the two slab cloud profile info here, using profX
                                             %% this then puts the info into "prof" by calling put_into_prof w/in routine
 
 prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 

@@ -179,14 +179,17 @@ end
 %  error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
 %end
 
+load airsheights.dat
+load airslevels.dat
+
 tic
 if nlev_std <= 1e-3
-  [prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
+  [prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum,airslevels,airsheights);   %% figure the two slab cloud 
                     %% profile info here, using profX
                     %% this then puts the info into "prof" by calling put_into_prof w/in routine
 else
   disp('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model, need to use varying levels (MERRA??)')
-  [prof,profX] = ecmwfcld2sartacld_varNlev(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
+  [prof,profX] = ecmwfcld2sartacld_varNlev(p,nlev,run_sarta.cumsum,airslevels,airsheights);   %% figure the two slab cloud 
                     %% profile info here, using profX
                     %% this then puts the info into "prof" by calling put_into_prof w/in routine
 end
@@ -211,7 +214,7 @@ elseif run_sarta.cumsum > 1
   %% set cloud top according to where cumulative cloud OD = run_sarta.cumsum/100, 
   %%      or if >= 9999, set at peak of cloud wgt fcn
   profXYZ = prof;
-  prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum/100);  
+  prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum/100,airslevels,airsheights);  
 %{
   disp(' ')
   [prof.cngwat(junky) prof.cngwat2(junky)]
