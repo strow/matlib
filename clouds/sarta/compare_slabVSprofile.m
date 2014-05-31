@@ -1,4 +1,5 @@
 function y = compare_slabVSprofile(p,ii)
+
 %% this script assume you have profile "p" and allows you to compare slab vs cloud profile for water and ice
 
 % ii = input('Enter profile number : ');
@@ -39,6 +40,15 @@ plot(water_prof,p_prof,'b',...
 y.water_prof = water_prof;
 y.ice_prof   = ice_prof;
 y.plevs      = p_prof;
+
+y.cngwat     = p.cngwat(ii)/norm;
+y.cprtop     = p.cprtop(ii);
+y.cprbot     = p.cprbot(ii);
+
+y.cngwat2     = p.cngwat2(ii)/norm;
+y.cprtop2     = p.cprtop2(ii);
+y.cprbot2     = p.cprbot2(ii);
+
 
 if p.cngwat(ii) > 0
   line([0 p.cngwat(ii)/norm],[p.cprtop(ii) p.cprtop(ii)],'color',color1)
