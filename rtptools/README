@@ -1,0 +1,31 @@
+
+bits2pfields.m	- convert bits to header pfields	- rtptools
+cat_rtp.m	- concatenate two [h p] pairs 		- rtptools
+find_variable_xdef.m - locate index of an attribute	- rtptools
+get_attr.m	- get rtp attribute field		- rtptools
+getudef.m	- get udef field from prof and pattr	- rtptools
+mmwater_rtp.m	- compte WMM from Rtp 			- rtptools
+pfields2bits.m	- convert pfields to bits		- rtptools
+ProfSubset2.m	- subset prof type structures by index	- rtptools
+rtpdate.m	- convert instrument rtime into mtime	- rtptools
+rtpgrow.m	- rtpZ grow routine			- rtptools
+rtpklayers.m	- run klayers on RTP profile, use attr	- rtptools
+rtpread_12.m	- read IASI type rtp files		- rtptools
+rtpsarta.m	- run sarta on RTP profile, use attr	- rtptools
+rtp_t_at_p.m	- compute temp at pressure p		- rtptools
+rtptrim.m	- rtpZ trim routine			- rtptools
+rtpwrite_12.m	- write IASI type rtp files		- rtptools
+set_attr.m	- set rtp attributes			- rtptools
+setudef.m	- set udefs				- rtptools
+simpcat.m	- simple concatenation of RTP prof sets	- rtptools
+subset_rtp_clouds.m - subset_rtp with cloud vars added	- rtptools
+subset_rtp.m	- subset RTP by chan, gas, or prof	- rtptools
+totalgas_rtp.m	- compute total column of a gas		- rtptools
+
+gstats.m	- The main GSTATS program 		- Gstats
+
+TranscomRegionMatrix.mat - Transcom Ragion matrix	- Data??
+
+gstats_orig.m	- OLD VERSION OF GSTATS			- XXX
+rtpadd_emis_wis.m - INCOMPLETE ROUTINE			- XXX
+

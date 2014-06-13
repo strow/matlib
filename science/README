@@ -1,0 +1,18 @@
+
+cal_seaemis2.m	- calculate sea emissivity		- emis
+Emis_get_all.m	- subroutine of Prof_add_emis		- emis
+Emis_get_land.m	- subroutine of Prof_add_emis		- emis
+Emis_get_water.m - subroutine of Prof_add_emis		- emis
+iremis_filedates.m - Wiscounsins emis subroutine	- emis
+Prof_add_emis.m	- Add emissivity to profiles		- emis
+rtpadd_emis_DanZhou.m	- add DanZhou Emis to profiles	- emis
+
+bt2rad.m	- compute BT to Rad			- science
+fixedsite.m	- Find points near fixed sites		- science
+rad2bt.m	- calculate radiance to BT		- science
+SolarZenAzi.m	- compute solar azimuth			- science
+ttorad.m	- compute BT to Rad			- science
+usgs_degN.m	- USGS salti and landfrac (regrid)	- science
+usgs_deg10_dem.m - USGS salti and landfrac		- science	
+
+

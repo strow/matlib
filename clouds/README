@@ -1,0 +1,23 @@
+airsheights.dat	- approx AIRS layers altitude		- aslutils? Data?
+airslevels.dat	- AIRS layers pressures 		- aslutils? Data?
+p2h.m 		- convert from pressure to height 	- aslutils 
+
+smooth1aa.m 	- a smoothing routine 			- science/aslutils
+
+boxshape.m	- a cloud boxing routine ??		- clouds
+combine_clouds2t1.m - 
+combine_clouds3t2.m - 
+combine_clouds4t3.m - 
+combine_clouds.m - 
+convert_gg_to_gm2.m - 
+ecmwfcld2sartacld.m - 
+fake_cfracs.m 	- 
+fake_cpsize.m 	- 
+junktotal_cfrac.m - 
+localmaxmin.m 	- 
+oldboxshape.m 	- 
+oldfake_cfracs.m - 
+put_into_prof.m - 
+slab_cfrac.m 	- 
+total_cfrac.m 	- 			
+

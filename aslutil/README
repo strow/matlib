@@ -1,0 +1,60 @@
+
+
+
+
+
+iasi2mattime.m	- Convert IASI time to mtime		- aslutils
+jday.m		- compute day of the year		- aslutils
+mat2jd.m	- compute day of the year		- aslutils
+mattime2iasi.m	- convert mtime to IASI time		- aslutils
+mattime2tai.m	- convert mtimt to AIRS time		- aslutils
+tai2mattime.m	- convert AIRS time to mtime		- aslutils
+tai2utc1970.m 	- convert TAI1970 to UTC		- aslutils
+tai2utc1993.m 	- convert AIRS to UTC			- aslutils
+tai2utc2000.m 	- convert IASI time to UTC		- aslutils
+utc2tai1970.m 	- convert UTC to TAI1970 time		- aslutils
+utc2tai1993.m 	- convert UTC to AIRS time		- aslutils
+utc2tai2000.m	- convert UTC to IASI time		- aslutils
+utc2tai.m     	- a symling to utc2tai1993.m		- aslutils
+
+gvsites.mat	- MATFILE with GV sites			- Data??
+
+Etc_show_error.m - display error messages		- Dbg
+farewell.m	- print message at exit points 		- Dbg
+greetings.m	- print message at entry points		- Dbg
+say.m		- print a message and routine name	- Dbg
+yesno.m		- display logical as 'yes' or 'no'	- Dbg
+
+simplemap.m	- make map out of data.			- Display
+
+binprofdyn.m	- geo-binning routine 			- Geo
+mapshift.m	- flip map longitudes			- Geo
+
+foldreduce.m	- gstats manipulation routine		- Gstats
+mkfold.m	- make gstats folds			- Gstats
+
+dirname.m	- return file's directory		- I/O
+findfiles.m	- find files by pattern			- I/O
+keepNfiles.m	- transfer files to tempdir and unzip	- I/O
+lockfile.m	- create a lockfile 			- I/O
+mkdirs.m	- make directory trees			- I/O
+mktemp.m	- create temporary files		- I/O
+tmpdir.m	- create a temporary dir		- I/O
+unlink.m	- remove file				- I/O
+basename.m	- strip dir and   			- I/O 
+
+bits2int.m	- convert bits to ints			- Math
+downscale.m	- mesh resolution change		- Math
+int2bits.m	- convert ints to bits			- Math
+meanbin.m	- a moving average routine		- Math
+nearest.m	- compute nearest value			- Math
+
+rm_attr.m	- remove RTP attribute fields		- rtptools
+structmerge.m	- merge structures			- rtptools
+
+radtot.m	- conpute Radiances to BT		- Science
+
+JOB.m		- get JOB environment variable		- Sys
+
+
+
