@@ -118,11 +118,12 @@ end
 % Header info
 head.ptype = 0;
 % Do I need stuff below commented out?
-% if (isfield(head,'pfields'))
-%    head.pfields = bitor(uint32(head.pfields), 1);
-% else
-%    head.pfields = 1;
-% end
+if (isfield(head,'pfields'))
+   head.pfields = bitor(uint32(head.pfields), 1);
+else
+   head.pfields = 1;
+end
+
 head.ngas = 2;
 head.glist = [1; 3];
 head.gunit = [21; 21];
@@ -162,3 +163,9 @@ if isfield(prof,'cfrac')
   end
 end
 
+% For now, assign plat to rlat, etc, since interpolating
+prof.plat = prof.rlat;
+prof.plon = prof.rlon;
+
+[~,nobs] = size(prof.rlat);
+prof.nlevs = ones(1,nobs).*length(F.levid);
