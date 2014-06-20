@@ -32,7 +32,8 @@ function [h ha p pa] = rtpadd_usgs_10dem(h,ha,p,pa,root)
     error(['Your "root" argument is invalid: ' root ]);
   end
 
-  disp(['rtpadd_usgs_10dem.m: Using ' wgf ' as landfrac/salti database.']);
+% Only if debug
+%  disp(['rtpadd_usgs_10dem.m: Using ' wgf ' as landfrac/salti database.']);
 
   % If there's any bad GEO data, replace it by the (0,0) so not to crash
   % usgs_deg10_dem.m. 

@@ -1,4 +1,4 @@
-function [head, hattr, prof, pattr] = rtpadd_grib_data(current_ename, sourcename, head, hattr, prof, pattr);
+function [head, hattr, prof, pattr, current_ename] = rtpadd_grib_data(current_ename, sourcename, head, hattr, prof, pattr);
 
 % function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, prof, pattr);
 %
@@ -54,14 +54,14 @@ enames = get_enames(mtime);
 
 % Find the unique grib files and indices that go with them
 [u_enames, ia, ic] = unique(enames);
-n = length(u_enames)
+n = length(u_enames);
 
 % Loop over unique grib file names
 for i = 1:n
 % Build file name from parts
    fne = ['UAD' u_enames{i} '001'];
    e_mth_year = datestr(mtime(ia(i)),'yyyymm');
-   fn = fullfile(fhdr,e_mth_year(1:4),e_mth_year(5:6),fne)
+   fn = fullfile(fhdr,e_mth_year(1:4),e_mth_year(5:6),fne);
 % Actually read grib1, grib2 .nc files
    fn_s = [fn '-1.nc'];
    fn_h = [fn '-2.nc'];

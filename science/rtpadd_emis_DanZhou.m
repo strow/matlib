@@ -26,7 +26,7 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
     root = '/asl';
   end
 
-  debug = 1; %indicate that we are in debug an print out a bunch of checks
+  debug = 0; %indicate that we are in debug an print out a bunch of checks
 
   if ~isfield(prof,'wspeed');
       error('Prof structure missing wspeed field')
