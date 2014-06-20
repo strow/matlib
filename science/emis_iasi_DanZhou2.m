@@ -1,6 +1,6 @@
-function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind,loc);
+function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind);
 
-% function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind,loc);
+% function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind);
 %
 % Return emissivity for IASI as determined by Dan Zhou (NASA Langley).
 % Based on Dans "emis_sample_reader.f" given to L.Strow circa 2 August 2010
@@ -10,8 +10,6 @@ function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind,loc);
 %    rlat   - [1 x nobs] latitude {degrees -90 to 90}
 %    rlon   - [1 x nobs] longitude {degrees -180 to 360}
 %    ind    - [npts x 1] desired IASI channel indices (in 1:8461)
-%    loc    - Location of data file (optional dir string)
-%             (default='/asl/data/iremis/DanZhou/Modified/')
 %
 % Output:
 %    emis   - [npts x nobs] emissivity; -999 if no data
@@ -23,7 +21,7 @@ function [emis] = emis_iasi_DanZhou2(yyyymm,rlat,rlon,ind,loc);
 % Update: 22 Dec 2010, S.Hannon - add missing "fclose" for ret file
 % Update: 23 Dec 2010, S.Hannon - switch to "Modified" database
 % Update: 24 Mar 2011, P.Schou - updated directory to /asl/data/iremis/DanZhou/
-% Updade: 02 Jul 2013, B.Imbiriba - updatede location 
+% Update: 20 Ju  2014, L. Strow - missing emis now NaN, not -999
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Edit this section as needed
 
@@ -37,11 +35,7 @@ nother = 5;      % number of other values preceeding coefs in ret file
 % Data files
 %datadir = '/home/strow/Transfer/DanZ/';
 %datadir = '/asl/data/IASI/Emis_DanZhou/';
-if(nargin()==5)
-  datadir = loc;
-else
-  datadir = '/asl/data/iremis/DanZhou/Modified/';
-end
+datadir = '/asl/data/iremis/Emis_DanZhou/Modified/';
 evname = 'IASI_B_EV_FUNC_GLOBAL_V3.bin';  % eigenvector file name
 retprefix = 'IASI_LAND_eFEOFA_';          % coef file prefix
 retsuffix = '_0.5DEG_1SIGMA.bin';         % coef file suffix
@@ -49,7 +43,7 @@ retsuffix = '_0.5DEG_1SIGMA.bin';         % coef file suffix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Check input
-if (nargin ~= 5)
+if (nargin ~= 4)
    error('unexpected number of input arguments')
 end
 d = size(yyyymm);
@@ -153,6 +147,7 @@ fclose(fid);
 
 
 % Determine indices of output with no data
+% ii = find(ret(1,:) < 0.2 & ret(6,:) == single(-999));
 ii = find(ret(1,:) < 0.2 & ret(6,:) == single(-999));
 jj = find(ret(5,:) < 50);
 ibad = union(ii,jj); % no data grid points indices
@@ -164,7 +159,8 @@ nok = length(iok);
 
 
 % Declare output
-emis = -999*ones(npts,nobs);
+% emis = -999*ones(npts,nobs);
+emis = -NaN*ones(npts,nobs);
 
 
 % Compute emis

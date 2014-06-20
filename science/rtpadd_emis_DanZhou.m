@@ -1,4 +1,4 @@
-function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,root)
+function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr)
 %function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,root)
 %
 % Compute surface emissivity and add it to the RTP profile structure.
@@ -16,6 +16,11 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,roo
 %  Written 17 March 2011 - Paul Schou
 %  Operational - 2013.05.08 - Breno Imbiriba
 %  Updated - 2013.07.02 - BI
+%  Updated, 2014.06.20 LLS
+%      Unused emissivity structures now NaN instead of zero
+%      Made lland, lsea, lmix calcs more transparent
+%      Removed concept of "good" land emissivity (may have to re-visit)
+     
 
   if(nargin()~=5)
     root = '/asl';
@@ -54,21 +59,30 @@ function [head hattr prof pattr] = rtpadd_emis_DanZhou(head,hattr,prof,pattr,roo
 
 
   % Get land emissivity
-  [efreq, emis] = emis_DanZhou(prof.rlat, prof.rlon, prof.rtime, st_year, root);
+  [efreq, emis] = emis_DanZhou(prof.rlat, prof.rlon, prof.rtime, st_year);
 
   % Get water emissivity
   [sea_nemis, sea_efreq, sea_emis] = cal_seaemis2(prof.satzen, prof.wspeed);
 
+%  keyboard
+  
   % Mix them accordingly
-  lgood_land = (all(emis>=0)); % good land emissivities
-  lland = (prof.landfrac==1 & lgood_land); % land AND good land emis
-  lsea = (prof.landfrac==0 | ~lgood_land); % ocean OR bad land emis
-  lmix = ~lland & ~lsea; % the left over
+%   lgood_land = (all(emis>=0)); % good land emissivities
+%   lland = (prof.landfrac==1 & lgood_land); % land AND good land emis
+%   lsea = (prof.landfrac==0 | ~lgood_land); % ocean OR bad land emis
+%   lmix = ~lland & ~lsea; % the left over
 
-  % Clean up arrays 
+  
+ lland = prof.landfrac ==1;
+ lsea = prof.landfrac ==0;
+ lmix = ~lland & ~lsea; % the left over
+
+% keyboard
+
+% Clean up arrays 
   prof.nemis = single(zeros([1, size(prof.rtime,2)]));
   prof.efreq = single(zeros([100,size(prof.rtime,2)]));
-  prof.emis = single(zeros([100,size(prof.rtime,2)]));
+  prof.emis = NaN*single(zeros([100,size(prof.rtime,2)]));
 
   % Add land 
   for ifov = find(lland)
