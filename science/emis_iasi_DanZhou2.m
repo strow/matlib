@@ -35,7 +35,7 @@ nother = 5;      % number of other values preceeding coefs in ret file
 % Data files
 %datadir = '/home/strow/Transfer/DanZ/';
 %datadir = '/asl/data/IASI/Emis_DanZhou/';
-datadir = '/asl/data/iremis/Emis_DanZhou/Modified/';
+datadir = '/asl/data/iremis/DanZhou/Modified/';
 evname = 'IASI_B_EV_FUNC_GLOBAL_V3.bin';  % eigenvector file name
 retprefix = 'IASI_LAND_eFEOFA_';          % coef file prefix
 retsuffix = '_0.5DEG_1SIGMA.bin';         % coef file suffix

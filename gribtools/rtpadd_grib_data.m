@@ -40,7 +40,8 @@ function [head, hattr, prof, pattr, current_ename] = rtpadd_grib_data(current_en
 % Taken from fill_ecmwf.m in ~strow/Matlab/Gribools
 
 % Location of grib files (add root var later)
-fhdr = fullfile('/asl/data/',lower(sourcename));
+% fhdr = fullfile('/asl/data/',lower(sourcename));
+fhdr = fullfile('/asl/s1/strow/',lower(sourcename));
 
 % Now input parameter
 % current_ename = '';  % This should be placed outside a rtp file loop
