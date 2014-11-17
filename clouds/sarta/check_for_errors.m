@@ -36,7 +36,44 @@ prof.cprtop2(ibad2) = prof.cprtop2(ibad2) + 50;
 prof.cprbot2(ibad2) = prof.cprbot2(ibad2) + 50;
 fprintf(1,'  stage2 : fixing  %6i %6i ibad cprtop < 0 \n',length(ibad),length(ibad2));
 
+%% need cprbot > 0, added Nov 14, 2014
+ibad = find(prof.cprbot <= 0 & prof.cprtop > 0);
+ibadlist = [ibadlist ibad];
+iNotOK = iNotOK + length(ibad);
+prof.cprbot(ibad) = prof.cprtop(ibad) + 50;
+lala = prof.cprbot(ibad);
+ibad2 = find(prof.cprbot2 <= 0 & prof.cprtop2 > 0);
+ibadlist = [ibadlist ibad2];
+iNotOK = iNotOK + length(ibad2);
+prof.cprbot2(ibad2) = prof.cprtop2(ibad2) + 50;
+fprintf(1,'  stage2A :fixing  %6i %6i ibad cprbot < 0 \n',length(ibad),length(ibad2));
+%[prof.cprtop(619) prof.cprbot(619) prof.ctype(619) prof.cprtop2(619) prof.cprbot2(619) prof.ctype2(619)]
+
 %% need cprbot < cprtop2 
+%% need to be smart about this ... mebbe everything is OK, just need to swap the cloud fields
+%% new, added Nov 15, 2014
+ibadX = find(prof.cprbot >= prof.cprtop2 & prof.cprtop > 0 & prof.cprtop2 > 0);
+for ii = 1 : length(ibadX)
+  if prof.cprtop(ibadX(ii)) < prof.cprbot(ibadX(ii)) & prof.cprtop2(ibadX(ii)) < prof.cprbot2(ibadX(ii)) & ...
+     prof.cprbot(ibadX(ii)) > prof.cprtop2(ibadX(ii))
+    %% everything ok, just need to swap fields
+    ij = ibadX(ii)
+    junk1 = [prof.cprtop(ij)  prof.cprbot(ij)  prof.ctype(ij)  prof.cfrac(ij)  prof.cngwat(ij)  prof.cpsize(ij)];
+    junk2 = [prof.cprtop2(ij) prof.cprbot2(ij) prof.ctype2(ij) prof.cfrac2(ij) prof.cngwat2(ij) prof.cpsize2(ij)];
+    prof.cprtop(ij) = junk2(1);
+    prof.cprbot(ij) = junk2(2);
+    prof.ctype(ij)  = junk2(3);
+    prof.cfrac(ij)  = junk2(4);
+    prof.cngwat(ij) = junk2(5);
+    prof.cpsize(ij) = junk2(6);
+    prof.cprtop2(ij) = junk1(1);
+    prof.cprbot2(ij) = junk1(2);
+    prof.ctype2(ij)  = junk1(3);
+    prof.cfrac2(ij)  = junk1(4);
+    prof.cngwat2(ij) = junk1(5);
+    prof.cpsize2(ij) = junk1(6);
+  end
+end
 ibad = find(prof.cprbot >= prof.cprtop2 & prof.cprbot > 0 & prof.cprtop2 > 0);
 ibadlist = [ibadlist ibad];
 iNotOK = iNotOK + length(ibad);
