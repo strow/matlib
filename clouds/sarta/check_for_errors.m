@@ -57,7 +57,7 @@ for ii = 1 : length(ibadX)
   if prof.cprtop(ibadX(ii)) < prof.cprbot(ibadX(ii)) & prof.cprtop2(ibadX(ii)) < prof.cprbot2(ibadX(ii)) & ...
      prof.cprbot(ibadX(ii)) > prof.cprtop2(ibadX(ii))
     %% everything ok, just need to swap fields
-    ij = ibadX(ii)
+    ij = ibadX(ii);
     junk1 = [prof.cprtop(ij)  prof.cprbot(ij)  prof.ctype(ij)  prof.cfrac(ij)  prof.cngwat(ij)  prof.cpsize(ij)];
     junk2 = [prof.cprtop2(ij) prof.cprbot2(ij) prof.ctype2(ij) prof.cfrac2(ij) prof.cngwat2(ij) prof.cpsize2(ij)];
     prof.cprtop(ij) = junk2(1);
