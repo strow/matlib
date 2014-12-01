@@ -11,6 +11,7 @@ function [cT,cB,cOUT,cngwat,cTYPE,iFound] = combine_clouds(...
 %    xPeak == max value of cloud(s) of type X
 %    plevs == "smoothed" pressure levels (56,87 levs after 2 pt smoothing)
 %    rlevs == "raw"      pressure levels (60,91 levs)
+%
 %   I/O
 %       xT == top of clouds     (integer)
 %       xB == bottom of clouds  (integer)
@@ -38,7 +39,7 @@ if iN == 0 & wN == 0
   cTYPE = [0 0];
   cTYPE = [ ];
   iFound = 0;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ICE CLDS
@@ -51,7 +52,7 @@ if iN == 1 & wN == 0
   cTYPE = [2];
   cTYPE = ['I'];
   iFound = 20;
-  end
+end
 
 if iN == 2 & wN == 0
   %% two ice clouds!
@@ -63,7 +64,7 @@ if iN == 2 & wN == 0
   cTYPE = [2 2];
   cTYPE = ['II'];
   iFound = 22;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% WATER CLDS
@@ -75,7 +76,7 @@ if iN == 0 & wN == 1
   cTYPE = [1];
   cTYPE = ['W'];
   iFound = 10;
-  end
+end
 
 if iN == 0 & wN == 2
   %% two water clouds!
@@ -87,7 +88,7 @@ if iN == 0 & wN == 2
   cTYPE = [1 1];
   cTYPE = ['WW'];
   iFound = 11;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ICE and WATER CLDS
@@ -141,15 +142,15 @@ if iN == 1 & wN == 1
         cTYPE = [2 1];
         cTYPE = ['IW'];
         iFound = 1112;
-        end
       end
     end
-  end 
+  end
+end 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if iFound < 0
   error('oops did not set final cloud types!!');
-  end
+end
 
 %%%%%% make cOUT
 
@@ -161,4 +162,4 @@ for ii = 1 : length(cT)
   pT = plevs(xT); jj = find(rlevs <= pT); xT = jj(length(jj)); 
   pB = plevs(xB); jj = find(rlevs >= pB); xB = jj(1);
   cOUT(xT:xB) = xPeak;
-  end
+end

@@ -141,6 +141,9 @@ cmin = 0.0001;
 % Max allowed cngwat[1,2]
 cngwat_max = 500;
 
+iDebugMain = +1;  %% yes debug keyboards
+iDebugMain = -1;  %% no debug keyboards
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if ~isfield(p,'ciwc')
@@ -197,14 +200,17 @@ end
 prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
   prof.ctype  = double(prof.ctype);
   prof.ctype2 = double(prof.ctype2);
-%disp('2')
-%[prof.cngwat]
+
+if iDebugMain > 0
+  figure(3); plot(prof.ciwc,prof.plevs,'b',prof.clwc,prof.plevs,'r'); ax=axis; axis([0 ax(2) 0 1000]); set(gca,'ydir','reverse')
+  figure(1); plot_hists_cprtop_cprtop2
+  disp('new keyboard posn1')
+  keyboard
+end
+
 
 %% sets fracs and particle effective sizes eg cfrac2
 prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta.randomCpsize);
-
-%disp('3')
-%[prof.cngwat]
 
 if run_sarta.cumsum > 0 & run_sarta.cumsum <= 1
   %% set cloud top according to cumulative sum fraction of ciwc or clwc
@@ -215,27 +221,19 @@ elseif run_sarta.cumsum > 1
   %%      or if >= 9999, set at peak of cloud wgt fcn
   profXYZ = prof;
   prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum/100,airslevels,airsheights);  
-%{
-  disp(' ')
-  [prof.cngwat(junky) prof.cngwat2(junky)]
-  [prof.cfrac(junky) prof.cfrac2(junky) prof.cfrac12(junky)]
-  [prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
-  [prof.sarta_wgtpeakI(junky) prof.sarta_wgtpeakW(junky)]
-  [profXYZ.cprtop(junky) profXYZ.cprbot(junky) profXYZ.cprtop2(junky) profXYZ.cprbot2(junky)]
-  keyboard
+end
 
-  aaaa = load('/home/sergio/test_paul_p2.mat');
-  figure(1); plot(prof.sarta_lvlODice,'b');   hold on; plot(aaaa.p2.pcrtm_lvlODice,'r'); hold off
-  figure(2); plot(prof.sarta_lvlODwater,'b'); hold on; plot(aaaa.p2.pcrtm_lvlODwater,'r'); hold off
-  ice = find(prof.ctype == 201);
-  water = find(prof.ctype2 == 101);
-  figure(3); plot(prof.sarta_lvl_iceOD_1(ice),prof.cprtop(ice),'bo',...
-                  prof.sarta_lvl_waterOD_1(water),prof.cprtop2(water),'rx',...
-                  [0 1000],[00 1000],'k')
-             axis([0 1000 0 1000]); grid
-  xlabel('OD = 1'); ylabel('cprtop')
+if iDebugMain > 0
+  figure(2); plot_hists_cprtop_cprtop2
+  figure(4); plot(prof.sarta_wgtI,prof.plevs,'b',prof.sarta_wgtW,prof.plevs,'r'); ax=axis; axis([0 ax(2) 0 1000]); 
+           set(gca,'ydir','reverse')
+  figure(5); 
+    plot(prof.sarta_index_wgtpeakI(oo11),prof.cprtop(oo11),'bo',prof.sarta_index_wgtpeakI(oo12),prof.cprtop2(oo12),'cx',...
+         prof.sarta_index_wgtpeakI(oo21),prof.cprtop(oo21),'ro',prof.sarta_index_wgtpeakW(oo22),prof.cprtop2(oo22),'mx')
+             set(gca,'ydir','reverse')
+    xlabel('layer of peak wgtfcn'); ylabel('cprtop')
+  disp('new keyboard posn2')
   keyboard
-%}
 end
 
 disp('---> checking cprtop vs cprbot vs spres')
@@ -248,8 +246,7 @@ while iFix < 12 & iNotOK > 0
   fprintf(1,' did n=%2i try at checking clouds \n',iFix)
 end
 if iFix >= 12 & iNotOK > 0
-  %disp('oops, could not fix cprtop vs cprbot vs spres')
-  %keyboard
+  %disp('oops, could not fix cprtop vs cprbot vs spres'); %keyboard
   error('oops, could not fix cprtop vs cprbot vs spres')
 end
 

@@ -7,10 +7,12 @@ function p1 = do_the_reset_cprtop_cloudOD(p0,p1,cumsumOD);
 
 if cumsumOD <= 99
   disp('  --->> resetting cloud top according to CUMULATIVE CLOUD OD SUM')
-  pICE = p1.sarta_lvl_iceOD_1; pWATER = p1.sarta_lvl_waterOD_1;         %% March 29, 2013
+  pICE = p1.sarta_lvl_iceOD_1; 
+  pWATER = p1.sarta_lvl_waterOD_1;         %% March 29, 2013
 else
   disp('  --->> resetting cloud top according to CLOUD PEAK WGT FCN')
-  pICE = p1.sarta_wgtpeakI;    pWATER = p1.sarta_wgtpeakW;              %% April 1, 2013
+  pICE = p1.sarta_wgtpeakI;    
+  pWATER = p1.sarta_wgtpeakW;              %% April 1, 2013
 end
 
 iVersion = 0;  %% this is the original, simplest version

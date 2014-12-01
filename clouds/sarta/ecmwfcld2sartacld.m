@@ -112,6 +112,12 @@ for iiiiA = 1:length(iiii)
     plevs = sort([plevs; plevsX]);
   end
 
+  if plevs(1) < plevs(10)
+    cut440 = find(plevs >= 440,1);
+  else
+    cut440 = find(plevs <= 440,1);
+  end
+
   watercld = interp1(log10(profX.plevs(:,ii)),profX.clwc(:,ii),log10(plevs));
   icecld   = interp1(log10(profX.plevs(:,ii)),profX.ciwc(:,ii),log10(plevs));
   ptemp    = interp1(log10(profX.plevs(:,ii)),profX.ptemp(:,ii),log10(plevs));
@@ -162,6 +168,18 @@ for iiiiA = 1:length(iiii)
   [cT,cB,cOUT,cngwat,cTYPE,iFound] = combine_clouds(...
               iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(:,ii),airslevels,airsheights);
 
+  if (length(cTYPE) >= 1)
+    for kk = 1 : length(cTYPE)
+      if cTYPE(kk) == 'I' & plevs(cT(kk)) > 440
+        cT(kk) = cut440 - 10; 
+        disp('warning had to reset ICE cloudtop, to make it less than 440 mb');
+      elseif cTYPE(kk) == 'W' & plevs(cT(kk)) < 440
+        cT(kk) = cut440 + 1;
+        cB(kk) = cB(kk)+3; 
+        disp('warning had to reset WATER cloudtop, to make it more than 440 mb');
+      end
+    end
+  end
   prof = put_into_prof(prof,profX,ii,jj,plevs,ptemp,iLevsVers,...
                        cT,cB,cOUT,cngwat,cTYPE,iFound,airslevels,airsheights);
 

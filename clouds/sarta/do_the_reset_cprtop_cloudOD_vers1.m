@@ -12,6 +12,8 @@ if iDebug > 0
   [p1.cprtop(junky) p1.cprbot(junky) p1.cprtop2(junky) p1.cprbot2(junky)]
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 ice = find(p1.ctype == 201 & p1.ctype2 ~= 201 & pICE > 0 & p1.sarta_iceOD_warn < 0);
 for oo = 1 : length(ice)
   od = ODice(:,ice(oo)); 
@@ -60,6 +62,7 @@ if iDebug > 0
   [p1.cprtop(junky) p1.cprbot(junky) p1.cprtop2(junky) p1.cprbot2(junky)]
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% this is water
 
 water = find(p1.ctype == 101 & p1.ctype2 ~= 101 & pWATER > 0 & p1.sarta_waterOD_warn < 0);
