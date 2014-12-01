@@ -64,6 +64,12 @@ MASSF = 18;     % g/mol for both water and ice!
 
 for ii = 1 : length(cT)
 
+  if (cT(ii) == cB(ii))
+    disp('>>>>>> warning .... convert_gg_to_gm2 .... cT(ii) == cB(ii) ... quickfix')
+    cT(ii) = max(1,cT(ii)-2);
+    cB(ii) = cT(ii)+2;
+  end
+
   %% WRONG as this is INTEGRATED amount
   %% mr = cngwat_ecmwf(ii);   
 
@@ -77,7 +83,7 @@ for ii = 1 : length(cT)
 
   pB = rlevs(cB(ii));
   pT = rlevs(cT(ii));
-  
+
   clear g_m2new sum_g_m2new
   g_m2new = 0;
   sum_g_m2new = 0.0;
@@ -102,8 +108,8 @@ for ii = 1 : length(cT)
       num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Tnew * dz;
       %%kilomoles -> moles, cm2 -> m2
       g_m2new(jjind) = num_kmoles_percm2*1000*MASSF*10000;  
-      end
     end
+  end
   sum_g_m2new = sum(g_m2new);
 
   pB = rlevs(cB(ii));
@@ -126,12 +132,12 @@ for ii = 1 : length(cT)
   ppmv = mr * (MDAIR/MASSF)*1E+6;
   pp = ppmv/1e6 * pold;  %%% use volume mix ratio rather than ppmv
   num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Told * dz;
-  g_m2old = num_kmoles_percm2*1000*MASSF*10000; %%kilomoles -> moles, cm2 -> m2
+  g_m2old = num_kmoles_percm2*1000*MASSF*10000; %% kilomoles -> moles, cm2 -> m2
 
   ppmv = mr * (MDAIR/MASSF)*1E+6;
   pp = ppmv/1e6 * pnew;  %%% use volume mix ratio rather than ppmv
   num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Tnew * dz;
-  g_m2new = num_kmoles_percm2*1000*MASSF*10000; %%kilomoles -> moles, cm2 -> m2
+  g_m2new = num_kmoles_percm2*1000*MASSF*10000; %% kilomoles -> moles, cm2 -> m2
 
   g_m2 = g_m2new;
   cngwat_sarta(ii) = g_m2;
@@ -139,4 +145,4 @@ for ii = 1 : length(cT)
   %format short e
   %[mr g_m2 g_m2new sum_g_m2new]
   %format 
-  end
+end

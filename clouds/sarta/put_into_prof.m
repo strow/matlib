@@ -110,6 +110,10 @@ if length(cTYPE) == 2
   icefound   = -1;
   waterfound = -1;
   cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp,airslevels,airsheights);
+if length(find(isnan(cc))) > 0
+  disp('kj;j;j')
+  keyboard
+end
 
   kk = 1;
   prof.cngwat(jj)  = cc(kk);

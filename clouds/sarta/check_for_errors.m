@@ -19,6 +19,11 @@ if cfracSet > 0
   prof.cfrac2(ibad) = cfracSet;
 end
 
+oo = find(prof.cngwat > 1000);
+prof.cngwat(oo) = 1000;
+oo = find(prof.cngwat2 > 1000);
+prof.cngwat2(oo) = 1000;
+
 %% cfrac checks
 ibad = find(prof.cfrac12 > prof.cfrac | prof.cfrac12 > prof.cfrac2);
 ibadlist = [ibadlist ibad];
