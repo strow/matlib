@@ -258,8 +258,6 @@ if run_sarta.cfrac >= 0 & run_sarta.cfrac <= 1
   oo = find(prof.cfrac  > 0 & prof.cfrac2 > 0);  prof.cfrac12(oo)  = run_sarta.cfrac;
 end
 
-keyboard
-
 if run_sarta.clear > 0 
   disp('running SARTA clear, saving into rclearcalc')
   tic

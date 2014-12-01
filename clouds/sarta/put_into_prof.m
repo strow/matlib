@@ -110,8 +110,15 @@ if length(cTYPE) == 2
   icefound   = -1;
   waterfound = -1;
   cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp,airslevels,airsheights);
+
 if length(find(isnan(cc))) > 0
-  disp('kj;j;j')
+  disp('length(find(isnan(cc))) > 0 in put_into_prof')
+  keyboard
+end
+
+
+if length(find(isinf(cc))) > 0
+  disp('length(find(isinf(cc))) > 0 in put_into_prof')
   keyboard
 end
 

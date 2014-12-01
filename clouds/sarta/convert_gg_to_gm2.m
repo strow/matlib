@@ -65,7 +65,13 @@ MASSF = 18;     % g/mol for both water and ice!
 for ii = 1 : length(cT)
 
   if (cT(ii) == cB(ii))
-    disp('>>>>>> warning .... convert_gg_to_gm2 .... cT(ii) == cB(ii) ... quickfix')
+    disp('>>>>>> warning .... convert_gg_to_gm2 .... cT(ii) == cB(ii) ... quickfix else will get cngwat = NAN')
+    cT(ii) = max(1,cT(ii)-2);
+    cB(ii) = cT(ii)+2;
+  end
+
+  if (cT(ii) > cB(ii))
+    disp('>>>>>> warning .... convert_gg_to_gm2 .... cT(ii) > cB(ii) ... quickfix else will get cngwat = INF')
     cT(ii) = max(1,cT(ii)-2);
     cB(ii) = cT(ii)+2;
   end
