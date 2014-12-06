@@ -13,7 +13,39 @@ prof = pin;
 nprof = length(prof.stemp);
 
 [cfracw, cfraci] = total_cfrac(profX.plevs,profX.cc,profX.clwc,profX.ciwc);
+
+oo = find(profX.cfrac < 0); 
+if length(oo) > 0 
+  profX.cfrac(oo) = 0; 
+  fprintf(1,'set_fracs_deffs : %5i profX.cfrac < 0 \n',length(oo))
+end
+oo = find(profX.cfrac > 1); 
+if length(oo) > 0 
+  profX.cfrac(oo) = 1;
+  fprintf(1,'set_fracs_deffs : %5i profX.cfrac > 1 \n',length(oo))
+end
 tcc = profX.cfrac;
+
+oo = find(cfracw < 0); 
+if length(oo) > 0 
+  cfracw(oo) = 0;
+  fprintf(1,'set_fracs_deffs : %5i cfracw < 0 \n',length(oo))
+end
+oo = find(cfracw > 1); 
+if length(oo) > 0 
+  cfracw(oo) = 1;
+  fprintf(1,'set_fracs_deffs : %5i cfracw > 1 \n',length(oo))
+end
+oo = find(cfraci < 0); 
+if length(oo) > 0 
+  cfraci(oo) = 0;
+  fprintf(1,'set_fracs_deffs : %5i cfraci < 0 \n',length(oo))
+end
+oo = find(cfraci > 1); 
+if length(oo) > 0 
+  cfraci(oo) = 1;
+  fprintf(1,'set_fracs_deffs : %5i cfraci > 1 \n',length(oo))
+end
 
 [prof.cfrac, prof.cfrac2, prof.cfrac12] = fake_cfracs(tcc, cfracw, cfraci, prof.ctype, prof.ctype2);
 
