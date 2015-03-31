@@ -7,7 +7,8 @@ function [] = aslprint(fn);
 %   Be sure to include either .pdf or .png extension (.ext)
 
 % Path to export_fig
-addpath /asl/matlib/fileexchange/export_fig
+%addpath /asl/matlib/fileexchange/export_fig
+addpath ~/Matlab/export_fig
 
 % First get username (works on Mac too), space at end of command?
 [stat username] = system('id -u -n');
@@ -43,6 +44,8 @@ end
 % export figure
 export_fig([fn '.png'],'-m2','-transparent');
 export_fig([fn '.pdf'],'-m2','-transparent');
+% export_fig([fn '.png'],'-m2');
+% export_fig([fn '.pdf'],'-m2');
 % Set the background color back to Matlab default
 set(gcf,'color',[0.8 0.8 0.8]);
 % Set the dockstate back to what it was
