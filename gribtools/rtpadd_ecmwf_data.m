@@ -58,7 +58,7 @@ function [head, hattr, prof, pattr] = rtpadd_ecmwf_data(head, hattr, prof, pattr
 
   mtime = mtime(~lbad);
 
-  for d = unique(sort(round([mtime(:)-.003 mtime(:) mtime(:)+.003] * rec_per_day) / rec_per_day))';
+  for d = unique(sort(round(mtime(:) * rec_per_day) / rec_per_day))';
     say(['reading ecmwf file for: ' datestr(d)])
     [Y M D h m s]= datevec(d);
     ename = ['/asl/data/ecmwf/' datestr(d,'yyyy/mm/') ecmwf_name(Y, M, D, h*10+m/6)];

@@ -66,13 +66,13 @@ end
 
   % handle the input arguments and assign variables
   if(nargin == 0)
-    TempDir = getenv('TMPDIR');
+    TempDir = getenv('JOB_SCRATCH_DIR');
     namePrefix = 'mktemp';
   elseif(nargin == 1)
     namePrefix = TempDir;
     TempDir = dirname(TempDir);
     if strcmp(TempDir,'.')
-      TempDir = getenv('TMPDIR');
+      TempDir = getenv('JOB_SCRATCH_DIR');
     end
   elseif(~ isdir(TempDir) && isempty(AlternateDir))
     disp(['Warning: ' TempDir ' does not exist, using alternate temporary directory'])

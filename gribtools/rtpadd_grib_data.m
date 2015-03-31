@@ -88,9 +88,9 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
 
   if exist([sourcename '.inv']) & exist([sourcename])
     [offset,param,level,gribdate] = readgrib_inv_data(sourcename);
-    if ~( max(gribdate)+0.5/rec_per_day > min(rtime) & min(gribdate)-0.5/rec_per_day < max(rtime) )
-      error(['ERROR: GRIB file times out of range. Something is bad.']);
-    end
+    %if ~( max(gribdate)+0.5/rec_per_day > min(rtime) & min(gribdate)-0.5/rec_per_day < max(rtime) )
+    %  error(['ERROR: GRIB file times out of range. Something is bad.']);
+    %end
   end
 
   orig_file = sourcename;
@@ -98,33 +98,13 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % 
-  % If GRIB file is in GZIP format, unzip it into a temporary file
+  % If GRIB file does not exist, error out
   %
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  if ~exist(sourcename,'file') & exist([sourcename '.gz'],'file')
-    new_file = keepNfiles([sourcename '.gz'],2);
-    sourcename = new_file;
+  if exist([sourcename '.1'],'file')
+    disp(['  Using split grib file for: ' sourcename])
   elseif ~exist(sourcename,'file')
-    disp('attempting download of ECMWF file');
-    SHMDIR = getenv('SHMDIR');
-    if length(SHMDIR) < 3
-      SHMDIR = ['/dev/shm/' num2str(feature('getpid'))];
-      mkdir(SHMDIR);
-    end
-    %disp(['cd ' SHMDIR '/; curl -O http://cress.umbc.edu/' sourcename '.gz']);
-    system(['cd ' SHMDIR '/; curl -O http://cress.umbc.edu/' sourcename '.gz']);
-    new_file = [SHMDIR '/' basename(sourcename)];
-    %disp(['new file = ' new_file])
-    if(exist([new_file '.gz'],'file'))
-      new_file = [new_file '.gz'];
-      sourcename = keepNfiles(new_file,2);
-      unlink(new_file);
-      new_file = sourcename;
-    end
-  end
-
-  if ~exist(sourcename,'file')
     error(['Grib file does not exist: ' sourcename])
   end
 
@@ -144,11 +124,8 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
     end
     [head, hattr, prof, pattr] = rtpadd_grib_data([sourcename '.1'], head, hattr, prof, pattr, fields, rec_per_day, center_long);
     [head, hattr, prof, pattr] = rtpadd_grib_data([sourcename '.2'], head, hattr, prof, pattr, fields, rec_per_day, center_long);
-    delete([sourcename '.1'])
-    delete([sourcename '.2'])
-    if ~isempty(new_file)
-      delete(new_file);
-    end
+    %delete([sourcename '.1'])
+    %delete([sourcename '.2'])
 
     farewell(rn);
     return
@@ -441,11 +418,6 @@ function [head, hattr, prof, pattr] = rtpadd_grib_data(sourcename, head, hattr, 
     fclose(fh);
   end
 
-  % If we are using keepNfiles, then it will keep the last 3 temporary
-  %   files read in and automatically delete the rest
-  if ~isempty(new_file)
-    delete(new_file);
-  end
 
   if date_match == 0
     say(['***WARNING***: No dates / fields matched, make sure the file is the correct date / set for requested fields'])
