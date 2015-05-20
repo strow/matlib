@@ -91,23 +91,26 @@ if isfield(p,xfield)
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-xfield = 'efreq';  
-if isfield(p,xfield)   
-  p = rmfield(p,xfield);
-end
+iDoThis = -1;
+if iDoThis > 0
+  xfield = 'efreq';  
+  if isfield(p,xfield)   
+    p = rmfield(p,xfield);
+  end
 
-xfield = 'emis';  
-if isfield(p,xfield)   
-  p = rmfield(p,xfield);
-end
+  xfield = 'emis';  
+  if isfield(p,xfield)   
+    p = rmfield(p,xfield);
+  end
 
-xfield = 'rho';  
-if isfield(p,xfield)   
-  p = rmfield(p,xfield);
-end
+  xfield = 'rho';  
+  if isfield(p,xfield)   
+    p = rmfield(p,xfield);
+  end
 
-xfield = 'udef';  
-if isfield(p,xfield)   
-  p = rmfield(p,xfield);
+  xfield = 'udef';  
+  if isfield(p,xfield)   
+    p = rmfield(p,xfield);
+  end
 end
 
