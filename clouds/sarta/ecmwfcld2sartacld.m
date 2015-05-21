@@ -171,12 +171,16 @@ for iiiiA = 1:length(iiii)
   if (length(cTYPE) >= 1)
     for kk = 1 : length(cTYPE)
       if cTYPE(kk) == 'I' & plevs(cT(kk)) > 440
-        cT(kk) = cut440 - 10; 
-        disp('warning had to reset ICE cloudtop, to make it less than 440 mb');
+        cT(kk) = cut440 - 10;
+	if iPrint > 0
+          disp('warning had to reset ICE cloudtop, to make it less than 440 mb');
+	end
       elseif cTYPE(kk) == 'W' & plevs(cT(kk)) < 440
         cT(kk) = cut440 + 1;
-        cB(kk) = cB(kk)+3; 
-        disp('warning had to reset WATER cloudtop, to make it more than 440 mb');
+        cB(kk) = cB(kk)+3;
+	if iPrint > 0	
+          disp('warning had to reset WATER cloudtop, to make it more than 440 mb');
+	end
       end
     end
   end

@@ -28,6 +28,9 @@ function [yOUT,wT,wB,peakN,N,maxN,minN] = boxshape(yIN,rGaussianCutoff);
 
 global iDoPlot
 
+iPrint = +1; %% talky
+iPrint = -1; %% quiet
+
 %% example 
 iExample = -1;
 if iExample > 0
@@ -687,9 +690,11 @@ end
 thediff = abs(yCHECK - yOUT);
 
 if (sum(thediff) > 0)
-  disp('sum(thediff) > 0')
-  wT
-  wB
+  if iPrint > 0
+    disp('sum(thediff) > 0')
+    wT
+    wB
+  end
   Ccombine = [];
   Cseparate = [];
   wTnew = [];
@@ -706,12 +711,16 @@ if (sum(thediff) > 0)
     pause;
   end
 
-  disp('oops found some overlap inconsistency!!!!')
+  if iPrint > 0
+    disp('oops found some overlap inconsistency!!!!')
+  end
   [wTunique,wIT,wJT] = unique(wT,'first');
   [wBunique,wIB,wJB] = unique(wB,'first');
 
   if length(wB) ~= length(wBunique)
-    disp('inconsistency in cld bottoms');
+    if iPrint > 0  
+      disp('inconsistency in cld bottoms');
+    end
     [wBunique,wIB1,wJB1] = unique(wB,'first');
     [wBunique,wIB2,wJB2] = unique(wB,'last');
     Ccombine  = setxor(wIB1,wIB2);    %% combine these!!!!!!
@@ -732,7 +741,9 @@ if (sum(thediff) > 0)
   end
 
   if length(wT) ~= length(wTunique)
-    disp('inconsistency in cld tops');
+    if iPrint > 0  
+      disp('inconsistency in cld tops');
+    end
     [wBunique,wIB1,wJB1] = unique(wT,'first');
     [wBunique,wIB2,wJB2] = unique(wT,'last');
     Ccombine  = setxor(wIB1,wIB2);    %% combine these!!!!!!
