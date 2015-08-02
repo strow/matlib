@@ -142,9 +142,9 @@ for ibox =1:nboxes
   end
   % parameters for default models in upper atmosphere
   for ilev = 1: indU(end)
-    newT(ilev)     = interp1(log(def_P), def_T, log(Pres(ilev)));
-    newh2o(ilev)   = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev))));
-    newozone(ilev) = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev))));
+    newT(ilev)     = interp1(log(def_P), def_T, log(Pres(ilev)),'linear');
+    newh2o(ilev)   = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev)),'linear'));
+    newozone(ilev) = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev)),'linear'));
   end
 
   endsign = 0;
@@ -165,11 +165,11 @@ for ibox =1:nboxes
     end
 
     %% sergio : orig was interp1(log(P),TT(:,ibox),log(Pp))
-    newT(ilev) = interp1(log(P(:,ibox)), TT(:,ibox), log(Pp),[],'extrap');               
+    newT(ilev) = interp1(log(P(:,ibox)), TT(:,ibox), log(Pp),'linear','extrap');               
     %% sergio : orig was exp(interp1(log(P),q(:,ibox),log(Pp)))
-    newh2o(ilev) = exp(interp1(log(P(:,ibox)), log(q(:,ibox)), log(Pp),[],'extrap'));    
+    newh2o(ilev) = exp(interp1(log(P(:,ibox)), log(q(:,ibox)), log(Pp),'linear','extrap'));    
     %% sergio : orig was exp(interp1(log(P),o3(:,ibox),log(Pp)))
-    newozone(ilev) = exp(interp1(log(P(:,ibox)), log(o3(:,ibox)), log(Pp),[],'extrap')); 
+    newozone(ilev) = exp(interp1(log(P(:,ibox)), log(o3(:,ibox)), log(Pp),'linear','extrap')); 
   end
     
   % set a minimum cloud cover (0.001) to decide clear or cloudy over the box
