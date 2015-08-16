@@ -26,7 +26,12 @@ function prof = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta)
 %                                      (based on Tcld)
 %                                      -1, then water is MODIS dme, random ice (based on Scott Tcld)
 %                                      9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
-%
+%     run_sarta.co2_ppm         = -1 to use 370 + (yy-2002)*2.2) in pcrtm/sarta
+%                               = +x to use user input value     in pcrtm/sarta 
+%                               =  0 to use DEFAULT klayers = 385 (set in executable by Scott; equivalent to run_sarta.co2_ppm = +385)
+%                   this is done to keep it consistent with PCRTM
+%                   however, also have to make sure this is only enabled if h.glist does NOT include gas_2
+%%
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 
 %   ptemp etc
@@ -101,7 +106,8 @@ if nargin == 4
   run_sarta.cfrac               = -1;  %% use random (instead of fixed) cfracs
   run_sarta.ncol                =  1;
   run_sarta.overlap             = +3;  %% maximal random overlap
-
+  run_sarta.co2_ppm             = 385;
+  
 %% SLAB
   %run_sarta.klayers_code    = '/asl/packages/klayers/Bin/klayers_airs';
   %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
@@ -110,6 +116,11 @@ if nargin == 4
 %% SLAB
 
 %% PROFILE
+  addpath ../
+  choose_klayers_sarta
+
+  %% now overwrite klayers and sarta
+  
   %% see /home/sergio/klayersV205/Src_rtpV201_100layercloudamountsize
   run_sarta.klayers_code = ...
     '/home/sergio/klayersV205/BinV201/klayers_airs_x_testmeCLOUDversion';
@@ -119,6 +130,9 @@ if nargin == 4
     '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3_100layerNEW';
 
 elseif nargin == 5
+  if ~isfield(run_sarta,'co2_ppm')
+    run_sarta.co2_ppm = 385;
+  end
   if ~isfield(run_sarta,'randomCpsize')
     run_sarta.randomCpsize = +1;
   end
@@ -143,13 +157,15 @@ elseif nargin == 5
   if ~isfield(run_sarta,'overlap')
     run_sarta.overlap = +3;
   end
+
+  addpath ../
+  choose_klayers_sarta
+
+  %% now overwrite with 100 layer clode for sarta scatter and klayers
   if ~isfield(run_sarta,'klayers_code')
     run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
     run_sarta.klayers_code = '/home/sergio/klayersV205/BinV201/klayers_airs_x_testmeCLOUDversion';
   end   
-  if ~isfield(run_sarta,'sartaclear_code')
-    run_sarta.sartaclear_code = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
-  end
   if ~isfield(run_sarta,'sartacloud_code')
     run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
     run_sarta.sartacloud_code = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3_100layerNEW';
@@ -264,6 +280,11 @@ prof = cloudOD_for100layer(prof,run_sarta.cumsum/100,airslevels,airsheights);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% add on co2
+p_add_co2
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if run_sarta.clear > 0 
   disp('running SARTA clear, saving into rclearcalc')
   tic
@@ -332,5 +353,3 @@ end
 
 tnow = toc;
 fprintf(1,'TOTAL : %8.6f minutes to process \n',tnow/60);
-
- 

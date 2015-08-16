@@ -27,6 +27,11 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %                                           (based on Tcld)
 %                                     -1, then water is MODIS dme, random ice (based on Tcld)
 %                                     9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
+%     run_sarta.co2_ppm         = -1 to use 370 + (yy-2002)*2.2) in pcrtm/sarta
+%                               = +x to use user input value     in pcrtm/sarta 
+%                               =  0 to use DEFAULT klayers = 385 (set in executable by Scott; equivalent to run_sarta.co2_ppm = +385)
+%                   this is done to keep it consistent with PCRTM
+%                   however, also have to make sure this is only enabled if h.glist does NOT include gas_2
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -91,19 +96,25 @@ addpath([base_dir2 '/h4tools'])
 %% defaults
 if nargin == 4
   %% default to running sarta_cloudy
-  run_sarta.clear               = -1;  %% do not run clear code
-  run_sarta.cloud               = +1;  %% run cloudy code
-  run_sarta.cumsum              = -1;  %% use pre-2012 cloudtop heights, without adjustments
+  run_sarta.clear   = -1;  %% do not run clear code
+  run_sarta.cloud   = +1;  %% run cloudy code
+
+  run_sarta.cumsum  = -1;    %% use pre-2012 cloudtop heights, without adjustments
+  run_sarta.cumsum  = 9999;  %% use this in later runs eg
+                             %% ~/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA_CLOUD_NADIR/clustbatch_make_eracloudrtp_nadir_sarta_filelist.m
+
   run_sarta.cfrac               = -1;  %% use random (instread of fixed) cfracs
   run_sarta.ice_water_separator = -1;  %% do not separate out ciwc and clwc by pressure; ie believe the NWP are correct
   run_sarta.randomCpsize        = +1;  %% keep randomizing dme for ice and water
-
-  %run_sarta.klayers_code    = '/asl/packages/klayers/Bin/klayers_airs';
-  %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-  run_sarta.klayers_code    = '/asl/packages/klayersV205/BinV201/klayers_airs';
-  run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
+  run_sarta.co2_ppm             = 385;
+  
+  addpath ../
+  choose_klayers_sarta
 
 elseif nargin == 5
+  if ~isfield(run_sarta,'co2_ppm')
+    run_sarta.co2_ppm = 385;
+  end
   if ~isfield(run_sarta,'randomCpsize')
     run_sarta.randomCpsize = +1;
   end
@@ -117,22 +128,16 @@ elseif nargin == 5
     run_sarta.cloud = -1;
    end
   if ~isfield(run_sarta,'cumsum')
-    run_sarta.cumsum = -1;
+    run_sarta.cumsum = -1;    %% use pre-2012 cloudtop heights, without adjustments
+    run_sarta.cumsum = 9999;  %% use this in later runs eg
+                            %% ~/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA_CLOUD_NADIR/clustbatch_make_eracloudrtp_nadir_sarta_filelist.m
   end
   if ~isfield(run_sarta,'cfrac')
     run_sarta.cfrac = -1;
   end
-  if ~isfield(run_sarta,'klayers_code')
-    %run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
-    run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
-  end   
-  if ~isfield(run_sarta,'sartaclear_code')
-    run_sarta.sartaclear_code = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
-  end
-  if ~isfield(run_sarta,'sartacloud_code')
-    %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-    run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-  end
+
+  addpath ../
+  choose_klayers_sarta
 end
 
 % Min allowed cloud fraction
@@ -256,6 +261,11 @@ if run_sarta.cfrac >= 0 & run_sarta.cfrac <= 1
   oo = find(prof.cfrac2 > 0 & prof.cngwat2 > 0); prof.cfrac2(oo) = run_sarta.cfrac;
   oo = find(prof.cfrac  > 0 & prof.cfrac2 > 0);  prof.cfrac12(oo)  = run_sarta.cfrac;
 end
+
+%% add on co2
+p_add_co2
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if run_sarta.clear > 0 
   disp('running SARTA clear, saving into rclearcalc')
