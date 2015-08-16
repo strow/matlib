@@ -63,7 +63,17 @@ overlap = 3;   %% switch for maximum random overlap
 if nargin == 4
   run_sarta.clear = -1;
   run_sarta.cloud = -1;
+  run_sarta.ncol0         = 50;
+  run_sarta.overlap       = 3;
+  run_sarta.randomCpsize = +20;  %% keep Xiangle's ice dme parmerization (based on KN Liou) and 20 um water dme
+  run_sarta.co2_ppm       = 0;   %% sets default of 385.848 ppm  
+  addpath ../
+  choose_klayers_sarta
+
 elseif nargin == 5
+  if ~isfield(run_sarta,'co2_ppm')
+    run_sarta.co2_ppm = 0;  %% sets default of 385.848 ppm  
+  end
   if ~isfield(run_sarta,'clear')
     run_sarta.clear = -1;
   end
@@ -73,22 +83,15 @@ elseif nargin == 5
   if ~isfield(run_sarta,'overlap')
     run_sarta.overlap = 3;
   end
+  if ~isfield(run_sarta,'randomCpsize')
+    run_sarta.randomCpsize = +20;
+  end  
   if ~isfield(run_sarta,'ncol0')
     run_sarta.ncol0 = 50;
   end
-  if ~isfield(run_sarta,'klayers_code')
-    %run_sarta.klayers_code = '/asl/packages/klayers/Bin/klayers_airs'; 
-    run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
-  end   
-  if ~isfield(run_sarta,'sartaclear_code')
-    run_sarta.sartaclear_code = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
-    run_sarta.sartaclear_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_wcon_nte';
-  end
-  if ~isfield(run_sarta,'sartacloud_code')
-    %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-    run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-    run_sarta.sartacloud_code = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';    
-  end
+
+  addpath ../
+  choose_klayers_sarta
 end
 
 ncol0 = run_sarta.ncol0;
@@ -123,7 +126,13 @@ clear p
 p1ALL = p0ALL;
 p0ALLX = p0ALL;
 
-[yy,mm,dd,hh] = tai2utc(p0ALL.rtime);
+% 12784 * 86400 + 27 = 1.1045e+09;
+if nanmean(p0ALL.rtime) > 1e9
+  %% /asl/matlab2012/airs/readers/xreadl1b_all.m
+  [yy,mm,dd,hh] = tai2utc(p0ALL.rtime - (12784 * 86400 + 27));
+else
+  [yy,mm,dd,hh] = tai2utc(p0ALL.rtime);
+end
 
 iIndMax = ceil(length(p0ALL.xtrack)/iChunk);
 
@@ -174,7 +183,17 @@ for iInd = 1 : iIndMax
   emis    = double(p.emis);
 
   zen_ang = double(p.scanang);
-  co2     = ones(size(p.stemp)) .* (370 + (yy(inds')-2002)*2.2);
+
+  if run_sarta.co2_ppm == -1
+    %co2     = ones(size(p.stemp)) .* (370 + (yy(inds')-2002)*2.2);
+    deltaT = (yy(inds')-2002) + (mm(inds')-1)/12 + dd(inds')/30/12;
+    co2    = ones(size(p.stemp)) .* (370 + deltaT*2.2);    
+  elseif run_sarta.co2_ppm == 0
+    co2     = ones(size(p.stemp)) * 385.848;
+  elseif run_sarta.co2_ppm > 0
+    co2     = ones(size(p.stemp)) * run_sarta.co2_ppm;
+  end
+  co2_all(inds) = co2;
 
   % use_Xiuhong  %% for debug default 2012/05/01  00:00-01:00 UTC
 

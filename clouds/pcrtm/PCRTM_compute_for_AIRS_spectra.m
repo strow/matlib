@@ -1,7 +1,8 @@
-function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS_spectra(...
+function [rad_allsky rad_clrsky tmpjunk rad_allsky_std sarta_gas_2_6] = PCRTM_compute_for_AIRS_spectra(...
               nboxes,nlev, ncol, overlap, P, WCT, ICT, cc, TT, q, o3, ...
-              Ps, Ts, sfctype,efreq,emis,zen_ang,co2, parname,ppath, ...
-              randomCpsize,modis_waterDME)
+              Ps, Ts, sfctype, efreq, emis, zen_ang, co2, parname, ppath, ...
+              randomCpsize, modis_waterDME,...
+	      run_sarta)
 
 % this git package code is an amalgalm between PCRTM_compute_for_AIRS_spectra.m and
 % /asl/s1/sergio/PCRTM_XIANGLEI/NEWVERS/PCRTM2AIRS_spec/PCRTM_compute_for_AIRS_spectra_V2.m
@@ -42,8 +43,8 @@ function [rad_allsky rad_clrsky tmpjunk rad_allsky_std] = PCRTM_compute_for_AIRS
 % modis_waterDME = [] if randomCpsize, else have set it from the modis climatology
 
 % error checking
-if nargin ~= 22
-  disp('wrong number of inputs');
+if nargin ~= 23
+  disp('wrong number of inputs (need 23)');
   return;
 end
 
@@ -115,7 +116,6 @@ newh2o = zeros(1,101);
 newozone = zeros(1,101);
 
 mod_default_profile = load('Modtran_standard_profiles.mat');
-
 def_P   = mod_default_profile.Pres(:, ATMno);
 def_T   = mod_default_profile.T_z(:, ATMno +1);
 def_h2o = mod_default_profile.h2o(:, ATMno);
@@ -349,15 +349,15 @@ for ibox =1:nboxes
 
   %used after Oct 2013
   make_PCRTM2AIRS_input_V2(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
-                           ucol_num(ibox),ucol_num_same(ibox,:), cldnum, cld_id,...
+                           ucol_num(ibox), ucol_num_same(ibox,:), cldnum, cld_id,...
                            cldpres, cldopt, cldde, cldphase, cld_qw, cld_qi,...
-                           sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
+                           sfctype(ibox), efreq(:,ibox), emis(:,ibox), zen_ang(ibox), co2(ibox),...
                            parname, usrstr, endsign);
 
   %used prior to Oct 2013
   %make_PCRTM2AIRS_input(Ps(ibox), Ts(ibox),Pres, newT, newh2o, newozone,...
-  %                      ucol_num(ibox),cldnum,cld_id, cldpres, cldopt, cldde, cldphase, ...
-  %                      sfctype(ibox),efreq(:,ibox),emis(:,ibox),zen_ang(ibox), co2(ibox),...
+  %                      ucol_num(ibox), cldnum, cld_id, cldpres, cldopt, cldde, cldphase, ...
+  %                      sfctype(ibox), efreq(:,ibox), emis(:,ibox), zen_ang(ibox), co2(ibox),...
   %                      parname, usrstr, endsign);
     
 end
@@ -367,9 +367,86 @@ disp('ENDED MAIN LOOP 1')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% NewVSOrig version
+%{
+>>>>>>>>>>>>>>>>>>>>>>>
+Xiuhong oringinally said default CO2 value is 330 ppmv!!!!! while Xu Liu says 370 ppm!!
+However, she now points me to  "par_constant.dat"
+cd /home/sergio/PCRTM_XIANGLEI/PCRTM_V2.1/code_changed/FWD
+[sergio@maya-usr1 FWD]$ grep -in 'par_constant.dat' *.f90
+FWD_simu_sample.f90:206: open(20,file='../InputDir/par_constant.dat')
+[sergio@maya-usr1 FWD]$ tail  ../InputDir/par_constant.dat | sed 's/^ *//g'
+tail  ../InputDir/par_constant.dat | sed 's/^ *//g'
+3.83828E+02 3.08305E-01 6.71960E-02 1.83678E+00
+3.84453E+02 3.23950E-01 6.95072E-02 1.83911E+00
+3.84950E+02 3.17136E-01 7.23853E-02 1.84139E+00
+3.85337E+02 3.20985E-01 7.51032E-02 1.84260E+00
+3.85615E+02 3.26975E-01 7.72790E-02 1.84312E+00
+3.85757E+02 3.03886E-01 7.84143E-02 1.84312E+00
+3.85848E+02 3.17632E-01 7.85714E-02 1.84312E+00
+3.85848E+02 3.14895E-01 7.85301E-02 1.84312E+00
+3.85848E+02 3.08534E-01 7.85301E-02 1.84312E+00
+>>>>>>>>>>>>>>>>>>>>>>>
+%}
+
+%% /asl/packages/klayersV205/Src/adafgl.f          adjusts : stdCO2 = 370 ppm!! stdCH4 = 1.8 ppm    see incLAY.f
+%% /asl/packages/klayersV205/Src_rtpV201/adafgl.f  adjusts : stdCO2 = 385 ppm!! stdCH4 = 1.8 ppm    see incLAY.f
 
 iNewVSOrig = -1;    %% do the orig version; calls PCRTM_V2.1.exe_orig which defaults to reading in      pcrtm.in
 iNewVSOrig = +1;    %% do the new  version; calls PCRTM_V2.1.exe      which reads in arbitrary located  pcrtm.in
+iNewVSOrig = run_sarta.iNewVSOrig;
+
+iUMichCO2 = -1;    %% use Xu Liu           CO2 profile that is default in PCRTM
+iUMichCO2 = +1;    %% use Xianglei/Xiuhong CO2 profile that is in InputDir/par_constant.dat, and used in all runs till Aug 2015
+                   %% however, rescale to 385.848 ppmv after hearing from Xiuhong in Aug 2015
+iUMichCO2 =  0;    %% use Xianglei/Xiuhong CO2 profile that is in InputDir/par_constant.dat, and used in all runs till Aug 2015
+                   %% KEEP EVERYTHING UNCHANGED, so co2ppm = 385.848 * 1.0135 in bottom part of atmosphere
+                   %% KEEP EVERYTHING UNCHANGED, so ch4ppm = 001.843 * 1.145  in bottom part of atmosphere
+iUMichCO2 = run_sarta.iUMichCO2;
+
+%% see PCRTM_USTD_profile.dat
+scalfac_str = '     1.0,  1.0135, 1.0,  1.0270, 1.0, 1.145, 1.0,  1.0,    1.0, 1.0,   1.0, 1.0, 0.74, 1.9, 2.3    !scalfac';
+molindx_str = '     2,    2,    2,    2,    2,    2,    0,    0,    0,    0,    0,    0,    0,    0,    0,   0     !molindx';
+%              0        1         2         3         4         5         6         7         8         9         10
+%              12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+scalfac_str = '     1.0,  1.0135, 1.0,  1.0270, 1.0, 1.1450, 1.0,  1.0,  1.0,  1.0,  1.0, 1.0, 0.74, 1.9, 2.3    !scalfac';
+molindx_str = '     2,    2,      2,    2,      2,   2,      0,    0,    0,    0,    0,   0,   0,    0,   0      !molindx';
+%              12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+if iUMichCO2 > 0
+  molindx_str = molindx_str;                %% unchanged
+
+  woo = num2str(nanmean(co2)/385.848,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = woo(1:6);
+  scalfac_str(12:17) = woo;                 %% Xiuhong CO2 is 385 ppm at bottom of atmosphere
+  
+  woo = num2str(1.8/1.843,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = woo(1:6);
+  scalfac_str(39:44) = woo;                 %% Xiuhong CH4 is 1.843 ppm at bottom of atmosphere
+
+  sarta_gas_2_6.co2 = nanmean(co2);
+  sarta_gas_2_6.ch4 = 1.8;
+
+elseif iUMichCO2 < 0
+
+  molindx_str(12:12) = num2str(1);          %% change from "2" to "1"
+  woo = num2str(nanmean(co2)/370.00,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = woo(1:6);  
+  scalfac_str(12:17) = woo;                 %% Xu Liu CO2 is 370 ppm at bottom of atmosphere
+  
+  molindx_str(39:39) = num2str(1);          %% change from "2" to "1"
+  woo = num2str(1.8/1.7,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = woo(1:6);
+  scalfac_str(39:44) = woo;                 %% Xu Liu CH4 is 1.7 ppm
+
+  sarta_gas_2_6.co2 = nanmean(co2);
+  sarta_gas_2_6.ch4 = 1.8;
+
+elseif iUMichCO2 == 0
+  %% do NOTHING ... orig stuff we had
+  %% so have to be careful with SARTA CO2 and SARTA CH4
+  sarta_gas_2_6.co2 = 385.848 * 1.0135;
+  sarta_gas_2_6.ch4 = 1.843   * 1.1450;
+end
 
 if iNewVSOrig == -1
 
@@ -385,12 +462,20 @@ if iNewVSOrig == -1
 
   lala = pwd;
   fprintf(1,'sergio line 1 : pcrtm.in in %s \n',lala);
-  fprintf(1,'sergio line 2 : tmp      in %s \n',[homepath,'/pcrtm.in.tmp'])
+  fprintf(1,'sergio line 2 : tmp      in %s \n',[homepath,'/pcrtm.in.tmp']);
 
   for iline = 1:5
-    str = fgetl( fid);
-    fprintf(vid, '%s\n', str);
-    fprintf(1, '%s\n', str);
+    str = fgetl(fid);
+    if iline == 2
+      fprintf(vid, '%s\n', molindx_str);
+      fprintf(1, '%s\n', molindx_str);
+    elseif iline == 3
+      fprintf(vid, '%s\n', scalfac_str);
+      fprintf(1, '%s\n', scalfac_str);
+    else
+      fprintf(vid, '%s\n', str);    
+      fprintf(1, '%s\n', str);      
+    end
   end
   fprintf(vid, '%d\n', 1);
 
@@ -400,8 +485,11 @@ if iNewVSOrig == -1
   fclose(vid);
   fclose(fid);
 
-  disp('CALLING PCRTM')
-  system('./PCRTM_V2.1.exe_orig');
+  %catter = ['!cat ' pcrtm.in];
+  %eval(catter)
+
+  disp(['iNewVSOrig = -1 CALLING PCRTM for ' num2str(length(co2)) ' profiles; mean CO2 = ' num2str(mean(co2)) ' ppm']);
+  system('time ./PCRTM_V2.1.exe_orig');
 
 elseif iNewVSOrig == +1
 
@@ -429,12 +517,20 @@ elseif iNewVSOrig == +1
 
   lala = pwd;
   fprintf(1,'sergio line 1 : pcrtm.in in %s \n',lala);
-  fprintf(1,'sergio line 2 : tmp      in %s \n',[homepath,'/pcrtm.in.tmp'])
+  fprintf(1,'sergio line 2 : tmp      in %s \n',[homepath,'/pcrtm.in.tmp']);
 
   for iline = 1:5
-    str = fgetl( fid);
-    fprintf(vid, '%s\n', str);
-    fprintf(1, '%s\n', str);
+    str = fgetl(fid);
+    if iline == 2
+      fprintf(vid, '%s\n', molindx_str);
+      fprintf(1, '%s\n', molindx_str);
+    elseif iline == 3
+      fprintf(vid, '%s\n', scalfac_str);
+      fprintf(1, '%s\n', scalfac_str);
+    else
+      fprintf(vid, '%s\n', str);    
+      fprintf(1, '%s\n', str);      
+    end
   end
   fprintf(vid, '%d\n', 1);
 
@@ -447,10 +543,10 @@ elseif iNewVSOrig == +1
   str = ['''' lalaNAME2 ''''];
   fidjunk = fopen(lalaNAME1,'w');
   fprintf(fidjunk,str);
-  fclose(fidjunk)
+  fclose(fidjunk);
 
-  disp('CALLING PCRTM')
-  runner = ['!./PCRTM_V2.1.exe < ' lalaNAME1];
+  disp(['iNewVSOrig = +1 CALLING PCRTM for ' num2str(length(co2)) ' profiles; mean CO2 = ' num2str(mean(co2)) ' ppm'])
+  runner = ['!time ./PCRTM_V2.1.exe < ' lalaNAME1];
   eval(runner)
 end
 
@@ -459,7 +555,7 @@ if iNewVSOrig == +1
   eval(rmer)
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%Prof. Huang  revised%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%% Prof. Huang  revised %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 disp('RECONSTRUCTING RADS')
 % coefficients database used for compute spectral Jacob 
 % the PC loadings are precomputed with fixed size
@@ -556,7 +652,7 @@ if exist([parname,'.out'], 'file')
       end    
     end  % end of bands
     [mbox,nbox] = size(rad_allsky_xind);
-    fprintf(1,' finding means and stddev : mbox,nbox = %4i %4i \n',mbox,nbox);
+    %fprintf(1,' finding means and stddev : mbox,nbox = %4i %4i \n',mbox,nbox);
     if nbox == 1
       rad_allsky_mean(:,ibox) = (rad_allsky_xind);
       rad_allsky_std(:,ibox)  = (rad_allsky_xind)*0;

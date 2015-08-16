@@ -3,8 +3,13 @@
 %end
 
 if run_sarta.clear > 0
-  p1ALL.sarta_clear(:,inds)       = profRX.rcalc;
+  p1ALL.sarta_clear(:,inds)       = profRX.rcalc;  %% this is with PCRTM co2 profile
   p1ALL.sarta_clr_co2_used(inds)  = ppmvLAY(40,:);
+  if exist('xprofRX')
+    p1ALL.sarta_xclear(:,inds)       = xprofRX.rcalc;  %% this is with SARTA co2 profile
+    p1ALL.sarta_xclr_co2_used(inds)  = xppmvLAY(40,:);     
+    disp('   >>> added both clear calcs (default SARTA profile and PCRTM profile) ...')
+  end
 end
 
 if run_sarta.cloud > 0
