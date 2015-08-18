@@ -2,10 +2,20 @@ function [p1,oo] = only_waterORice_cloud(h,p0,waterORice)
 
 %% p0 is input profile
 %% p1 is output profile, keeping only "oo" from the input profile
-%% depending on "waterORice"
+%% depending on "waterORice" +1 keeps water, removes ice clouds
+%%                           -1 removes water, keeps ice clouds
+%%                            0 does nothing
+
+if waterORice == 0
+  disp(' >>>>>>>>>>>>> in only_waterORice_cloud.m, doing NOTHING (keeping ice/water clds) <<<<<<<<<<<<<<<<')
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if waterORice > 0
   disp(' >>>>>>>>>>>>> WARNING : turning off ice clouds <<<<<<<<<<<<<<<<')
+  disp(' >>> keeping only water clouds ==> less profiles out than in <<<')  
+  
   %% water is 101, ice is 201
   %% keep only water slab clouds %%
   oo1 = find(p0.ctype  == 201 & p0.ctype2 == 101); %% so 2 = water, 1 = ice
@@ -69,7 +79,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if waterORice < 0
-  disp(' >>>>>>>>>>>>> WARNING : turning off water clouds <<<<<<<<<<<<<<<<')
+  disp(' >>>>>>>>>>>>> WARNING : turning off water clouds <<<<<<<<<<<<<<')
+  disp(' >>>> keeping only ice clouds ==> less profiles out than in <<<<')    
   %% water is 101, ice is 201
   %% keep only ice slab clouds %%
   oo1 = find(p0.ctype  == 101 & p0.ctype2 == 201); %% so 1 = water, 2 = ice

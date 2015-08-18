@@ -1,7 +1,10 @@
 if iDoKlayersHard < 0   %% simple, just add in CO2 profiles
+  disp(' adding in ONLY co2/ch4 profile using current plevs')
   p_add_co2_ch4_simple   %% loads in pcrtm CO2/CH4 and pressure profiles, and interpolates them onto p.plevs
 
 elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3,T form USSTD
+  disp(' adding in co2/ch4 profile using current plevs PLUS adding on info from top-of-input-plevs to 0.005 mb')
+  
   p_add_co2_ch4_simple   %% loads in pcrtm CO2/CH4 and pressure profiles, and interpolates them onto p.plevs
 
   %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,6 +98,8 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
     error('oops different minp???')
   end
 
+  clear pxx
+  
   %% initial set of xover
   pxx.txover      = ones(size(pxjunk.stemp)) * minp1;
   pxx.txover      = ones(size(pxjunk.stemp)) * minp1;
@@ -117,6 +122,11 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
     pxx.clwc = ones(mmjunk+length(newpoints),nnjunk) * 0.0; pxx.clwc(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.clwc;
     pxx.cc = ones(mmjunk+length(newpoints),nnjunk) *   0.0; pxx.cc(length(newpoints)+1:mmjunk+length(newpoints),:)   = pxjunk.cc;
   end
+  if isfield(p0ALL,'sarta_lvlODice')
+    pxx.sarta_lvlODice   = ones(mmjunk+length(newpoints),nnjunk) * 0.0; pxx.sarta_lvlODice(length(newpoints)+1:mmjunk+length(newpoints),:)   = pxjunk.sarta_lvlODice;
+    pxx.sarta_lvlODwater = ones(mmjunk+length(newpoints),nnjunk) * 0.0; pxx.sarta_lvlODwater(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.sarta_lvlODwater;
+  end
+
   %% add in CO2/CH4 profile from 1mb to TOA
   pxx.nlevs = pxjunk.nlevs + length(newpoints);
   pxx.plevs(1:length(newpoints),:) = pcrtm_p(newpoints) * ones(1,nnjunk);
@@ -161,6 +171,10 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
     pxjunk.ciwc = pxx.ciwc;
     pxjunk.clwc = pxx.clwc;
     pxjunk.cc   = pxx.cc;
+  end
+  if isfield(p0ALL,'sarta_lvlODice')
+    pxjunk.sarta_lvlODice   = pxx.sarta_lvlODice;
+    pxjunk.sarta_lvlODwater = pxx.sarta_lvlODwater;
   end
   hx.pmin = min(pcrtm_p);
   %%%%%%%%%%%%%%%%%%%%%%%%%

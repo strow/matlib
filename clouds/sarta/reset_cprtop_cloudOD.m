@@ -69,7 +69,7 @@ for ii = 1 : length(p0.stemp)
   bad = find(isnan(iceOD) | isinf(iceOD)); iceOD(bad) = 0;
 
   %% now check things are ok ie where there is iwc, there is finite cc
-  
+
   p1.sarta_lvlODice(:,ii) = iceOD;
   p1.sarta_lvlZ(:,ii) = Z;
 

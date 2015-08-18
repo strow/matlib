@@ -466,7 +466,7 @@ end
 fieldsIN  = fieldnames(profin);
 fieldsOUT = fieldnames(prof);
 if length(fieldsIN) ~= length(fieldsOUT)
-  disp('oops Houston we have a problem')
+  fprintf(1,'oops Houston we have a problem : length(fieldsIN)=%3i length(fieldsOUT)=%3i\n',length(fieldsIN),length(fieldsOUT)) 
   if length(fieldsIN) > length(fieldsOUT)
     for ii = 1 : length(fieldsIN)
       finName = fieldsIN{ii};

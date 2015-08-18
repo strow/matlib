@@ -1,4 +1,4 @@
-function [cngwat_sarta] = convert_gg_to_gm2(cT,cB,cngwat_ecmwf,rlevs,tlevs,airslevels,airsheights) 
+function [cngwat_sarta cT cB] = convert_gg_to_gm2(cT,cB,cngwat_ecmwf,rlevs,tlevs,airslevels,airsheights) 
 
 %% changes the [cT,cB,cngwat_ecmwf,rlevs,tlevs] from ECMWF (in kg/kg) to g/m2
 %% where cT,cB         = level number for cloud tops, cloud bottoms
@@ -63,6 +63,14 @@ MDAIR = 28.966; % g/mol
 MASSF = 18;     % g/mol for both water and ice!
 
 for ii = 1 : length(cT)
+
+  if cB(ii) > length(rlevs)
+    cB(ii) = length(rlevs);
+  end
+
+  if cT(ii) > length(rlevs)
+    cT(ii) = length(rlevs);
+  end
 
   if (cT(ii) == cB(ii))
     disp('>>>>>> warning .... convert_gg_to_gm2 .... cT(ii) == cB(ii) ... quickfix else will get cngwat = NAN')

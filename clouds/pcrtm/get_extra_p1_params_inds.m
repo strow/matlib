@@ -3,6 +3,7 @@
 %end
 
 if run_sarta.clear > 0
+  p1ALL.sarta_rclearcalc(:,inds)  = profRX.rcalc;  %% this is with PCRTM co2 profile
   p1ALL.sarta_clear(:,inds)       = profRX.rcalc;  %% this is with PCRTM co2 profile
   p1ALL.sarta_clr_co2_used(inds)  = ppmvLAY(40,:);
   if exist('xprofRX')
@@ -13,6 +14,7 @@ if run_sarta.clear > 0
 end
 
 if run_sarta.cloud > 0
+  p1ALL.sarta_rclearcalc(:,inds)  = profRX.rcalc;   
   p1ALL.sarta_cloud(:,inds)       = profRX2.rcalc;
   p1ALL.sarta_cld_co2_used(inds)  = ppmvLAY2(40,:);
 
@@ -26,7 +28,7 @@ if run_sarta.cloud > 0
   if isfield(p2junk,'icecldY')
     p1ALL.icecldY(:,inds) = p2junk.icecldY;
   end
-  if isfield(p2junk,'sarta_lvlDMEice')
+  if isfield(p2junk,'sarta_lvlDMEice') 
     p1ALL.sarta_lvlDMEice(:,inds) = p2junk.sarta_lvlDMEice;
   end
   if isfield(p2junk,'sarta_lvlODice')
@@ -60,14 +62,13 @@ if run_sarta.cloud > 0
 
 end
 
-p1ALL.rad_allsky(:,inds)  = rad_allsky(h.ichan,:)*1000;
-p1ALL.rad_allsky_std(:,inds)  = rad_allsky_std(h.ichan,:)*1000;
+p1ALL.rad_allsky(:,inds)     = rad_allsky(h.ichan,:)*1000;
+p1ALL.rad_allsky_std(:,inds) = rad_allsky_std(h.ichan,:)*1000;
+p1ALL.rad_clrsky(:,inds)     = rad_clrsky(h.ichan,:)*1000;
 
-p1ALL.rad_clrsky(:,inds)  = rad_clrsky(h.ichan,:)*1000;
-
-p1ALL.ncol(inds)                = ones(size(p0ALL.stemp(inds)))*ncol0;
-p1ALL.pcrtm_co2_used(inds)      = co2;
-p1ALL.overlap(inds)             = ones(size(p0ALL.stemp(inds)))*overlap;
+p1ALL.ncol(inds)           = ones(size(p0ALL.stemp(inds)))*ncol0;
+p1ALL.pcrtm_co2_used(inds) = co2;
+p1ALL.overlap(inds)        = ones(size(p0ALL.stemp(inds)))*overlap;
 
 p1ALL.rlat(inds)         = p.rlat;
 p1ALL.rlon(inds)         = p.rlon;

@@ -23,15 +23,18 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this 
 %                                     (DEFAULT = -1, use ciwc/clwc structures as is)
 %     run_sarta.randomCpsize        = +1 (DEFAULT) to randomize BOTH ice (based on Tcld) and water deff
-%                                     20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
+%                                   = 20,   then water is ALWAYS 20 um (as in PCRTM wrapper),random ice
 %                                           (based on Tcld)
-%                                     -1, then water is MODIS dme, random ice (based on Tcld)
-%                                     9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
-%     run_sarta.co2_ppm         = -1 to use 370 + (yy-2002)*2.2) in pcrtm/sarta
+%                                   = -1,   then water is MODIS dme, random ice (based on Tcld)
+%                                   = 9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
+%     run_sarta.co2ppm          = -1 to use 370 + (yy-2002)*2.2) in pcrtm/sarta
 %                               = +x to use user input value     in pcrtm/sarta 
-%                               =  0 to use DEFAULT klayers = 385 (set in executable by Scott; equivalent to run_sarta.co2_ppm = +385)
+%                               =  0 to use DEFAULT klayers = 385 (set in executable by Scott; equivalent to run_sarta.co2ppm = +385)
 %                   this is done to keep it consistent with PCRTM
 %                   however, also have to make sure this is only enabled if h.glist does NOT include gas_2
+%      ForceNewSlabs            = -1 (default) to keep any slab clouds that are input, as they are
+%                               = +1           to force new slabs to be derived from clwc,ciwc,cc
+%      Slab_or_100layer         = +1 for slab clouds/-1 for 100 layer clouds (which then need their own sarta,klayers,ncol,overlap)
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -49,6 +52,14 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  08/15/2015 : cleaned up code by including lots of common functions for driver_sarta_cloud_rtp.m driver_sarta_cloud100layer_rtp.m
+%  08/14/2015 : f cprtop,cprbot,cngwat,cpsize exist, code no longer redoes profile--> slab unless forced to do so (run_sarta.ForceNewSlabs)
+%  08/12/2015 : can send in CO2 and CH4 profiles (mostly from PCRTM code)
+%  08/02/2015 : introduced "choose_klayers_sarta" to have default klayers/sarta
+%
+%  2014 : major fixes like fix problems with cfracs, cngwat
+%  2014 : minor fixes like cut down on chatter, fix inf nan outputs
+%
 %  08/18/2013 : introduced run_sarta.randomCpsize, default = +1  to keep randomizing deff; 
 %                                                             20 to keep ice = ice(T,pcrtm), water = 20 um
 %                                                             -1 to use MODIS water DME
@@ -65,19 +76,6 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %  03/11/2013 : run_sarta.cumsum = 0--1 option allows the clouds to be placed where cumsum(ciwc)/sum(ciwc) = X
 %                                  -1  option is to default wherever ecmwf2sarta put the cloud
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-base_dir = fileparts(mfilename('fullpath')); % current directory
-base_dir1 = fileparts(base_dir);  % dir:  ../
-base_dir2 = fileparts(base_dir1); % dir:  ../../
-
-% Airs Matlab utility box
-addpath([base_dir2 '/gribtools'])
-addpath([base_dir2 '/rtptools'])
-addpath([base_dir2 '/aslutil'])
-addpath([base_dir2 '/science'])
-addpath([base_dir2 '/h4tools'])
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %{
 % testing the code
@@ -92,196 +90,94 @@ addpath([base_dir2 '/h4tools'])
   rtpwrite('/asl/data/rtprod_airs/2012/05/01/pcrtm_cld_ecm_41ch.airs_ctr.2012.05.01.10_sarta.rtp',h,ha,p1,pa);
 %}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+base_dir = fileparts(mfilename('fullpath')); % current directory
+base_dir1 = fileparts(base_dir);  % dir:  ../
+base_dir2 = fileparts(base_dir1); % dir:  ../../
+
+% Airs Matlab utility box
+addpath([base_dir2 '/gribtools'])
+addpath([base_dir2 '/rtptools'])
+addpath([base_dir2 '/aslutil'])
+addpath([base_dir2 '/science'])
+addpath([base_dir2 '/h4tools'])
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% defaults
-if nargin == 4
-  %% default to running sarta_cloudy
-  run_sarta.clear   = -1;  %% do not run clear code
-  run_sarta.cloud   = +1;  %% run cloudy code
+check_sarta_cloud_rtp_defaults
 
-  run_sarta.cumsum  = -1;    %% use pre-2012 cloudtop heights, without adjustments
-  run_sarta.cumsum  = 9999;  %% use this in later runs eg
-                             %% ~/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA_CLOUD_NADIR/clustbatch_make_eracloudrtp_nadir_sarta_filelist.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  run_sarta.cfrac               = -1;  %% use random (instread of fixed) cfracs
-  run_sarta.ice_water_separator = -1;  %% do not separate out ciwc and clwc by pressure; ie believe the NWP are correct
-  run_sarta.randomCpsize        = +1;  %% keep randomizing dme for ice and water
-  run_sarta.co2_ppm             = 385;
+iAlreadyExistSlabClds = -1;  % assume no slab clouds
+if isfield(p,'cprtop') & isfield(p,'cprbot') & isfield(p,'cpsize') & isfield(p,'cngwat') & isfield(p,'cfrac') & isfield(p,'ctype')
+  disp('hmm : cprtop/cprbot,cpsize,cngwat,cfrac,ctype all exist')
+  testA1 = p.cprtop; testA1(testA1 < 0) = NaN;
+  testA2 = p.cprbot; testA2(testA2 < 0) = NaN;
+  testA3 = p.cpsize; testA3(testA3 < 0) = NaN;
+  testA4 = p.cngwat; testA4(testA4 < 0) = NaN;
+  testA5 = p.cfrac;  testA3(testA3 < 0) = NaN;
+  testA6 = p.ctype;  testA4(testA4 < 0) = NaN;
+
+  testB1 = p.cprtop2; testB1(testB1 < 0) = NaN;
+  testB2 = p.cprbot2; testB2(testB2 < 0) = NaN;
+  testB3 = p.cpsize2; testB3(testB3 < 0) = NaN;
+  testB4 = p.cngwat2; testB4(testB4 < 0) = NaN;
+  testB5 = p.cfrac2;  testB3(testB3 < 0) = NaN;
+  testB6 = p.ctype2;  testB4(testB4 < 0) = NaN;
+
+  if nanmean(testA1) > 0 & nanmean(testA2) > 0 & nanmean(testA3) > 0 & nanmean(testA4) > 0 & nanmean(testA5) > 0 & nanmean(testA5) > 0
+    disp('    and they are all valid non-negative means!');
+    iAlreadyExistSlabClds = +1;
+  end
   
-  addpath ../
-  choose_klayers_sarta
-
-elseif nargin == 5
-  if ~isfield(run_sarta,'co2_ppm')
-    run_sarta.co2_ppm = 385;
-  end
-  if ~isfield(run_sarta,'randomCpsize')
-    run_sarta.randomCpsize = +1;
-  end
-  if ~isfield(run_sarta,'ice_water_separator')
-    run_sarta.ice_water_separator = -1;
-  end
-  if ~isfield(run_sarta,'clear')
-    run_sarta.clear = -1;
-  end
-  if ~isfield(run_sarta,'cloud')
-    run_sarta.cloud = -1;
-   end
-  if ~isfield(run_sarta,'cumsum')
-    run_sarta.cumsum = -1;    %% use pre-2012 cloudtop heights, without adjustments
-    run_sarta.cumsum = 9999;  %% use this in later runs eg
-                            %% ~/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA_CLOUD_NADIR/clustbatch_make_eracloudrtp_nadir_sarta_filelist.m
-  end
-  if ~isfield(run_sarta,'cfrac')
-    run_sarta.cfrac = -1;
-  end
-
-  addpath ../
-  choose_klayers_sarta
-end
-
-% Min allowed cloud fraction
-cmin = 0.0001;
-
-% Max allowed cngwat[1,2]
-cngwat_max = 500;
-
-iDebugMain = +1;  %% yes debug keyboards
-iDebugMain = -1;  %% no debug keyboards
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-if ~isfield(p,'ciwc')
-  error('driver_pcrtm_cloud_rtp.m requires ciwc');
-elseif ~isfield(p,'clwc')
-  error('driver_pcrtm_cloud_rtp.m requires clwc');
-elseif ~isfield(p,'cc')
-  error('driver_pcrtm_cloud_rtp.m requires cc');
-elseif h.ptype ~= 0
-  error('driver_pcrtm_cloud_rtp.m requires LEVELS profiles (h.ptype = 0)');
-end
-
-if ~isfield(p,'cfrac')
-  %% need random cfracs
-  disp('>>>>>>>> warning : need random cfracs .... initializing')
-  %% want to make sure there are NO zeros cfrac
-  p.cfrac = 0.50*(rand(size(p.stemp)) + rand(size(p.stemp))) ;
-end
-
-if run_sarta.ice_water_separator > 0
-  disp('>>>>>>>> warning : setting SEPARATOR for ice and water .... initializing')
-  p = convert_ice_water_separator(p,run_sarta.ice_water_separator);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-head  = h;
 
-nlev     = ceil(mean(p.nlevs));
-nlev_std = (std(double(p.nlevs)));
-
-if h.ptype ~= 0
-  error('need levels input!')
+if run_sarta.ForceNewSlabs > 0
+  %% force the making of new slab clouds
+  disp(' >>>> even though slab cloud params already exist, run_sarta.ForceNewSlabs > 0 ==> make new slab clouds')
+  iAlreadyExistSlabClds = -1;
 end
 
-%if nlev_std > 1e-3
-%  error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
-%end
+if iAlreadyExistSlabClds < 0
+  %% need to add in slab cloud fields
+  disp(' >>>>>>>>>>>>> adding in slab cloud fields <<<<<<<<<<<<<<<<<')
+  prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta); 
 
-load airsheights.dat
-load airslevels.dat
+elseif iAlreadyExistSlabClds > 0
+  %% slab cloud fields already exist, just run klayers and sarta
+  disp(' >>>>>>>>>>>>> slab cloud fields already exist; simply running klayers and sarta <<<<<<<<<<<<<<<<<')  
 
-tic
-if nlev_std <= 1e-3
-  [prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum,airslevels,airsheights);   %% figure the two slab cloud 
-                    %% profile info here, using profX
-                    %% this then puts the info into "prof" by calling put_into_prof w/in routine
-else
-  disp('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model, need to use varying levels (MERRA??)')
-  [prof,profX] = ecmwfcld2sartacld_varNlev(p,nlev,run_sarta.cumsum,airslevels,airsheights);   %% figure the two slab cloud 
-                    %% profile info here, using profX
-                    %% this then puts the info into "prof" by calling put_into_prof w/in routine
-end
+  prof = p;
+  prof_add_co2
 
-prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
-  prof.ctype  = double(prof.ctype);
-  prof.ctype2 = double(prof.ctype2);
+  %% now turn off ice, change water!!!!!!!!
+  %% this is kinda doing what "driver_sarta_cloud_rtp_onecldtest.m" is meant to do
+  if run_sarta.waterORice ~= 0
+    [prof,index] = only_waterORice_cloud(h,prof,run_sarta.waterORice);
+  end
 
-if iDebugMain > 0
-  figure(3); plot(prof.ciwc,prof.plevs,'b',prof.clwc,prof.plevs,'r'); ax=axis; axis([0 ax(2) 0 1000]); set(gca,'ydir','reverse')
-  figure(1); plot_hists_cprtop_cprtop2
-  disp('new keyboard posn1')
-  keyboard
-end
-
-%% sets fracs and particle effective sizes eg cfrac2
-prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta.randomCpsize);
-
-if run_sarta.cumsum > 0 & run_sarta.cumsum <= 1
-  %% set cloud top according to cumulative sum fraction of ciwc or clwc
-  profXYZ = prof;
-  prof = reset_cprtop(prof);
-elseif run_sarta.cumsum > 1
-  %% set cloud top according to where cumulative cloud OD = run_sarta.cumsum/100, 
-  %%      or if >= 9999, set at peak of cloud wgt fcn
-  profXYZ = prof;
-  prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum/100,airslevels,airsheights);  
-end
-
-if iDebugMain > 0
-  figure(2); plot_hists_cprtop_cprtop2
-  figure(4); plot(prof.sarta_wgtI,prof.plevs,'b',prof.sarta_wgtW,prof.plevs,'r'); ax=axis; axis([0 ax(2) 0 1000]); 
-           set(gca,'ydir','reverse')
-  figure(5); 
-    plot(prof.sarta_index_wgtpeakI(oo11),prof.cprtop(oo11),'bo',prof.sarta_index_wgtpeakI(oo12),prof.cprtop2(oo12),'cx',...
-         prof.sarta_index_wgtpeakI(oo21),prof.cprtop(oo21),'ro',prof.sarta_index_wgtpeakW(oo22),prof.cprtop2(oo22),'mx')
-             set(gca,'ydir','reverse')
-    xlabel('layer of peak wgtfcn'); ylabel('cprtop')
-  disp('new keyboard posn2')
-  keyboard
-end
-
-disp('---> checking cprtop vs cprbot vs spres')
-iNotOK = +1;
-iFix = 0;
-%% before used to give up at iFix == 10
-while iFix < 12 & iNotOK > 0
-  iFix = iFix + 1;
-  [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac,iFix);  %% see possible pitfalls in clouds
-  fprintf(1,' did n=%2i try at checking clouds \n',iFix)
-end
-if iFix >= 12 & iNotOK > 0
-  %disp('oops, could not fix cprtop vs cprbot vs spres'); %keyboard
-  error('oops, could not fix cprtop vs cprbot vs spres')
-end
-
-clear profX
-
-if run_sarta.cfrac >= 0 & run_sarta.cfrac <= 1
-  oo = find(prof.cfrac  > 0 & prof.cngwat > 0);  prof.cfrac(oo)  = run_sarta.cfrac;
-  oo = find(prof.cfrac2 > 0 & prof.cngwat2 > 0); prof.cfrac2(oo) = run_sarta.cfrac;
-  oo = find(prof.cfrac  > 0 & prof.cfrac2 > 0);  prof.cfrac12(oo)  = run_sarta.cfrac;
-end
-
-%% add on co2
-p_add_co2
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
-if run_sarta.clear > 0 
-  disp('running SARTA clear, saving into rclearcalc')
-  tic
-  get_sarta_clear;
-  toc
-  prof.sarta_rclearcalc = profRX2.rcalc;
-end
-if run_sarta.cloud > 0 
-  disp('running SARTA cloud')
-  tic
-  get_sarta_cloud;
-  toc
-  prof.rcalc = profRX2.rcalc;
-else
-  disp('you did not ask for SARTA cloudy to be run; not changing p.rcalc')
+  if run_sarta.clear > 0 
+    disp('running SARTA clear, saving into rclearcalc')
+    tic
+    get_sarta_clear;
+    toc
+    prof.sarta_rclearcalc = profRX2.rcalc;
+  else
+    disp('you did not ask for SARTA clear to be run; not changing p.sarta_rclearcalc')
+  end
+  
+  if run_sarta.cloud > 0 
+    disp('running SARTA cloud')
+    tic
+    get_sarta_cloud;
+    toc
+    prof.rcalc = profRX2.rcalc;
+  else
+    disp('you did not ask for SARTA cloudy to be run; not changing p.rcalc')
+  end
 end
 
 tnow = toc;

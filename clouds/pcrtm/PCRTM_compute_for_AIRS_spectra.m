@@ -241,8 +241,12 @@ for ibox =1:nboxes
       cldde_liq(ilev) = 20; % Diameter in PCRTM
     elseif randomCpsize == 9999
       cldde_liq(ilev) = modis_waterDME(ibox); % Diameter in PCRTM from MODIS
+    elseif randomCpsize == -1
+      cldde_liq(ilev) = modis_waterDME(ibox); % Diameter in PCRTM from MODIS
+    elseif randomCpsize == +1
+      cldde_liq(ilev) = 20 + randn(1);      % close to 20 um
     else
-      error('PCRTM wrapper only handles randomCpsize = +20 or +9999')
+      error('PCRTM wrapper only handles randomCpsize = +20 or +9999 or -1 or +1')
     end
 
     % cloud phase and cloud effective size  in  micron

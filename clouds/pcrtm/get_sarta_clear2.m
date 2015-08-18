@@ -43,7 +43,10 @@ if isfield(p,'co2ppm')
   p = rmfield(p,'co2ppm');
 end
 
-p_sarta_add_co2_ch4
+[hxjunk,pxjunk] = p_sarta_add_co2_ch4(h,p,sarta_gas_2_6,p0ALL);
+
+[mmjunk,nnjunk] = size(pxjunk.plevs);
+fprintf(1,'    >> size of plevs after  adding in co2/ch4 = %5i x %5i \n',mmjunk,nnjunk)
 
 rtpwrite(fip,hxjunk,ha,pxjunk,pa);
 

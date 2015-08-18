@@ -10,7 +10,7 @@ function [ppmvLAY,ppmvAVG,ppmvMAX,pavgLAY,tavgLAY,ppmv500,ppmv75] = layers2ppmv(
 %%   ppmvLAY = ppmv for each layer
 %%   ppmvAVG = avg over the layers
 %%   ppmvMAX = max over the layers
-%%   pavgLAY = layer pressures
+%%   pavgLAY = layer pressures (in mb)
 %%   tavgLAY = layer temps
 %%   ppmv500 = ppmv at 500 mb
 %%   ppmv75  = ppmv at  75 mb
@@ -77,5 +77,4 @@ for ii = 1 : length(index)
 
 end
 
-
-
+pavgLAY = pavgLAY/100;    %% back to mb

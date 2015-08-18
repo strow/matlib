@@ -63,16 +63,16 @@ overlap = 3;   %% switch for maximum random overlap
 if nargin == 4
   run_sarta.clear = -1;
   run_sarta.cloud = -1;
-  run_sarta.ncol0         = 50;
-  run_sarta.overlap       = 3;
+  run_sarta.ncol0        = 50;
+  run_sarta.overlap      = 3;
   run_sarta.randomCpsize = +20;  %% keep Xiangle's ice dme parmerization (based on KN Liou) and 20 um water dme
-  run_sarta.co2_ppm       = 0;   %% sets default of 385.848 ppm  
+  run_sarta.co2ppm       = 0;   %% sets default of 385.848 ppm  
   addpath ../
   choose_klayers_sarta
 
 elseif nargin == 5
-  if ~isfield(run_sarta,'co2_ppm')
-    run_sarta.co2_ppm = 0;  %% sets default of 385.848 ppm  
+  if ~isfield(run_sarta,'co2ppm')
+    run_sarta.co2ppm = 0;  %% sets default of 385.848 ppm  
   end
   if ~isfield(run_sarta,'clear')
     run_sarta.clear = -1;
@@ -145,8 +145,9 @@ for iInd = 1 : iIndMax
 
   %p0 = index_subset(inds,p0ALLX); 
   %[h,ha,p,pa] = rtpgrow(h,ha,p0,pa);
-  [h,p] = subset_rtp_clouds(h,p0ALLX,[],[],inds);
-
+  %[h,p] = subset_rtp_clouds(h,p0ALLX,[],[],inds);
+  [h,p] = subset_rtp_allcloudfields(h,p0ALLX,[],[],inds);
+  
   nboxes = length(p.stemp);  
   [nlev,nprof] = size(p.clwc);
   ncol = ncol0;
@@ -184,14 +185,14 @@ for iInd = 1 : iIndMax
 
   zen_ang = double(p.scanang);
 
-  if run_sarta.co2_ppm == -1
+  if run_sarta.co2ppm == -1
     %co2     = ones(size(p.stemp)) .* (370 + (yy(inds')-2002)*2.2);
     deltaT = (yy(inds')-2002) + (mm(inds')-1)/12 + dd(inds')/30/12;
     co2    = ones(size(p.stemp)) .* (370 + deltaT*2.2);    
-  elseif run_sarta.co2_ppm == 0
+  elseif run_sarta.co2ppm == 0
     co2     = ones(size(p.stemp)) * 385.848;
-  elseif run_sarta.co2_ppm > 0
-    co2     = ones(size(p.stemp)) * run_sarta.co2_ppm;
+  elseif run_sarta.co2ppm > 0
+    co2     = ones(size(p.stemp)) * run_sarta.co2ppm;
   end
   co2_all(inds) = co2;
 

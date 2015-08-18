@@ -5,7 +5,10 @@ pcrtm = load('/home/sergio/PCRTM_XIANGLEI/PCRTM_V2.1/code_changed/InputDir/par_c
 hxjunk = h;
 pxjunk = p;
 
-hxjunk.ngas = 4;
+[mmjunk,nnjunk] = size(pxjunk.plevs);
+fprintf(1,'    >> size of plevs before adding in co2/ch4 = %5i x %5i \n',mmjunk,nnjunk)
+
+hxjunk.ngas  = 4;
 hxjunk.glist = [ 1  2  3  6]';
 hxjunk.gunit = [21 10 21 10]';  %% mr g/g = 21,  ppmv = 10
 

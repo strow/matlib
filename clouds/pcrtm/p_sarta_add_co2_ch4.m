@@ -1,6 +1,6 @@
-if isfield(p,'co2ppm')
-  p = rmfield(p,'co2ppm');
-end
+function [hxjunk,pxjunk] = p_sarta_add_co2_ch4(h,p,sarta_gas_2_6,p0ALL);
+
+%% adds in CO2 and CH4 profiles, first to Top-Of-Current-Atmosphere (eg 1 mb for ERA) and then all the way to 0.005 mb
 
 if h.ptype == 0
   if sum(double(h.gunit) - [21 21]') ~= 0
