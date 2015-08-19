@@ -128,7 +128,7 @@ endsign = 0;
 
 tstart = tic;
 iMOD0 = 25;
-for ibox =1:nboxes
+for ibox = 1:nboxes
   if mod(ibox,iMOD0) == 0
     tcurrent = toc(tstart);
     fprintf(1,'processing %6i out of % 6i in avg %8.6f secs \n',ibox,nboxes,tcurrent/iMOD0);
@@ -181,6 +181,7 @@ for ibox =1:nboxes
 
   % get T, q, o3 profiles for lower atmosphere from reanalysis top to surface
   for ilev =indU(end) + 1:length(Pres)
+
     % for Pres below the bottom pressure, T, q, and o3 are set to the value at bottom pressure
     if (Pres(ilev)>= P(end,ibox))
       Pp = P(end,ibox);
@@ -188,6 +189,9 @@ for ibox =1:nboxes
       Pp = Pres(ilev);
     end
 
+    %% new code, affects botom layers below surface pres, 08/19/2015
+    %% Pp = Pres(ilev);
+    
     %% sergio : orig was interp1(log(P),TT(:,ibox),log(Pp))
     newT(ilev) = interp1(log(P(:,ibox)), TT(:,ibox), log(Pp),'linear','extrap');               
     %% sergio : orig was exp(interp1(log(P),q(:,ibox),log(Pp)))
@@ -202,16 +206,27 @@ for ibox =1:nboxes
     figure(1)
     semilogy(TT(:,ibox),P(:,ibox),'rx-',newT,Pres,'bo-',def_T,def_P,'ks-','linewidth',2); set(gca,'ydir','reverse')
     hl = legend('what came in from ERA/ECM','what goes into PCRTM','US Std from UMich');
+    ax = axis;
+      line([ax(1) ax(2)],[Ps(ibox) Ps(ibox)],'color','r','linewidth',2)
+      line([Ts(ibox) Ts(ibox)],[ax(3) ax(4)],'color','r','linewidth',2)      
     set(hl,'fontsize',10); grid; title('T(z)')
 
     figure(2)
     loglog(q(:,ibox),P(:,ibox),'rx-',newh2o,Pres,'bo-',def_h2o,def_P,'ks-','linewidth',2); set(gca,'ydir','reverse')
     hl = legend('what came in from ERA/ECM','what goes into PCRTM','US Std from UMich');
+    junkx = size(q); junkx = q(junkx(1),ibox);
+    ax = axis;
+      line([ax(1) ax(2)],[Ps(ibox) Ps(ibox)],'color','r','linewidth',2)
+      line([junkx junkx],[ax(3) ax(4)],'color','r','linewidth',2)          
     set(hl,'fontsize',10); grid; title('WV(z)')
 
     figure(3)
     loglog(o3(:,ibox),P(:,ibox),'rx-',newozone,Pres,'bo-',def_o3,def_P,'ks-','linewidth',2); set(gca,'ydir','reverse')
     hl = legend('what came in from ERA/ECM','what goes into PCRTM','US Std from UMich');
+    junkx = size(o3); junkx = o3(junkx(1),ibox);    
+    ax = axis;
+      line([ax(1) ax(2)],[Ps(ibox) Ps(ibox)],'color','r','linewidth',2)
+      line([junkx junkx],[ax(3) ax(4)],'color','r','linewidth',2)                
     set(hl,'fontsize',10); grid; title('O3(z)')
 
     disp('debug 1')
@@ -413,7 +428,6 @@ for ibox =1:nboxes
 end
 
 fprintf(1,'can examine input file (profiles, emiss etc) for PCRTM %s \n',parname)
-
 disp('ENDED MAIN LOOP 1')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
