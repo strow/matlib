@@ -133,9 +133,10 @@ fprintf(1,'    >> size of plevs before padding INPUT prof struct = %5i x %5i \n'
 [mmjunk,nnjunk] = size(p0ALL.plevs);
 fprintf(1,'    >> size of plevs after  padding INPUT prof struct = %5i x %5i \n',mmjunk,nnjunk)
 
-%disp('lkjhfslhjs')
-%h     = h_inputLVLS;
-%p0ALL = p0ALL_inputLVLS;
+% disp(' >>>>>>>>>>>>>>>>>>> NOT adding in toa stuff in driver_pcrtm_cloud_rtp.m <<<<<<<<<<<<<<<<<<<<<<<<')
+% disp(' >>>>>>>>>>>>>>>>>>> NOT adding in toa stuff in driver_pcrtm_cloud_rtp.m <<<<<<<<<<<<<<<<<<<<<<<<')
+% h     = h_inputLVLS;
+% p0ALL = p0ALL_inputLVLS;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

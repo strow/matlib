@@ -111,8 +111,8 @@ o3 = o3 *1e3/47.998*28.96;
 
 ATMno = 6;
 
-newT = zeros(1,101);
-newh2o = zeros(1,101);
+newT     = zeros(1,101);
+newh2o   = zeros(1,101);
 newozone = zeros(1,101);
 
 mod_default_profile = load('Modtran_standard_profiles.mat');
@@ -120,6 +120,7 @@ def_P   = mod_default_profile.Pres(:, ATMno);
 def_T   = mod_default_profile.T_z(:, ATMno +1);
 def_h2o = mod_default_profile.h2o(:, ATMno);
 def_o3  = mod_default_profile.o3(:, ATMno);
+
 % convert default h2o from ppmv to g/kg
 def_h2o = def_h2o *1e-3 *18/28.96;
 
@@ -140,11 +141,34 @@ for ibox =1:nboxes
   if length(indU) == 0                   %% added this after June 2013
     indU = 0;
   end
+
   % parameters for default models in upper atmosphere
   for ilev = 1: indU(end)
-    newT(ilev)     = interp1(log(def_P), def_T, log(Pres(ilev)),'linear');
-    newh2o(ilev)   = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev)),'linear'));
-    newozone(ilev) = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev)),'linear'));
+    newT(ilev)     = interp1(log(def_P),     def_T,        log(Pres(ilev)), 'linear');
+    newh2o(ilev)   = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev)), 'linear'));
+    newozone(ilev) = exp(interp1(log(def_P), log(def_o3),  log(Pres(ilev)), 'linear'));
+  end
+
+  % if input ERA profile ends bewlow TOA (eg ERA ends at 1mb, TOA of DARTA is 0.005 mb)
+  % then there should be an offset to go from US STD to ERA profile
+  % Sergio added this 8/18/2015
+  ilev = indU(end)+1;
+  toff    = 0;   %% default, what was essentially in the orig code
+    junkA = interp1(log(def_P), def_T, log(Pres(ilev)),'linear');
+    junkB = interp1(log(P(:,ibox)), TT(:,ibox), log(Pres(ilev)),'linear','extrap');
+    toff  = junkB - junkA;
+  wvoff   = 1;   %% default, what was essentially in the orig code
+    junkA = exp(interp1(log(def_P), log(def_h2o), log(Pres(ilev)),'linear'));
+    junkB = exp(interp1(log(P(:,ibox)), log(q(:,ibox)), log(Pres(ilev)),'linear','extrap'));
+    wvoff = junkB/junkA;
+  ozoneoff = 1;  %% default, what was essentially in the orig code
+    junkA = exp(interp1(log(def_P), log(def_o3), log(Pres(ilev)),'linear'));
+    junkB = exp(interp1(log(P(:,ibox)), log(o3(:,ibox)), log(Pres(ilev)),'linear','extrap'));
+    ozoneoff = junkB/junkA;
+  for ilev = 1: indU(end)
+    newT(ilev)     = newT(ilev) + toff;
+    newh2o(ilev)   = newh2o(ilev) * wvoff;
+    newozone(ilev) = newozone(ilev) * ozoneoff;
   end
 
   endsign = 0;
@@ -171,7 +195,29 @@ for ibox =1:nboxes
     %% sergio : orig was exp(interp1(log(P),o3(:,ibox),log(Pp)))
     newozone(ilev) = exp(interp1(log(P(:,ibox)), log(o3(:,ibox)), log(Pp),'linear','extrap')); 
   end
-    
+
+  iDebugProf = +1;  
+  iDebugProf = -1;
+  if iDebugProf > 0
+    figure(1)
+    semilogy(TT(:,ibox),P(:,ibox),'rx-',newT,Pres,'bo-',def_T,def_P,'ks-','linewidth',2); set(gca,'ydir','reverse')
+    hl = legend('what came in from ERA/ECM','what goes into PCRTM','US Std from UMich');
+    set(hl,'fontsize',10); grid; title('T(z)')
+
+    figure(2)
+    loglog(q(:,ibox),P(:,ibox),'rx-',newh2o,Pres,'bo-',def_h2o,def_P,'ks-','linewidth',2); set(gca,'ydir','reverse')
+    hl = legend('what came in from ERA/ECM','what goes into PCRTM','US Std from UMich');
+    set(hl,'fontsize',10); grid; title('WV(z)')
+
+    figure(3)
+    loglog(o3(:,ibox),P(:,ibox),'rx-',newozone,Pres,'bo-',def_o3,def_P,'ks-','linewidth',2); set(gca,'ydir','reverse')
+    hl = legend('what came in from ERA/ECM','what goes into PCRTM','US Std from UMich');
+    set(hl,'fontsize',10); grid; title('O3(z)')
+
+    disp('debug 1')
+    keyboard
+  end
+  
   % set a minimum cloud cover (0.001) to decide clear or cloudy over the box
   idc = find(cc(:,ibox)>0.001);  
         
@@ -365,6 +411,8 @@ for ibox =1:nboxes
   %                      parname, usrstr, endsign);
     
 end
+
+fprintf(1,'can examine input file (profiles, emiss etc) for PCRTM %s \n',parname)
 
 disp('ENDED MAIN LOOP 1')
 
