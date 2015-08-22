@@ -35,6 +35,13 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %      ForceNewSlabs            = -1 (default) to keep any slab clouds that are input, as they are
 %                               = +1           to force new slabs to be derived from clwc,ciwc,cc
 %      Slab_or_100layer         = +1 for slab clouds/-1 for 100 layer clouds (which then need their own sarta,klayers,ncol,overlap)
+% >>> test ONE cloud
+%     run_sarta.waterORice = 0 (default, use both clouds)
+%                          = +1 turn off ice   clouds, keep water only, set ncol0 = -1, set cc = 1
+%                          = -1 turn off water clouds, keep ice   only, set ncol0 = -1, set cc = 1
+%       if run_sarta.waterORice = +/-1 in PCRTM we set run_sarta.ncol0 == -1, p.cc = 1 and turn off water or ice clouds
+%          while in SARTA it turns off appropriate ice or water slab
+%          this is test of ONE SLAB CLOUD vs ONE COLUMN CLOUD
 %
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -42,12 +49,12 @@ function prof = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %   h.ptype = 0 (ie must be levels profile)
 %
 % Can do arbitrary levels eg ECM (91 levels) or ERA (37 levels)
-
+%
 % can do "driver_sarta_cloud_rtp_onecldtest", but remember
 %    simplest way of turing off ice   is set p.ciwc = 0
 %    simplest way of turing off water is set p.clwc = 0,
 % and then set p.cc = 1
-
+%
 %
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
@@ -156,7 +163,7 @@ elseif iAlreadyExistSlabClds > 0
   %% now turn off ice, change water!!!!!!!!
   %% this is kinda doing what "driver_sarta_cloud_rtp_onecldtest.m" is meant to do
   if run_sarta.waterORice ~= 0
-    [prof,index] = only_waterORice_cloud(h,prof,run_sarta.waterORice);
+    [prof,index_kept] = only_waterORice_cloud(h,prof,run_sarta.waterORice);
   end
 
   if run_sarta.clear > 0 

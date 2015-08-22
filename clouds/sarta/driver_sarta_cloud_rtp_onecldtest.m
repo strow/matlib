@@ -41,9 +41,12 @@ function [prof,index] = driver_sarta_cloud_rtp_onecldtest(h,ha,p,pa,run_sarta)
 % testing : 
 %   test_onecld_sarta
 % though remember, 
-%    simplest way of turing off ice   is set p.ciwc = 0
-%    simplest way of turing off water is set p.clwc = 0, 
+%    simplest way of turning off ice   is set p.ciwc = 0
+%    simplest way of turning off water is set p.clwc = 0, 
 % and then set p.cc = 1
+%       if run_sarta.waterORice = +/-1 in PCRTM we set run_sarta.ncol0 == -1, p.cc = 1 and turn off water or ice clouds
+%          while in SARTA it turns off appropriate ice or water slab
+%          this is test of ONE SLAB CLOUD vs ONE COLUMN CLOUD
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

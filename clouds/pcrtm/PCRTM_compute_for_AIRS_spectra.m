@@ -93,11 +93,17 @@ c2 = 0.197;
 c3 = 0.0012;
   
 homepath = pwd;
-                               
+
 %  cloud assignment to each sub column wthin a gridbox
 [unique_col_frac ucol_num ucol_num_same subcol_frac] = ...
   get_subcolumn_frac_v2(nboxes, nlev, abs(ncol), cc', overlap);
 if ncol > 0
+  tmpjunk.unique_col_frac = unique_col_frac;
+  tmpjunk.ucol_num        = ucol_num;
+  tmpjunk.ucol_num_same   = ucol_num_same;
+  tmpjunk.subcol_frac     = subcol_frac;
+elseif ncol == -1
+  %% this is new Aug 2015
   tmpjunk.unique_col_frac = unique_col_frac;
   tmpjunk.ucol_num        = ucol_num;
   tmpjunk.ucol_num_same   = ucol_num_same;
@@ -190,7 +196,7 @@ for ibox = 1:nboxes
     end
 
     %% new code, affects botom layers below surface pres, 08/19/2015
-    %% Pp = Pres(ilev);
+    Pp = Pres(ilev);
     
     %% sergio : orig was interp1(log(P),TT(:,ibox),log(Pp))
     newT(ilev) = interp1(log(P(:,ibox)), TT(:,ibox), log(Pp),'linear','extrap');               

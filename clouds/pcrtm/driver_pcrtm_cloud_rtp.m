@@ -18,6 +18,9 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_
 %     run_sarta.overlap = 1,2,3 for max overlap, random pverlap, max random overlap (suggest 3)
 %     run_sarta.ncol0 >= 1 for number of random subcolumns (recommend 50)
 %       if run_sarta.ncol0 == -1 then we do ONE column, cloud fraction = 1 == TEST CASE
+%       if run_sarta.waterORice = +/-1 we are going to set run_sarta.ncol0 == -1, p.cc = 1 and turn off water or ice clouds
+%          so when SARTA is called it turns off appropriate ice or water slab
+%          this is test of ONE SLAB CLOUD vs ONE COLUMN CLOUD
 %   >>> options for SARTA runs
 %     run_sarta.clear           = +/-1 for yes/no, results into prof.sarta_clear
 %     run_sarta.cloud           = +/-1 for yes/no, results into prof.sarta_cloudy
@@ -38,6 +41,13 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_
 %                               =  0 to use DEFAULT klayers = 385.848 (set in executable by Scott; equivalent to run_sarta.co2ppm = +385.848)
 %                   We need to do this as we do not run klayers here, but an internal converter
 %                   Note : this value also percolates to klayers/sarta-clear/sarta-cloud, if they are called
+% >>> test ONE cloud
+%     run_sarta.waterORice = 0 (default, use both clouds)
+%                          = +1 turn off ice   clouds, keep water only, set ncol0 = -1, set cc = 1
+%                          = -1 turn off water clouds, keep ice   only, set ncol0 = -1, set cc = 1
+%       if run_sarta.waterORice = +/-1 we are going to set run_sarta.ncol0 == -1, p.cc = 1 and turn off water or ice clouds
+%          so when SARTA is called it turns off appropriate ice or water slab
+%          this is test of ONE SLAB CLOUD vs ONE COLUMN CLOUD
 %
 % Requirements : 
 %   p0ALL_inputLVLS must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 ptemp etc
@@ -51,6 +61,14 @@ function [p1ALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_
 %{
 quick_test_driver_pcrtm_cloud_rtp
 %}
+%
+%
+% testing ONE cloud (driver_pcrtm_cloud_rtp_onecldtest.m)
+%   test_onecld_pcrtm
+% though remember,
+%    simplest way of turning off ice   is set p.ciwc = 0
+%    simplest way of turning off water is set p.clwc = 0,
+% and then set p.cc = 1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -75,6 +93,7 @@ overlap = 2;   %% switch for random overlap
 overlap = 3;   %% switch for maximum random overlap
 
 if nargin == 4
+  run_sarta.waterORice    = 0;   %% keep both clouds
   run_sarta.clear         = -1;
   run_sarta.cloud         = -1;
   %% these are for PCRTM
@@ -90,6 +109,9 @@ if nargin == 4
   choose_klayers_sarta
 
 elseif nargin == 5
+  if ~isfield(run_sarta,'waterORice')
+    run_sarta.waterORice    = 0;   %% keep both clouds
+  end
   if ~isfield(run_sarta,'co2ppm')
     run_sarta.co2ppm = 0;  %% sets default of 385.848 ppm
   end
@@ -149,6 +171,27 @@ elseif ~isfield(p0ALL,'cc')
 elseif h.ptype ~= 0
   error('driver_pcrtm_cloud_rtp.m requires LEVELS profiles (h.ptype = 0)');
 end
+
+% >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+if run_sarta.waterORice == -1
+  %% removes water, keeps ice clouds
+  disp(' >>> WARNING remove water, keep ice clouds in PCRTM <<<<<<<<');
+  disp(' >>> WARNING remove water, keep ice clouds in PCRTM <<<<<<<<');  
+  p0ALL.clwc = 0 * p0ALL.clwc;
+  run_sarta.ncol0 = -1;
+  ncol0 = -1;
+  p0ALL.cc = ones(size(p0ALL.cc));  
+elseif run_sarta.waterORice == +1
+  %% keeps water, removes ice clouds
+  disp(' >>> WARNING remove ice, keep water clouds in PCRTM <<<<<<<<');
+  disp(' >>> WARNING remove ice, keep water clouds in PCRTM <<<<<<<<');    
+  p0ALL.ciwc = 0 * p0ALL.ciwc;
+  run_sarta.ncol0 = -1;
+  ncol0 = -1;
+  p0ALL.cc = ones(size(p0ALL.cc));  
+end
+% >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 iChunk = 100;  %% speed up the code  by breaking input profiles into chunks, don't change this (code really slows down!)
 
@@ -221,7 +264,8 @@ for iInd = 1 : iIndMax
   efreq   = double(p.efreq);
   emis    = double(p.emis);
 
-  zen_ang = double(p.scanang);
+  %%% zen_ang = double(p.scanang);      %% orig, gives very large average clr sky biases between SARTA and PCRTM
+  zen_ang = double(abs(p.satzen));  %% new and agrees much better with SARTA clear sky, Sergio 08/19/2015
 
   if run_sarta.co2ppm == -1
     %co2     = ones(size(p.stemp)) .* (370 + (yy(inds')-2002)*2.2);  
@@ -253,6 +297,7 @@ for iInd = 1 : iIndMax
   iDoCalcPCRTM = +1;  %% what we want : PCRTM calcs!!!
   
   if iDoCalcPCRTM > 0
+    %% note that internally this soubroutine uses abs(ncol) so if we use ncol0 = -1, we have ONE column  
     [rad_allsky rad_clrsky tmpjunk rad_allsky_std sarta_gas_2_6] = ...
                                     PCRTM_compute_for_AIRS_spectra(nboxes,nlev, ncol, overlap, ...
                                                            P, WCT, ICT, cc, TT, q, o3, Ps, Ts, ...

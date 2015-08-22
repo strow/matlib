@@ -35,9 +35,12 @@ function [p1ALL] = driver_pcrtm_cloud_rtp_onecldtest(h,ha,p0ALL,pa,run_sarta,wat
 % testing
 %   test_onecld_pcrtm
 % though remember,
-%    simplest way of turing off ice   is set p.ciwc = 0
-%    simplest way of turing off water is set p.clwc = 0,
+%    simplest way of turning off ice   is set p.ciwc = 0
+%    simplest way of turning off water is set p.clwc = 0,
 % and then set p.cc = 1
+%       as waterORice = +/-1 we are going to set run_sarta.ncol0 == -1, p.cc = 1 and turn off water or ice clouds
+%          so when SARTA is called it turns off appropriate ice or water slab
+%          this is test of ONE SLAB CLOUD vs ONE COLUMN CLOUD
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -109,14 +112,23 @@ elseif h.ptype ~= 0
 end
 
 % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-if waterORice == +1
+if waterORice == -1
+  %% removes water, keeps ice clouds
+  disp(' >>> WARNING remove water, keep ice clouds in PCRTM <<<<<<<<');
+  disp(' >>> WARNING remove water, keep ice clouds in PCRTM <<<<<<<<');  
   p0ALL.clwc = 0 * p0ALL.clwc;
-elseif waterORice == -1
+  run_sarta.ncol0 = -1;
+  ncol0 = -1;
+  p0ALL.cc = ones(size(p0ALL.cc));  
+elseif waterORice == +1
+  %% keeps water, removes ice clouds
+  disp(' >>> WARNING remove ice, keep water clouds in PCRTM <<<<<<<<');
+  disp(' >>> WARNING remove ice, keep water clouds in PCRTM <<<<<<<<');  
   p0ALL.ciwc = 0 * p0ALL.ciwc;
+  run_sarta.ncol0 = -1;
+  ncol0 = -1;
+  p0ALL.cc = ones(size(p0ALL.cc));
 end
-run_sarta.ncol0 = -1;
-ncol0 = -1;
-p0ALL.cc = ones(size(p0ALL.cc));
 % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 iChunk = 100;  %% speed up the code  by breaking input profiles into chunks, don't change this (code really slows down!)
@@ -183,7 +195,8 @@ for iInd = 1 : iIndMax
   efreq   = double(p.efreq);
   emis    = double(p.emis);
 
-  zen_ang = double(p.scanang);
+  %%% zen_ang = double(p.scanang);      %% orig, gives very large average clr sky biases between SARTA and PCRTM
+  zen_ang = double(abs(p.satzen));  %% new and agrees much better with SARTA clear sky, Sergio 08/19/2015
 
   if run_sarta.co2ppm == -1
     %co2     = ones(size(p.stemp)) .* (370 + (yy(inds')-2002)*2.2);
@@ -210,6 +223,7 @@ for iInd = 1 : iIndMax
   %whos P WCT ICE cc TT q o3 Ps Ts sfctype efreq emis zen_ang co2 
   fprintf(1,'making PCRTM input file %s for iChunk %3i of %3i \n',parname,iInd,iIndMax)
 
+  %% note that internally this soubroutine uses abs(ncol) so if we use ncol0 = -1, we have ONE column
   [rad_allsky rad_clrsky tmpjunk] = PCRTM_compute_for_AIRS_spectra(nboxes,nlev, ncol, overlap, ...
                                                            P, WCT, ICT, cc, TT, q, o3, Ps, Ts, ...
                                                            sfctype,efreq,emis, ...
@@ -243,4 +257,6 @@ end
 
 % now overwrite p.rcalc and replace with pcrtm calcs
 p1ALL.rcalc = p1ALL.rad_allsky;
+p1ALL.rcalc_std = p1ALL.rad_allsky_std;
+p1ALL.co2ppm    = co2_all;
 
