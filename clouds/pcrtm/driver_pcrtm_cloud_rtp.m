@@ -1,4 +1,4 @@
-function [p1ALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_sarta)
+function [p1ALL,h1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_sarta)
 
 %     [this is based on xdriver_PCRTM_compute_for_AIRS_spectra_ERAorECMWF.m]
 %     [takes about 800 secs for 41 chans/2700 profiles]
@@ -150,7 +150,7 @@ overlap = run_sarta.overlap;
 [mmjunk,nnjunk] = size(p0ALL_inputLVLS.plevs);
 fprintf(1,'    >> size of plevs before padding INPUT prof struct = %5i x %5i \n',mmjunk,nnjunk)
 
-[h,p0ALL] = pad_upper_atm(h_inputLVLS,p0ALL_inputLVLS);
+[h,p0ALL,p_co2_n2o_co_ch4_pcrtm] = pad_upper_atm(h_inputLVLS,p0ALL_inputLVLS);
 
 [mmjunk,nnjunk] = size(p0ALL.plevs);
 fprintf(1,'    >> size of plevs after  padding INPUT prof struct = %5i x %5i \n',mmjunk,nnjunk)
@@ -310,8 +310,8 @@ for iInd = 1 : iIndMax
 %                                                           zen_ang, co2, parname,ppath,run_sarta);
   else
     disp('skipped PCRTM/MRO ... going straight on to SARTA 2S')
-    sarta_gas_2_6.co2 = 385.14;
-    sarta_gas_2_6.ch4 = 1.8;
+    sarta_gas_2_6.co2 = 385.848;
+    sarta_gas_2_6.ch4 = 1.843;
     
     rad_allsky     = zeros(2378,length(p.stemp));
     rad_clrsky     = zeros(2378,length(p.stemp));
@@ -358,7 +358,25 @@ if run_sarta.clear > 0
 end
 
 % now overwrite p.rcalc and replace with pcrtm calcs
-p1ALL.rcalc     = p1ALL.rad_allsky;
-p1ALL.rcalc_std = p1ALL.rad_allsky_std;
-p1ALL.co2ppm    = co2_all;
+p1ALL.rcalc       = p1ALL.rad_allsky;
+p1ALL.rcalc_std   = p1ALL.rad_allsky_std;
 
+%% in ppmv, GUNITS = 10
+for ij = 1 : length(p1ALL.stemp)
+  p1ALL.co2ppm_used(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_2(:,ij) * co2_all(ij)/385.848;
+  p1ALL.n2oppm_used(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_4(:,ij)
+  p1ALL.coppm_used(:,ij)  = p_co2_n2o_co_ch4_pcrtm.gas_5(:,ij)    
+  p1ALL.ch4ppm_used(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_6(:,ij) * sarta_gas_2_6.ch4/1.843;
+end
+
+addpath /asl/matlib/rtptools
+h1ALL  = h;
+h1aALL = ha;
+p1aALL = pa;
+p1aALL = set_attr(p1aALL,'sarta_clear',  run_sarta.sartaclear_code);
+p1aALL = set_attr(p1aALL,'sarta_cloud',  run_sarta.sartacloud_code);
+p1aALL = set_attr(p1aALL,'iUMichCO2',    num2str(run_sarta.iUMichCO2));
+p1aALL = set_attr(p1aALL,'cumsum',       num2str(run_sarta.cumsum));
+p1aALL = set_attr(p1aALL,'ncol0',        num2str(run_sarta.ncol0));
+p1aALL = set_attr(p1aALL,'co2ppm',       num2str(run_sarta.co2ppm));
+p1aALL = set_attr(p1aALL,'ForceNewSlabs',num2str(run_sarta.ForceNewSlabs));

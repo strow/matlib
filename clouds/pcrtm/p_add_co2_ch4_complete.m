@@ -1,11 +1,11 @@
 if iDoKlayersHard < 0   %% simple, just add in CO2 profiles
-  disp(' adding in ONLY co2/ch4 profile using current plevs')
-  p_add_co2_ch4_simple   %% loads in pcrtm CO2/CH4 and pressure profiles, and interpolates them onto p.plevs
+  disp(' adding in ONLY co2/n2o/co/ch4 profile using current plevs')
+  p_add_co2_ch4_simple   %% loads in pcrtm CO2/N2O/CO/CH4 and pressure profiles, and interpolates them onto p.plevs
 
 elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3,T form USSTD
-  disp(' adding in co2/ch4 profile using current plevs PLUS adding on info from top-of-input-plevs to 0.005 mb')
+  disp(' adding in co2/n2o/co/ch4 profile using current plevs PLUS adding on info from top-of-input-plevs to 0.005 mb')
   
-  p_add_co2_ch4_simple   %% loads in pcrtm CO2/CH4 and pressure profiles, and interpolates them onto p.plevs
+  p_add_co2_ch4_simple   %% loads in pcrtm CO2/N2O/CO/CH4 and pressure profiles, and interpolates them onto p.plevs
 
   %%%%%%%%%%%%%%%%%%%%%%%%%
   %%% NEW %%%
@@ -35,7 +35,9 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
   pxx.gxover(1,:) = ones(size(pxjunk.stemp)) * minp1;
   pxx.gxover(2,:) = ones(size(pxjunk.stemp)) * min(pcrtm_p);  
   pxx.gxover(3,:) = ones(size(pxjunk.stemp)) * minp1;
-  pxx.gxover(4,:) = ones(size(pxjunk.stemp)) * min(pcrtm_p);  
+  pxx.gxover(4,:) = ones(size(pxjunk.stemp)) * min(pcrtm_p);
+  pxx.gxover(5,:) = ones(size(pxjunk.stemp)) * min(pcrtm_p);
+  pxx.gxover(6,:) = ones(size(pxjunk.stemp)) * min(pcrtm_p);    
 
   %% initial replacement with current profile
   newpoints = find(pcrtm_p < minp1);
@@ -43,6 +45,8 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
   pxx.gas_1 = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.gas_1(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.gas_1;
   pxx.gas_2 = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.gas_2(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.gas_2;
   pxx.gas_3 = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.gas_3(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.gas_3;
+  pxx.gas_4 = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.gas_4(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.gas_4;
+  pxx.gas_5 = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.gas_5(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.gas_5;  
   pxx.gas_6 = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.gas_6(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.gas_6;  
   pxx.ptemp = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.ptemp(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.ptemp;
   pxx.plevs = ones(mmjunk+length(newpoints),nnjunk) * -9999; pxx.plevs(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.plevs;  
@@ -56,10 +60,12 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
     pxx.sarta_lvlODwater = ones(mmjunk+length(newpoints),nnjunk) * 0.0; pxx.sarta_lvlODwater(length(newpoints)+1:mmjunk+length(newpoints),:) = pxjunk.sarta_lvlODwater;
   end
 
-  %% add in CO2/CH4 profile from 1mb to TOA
+  %% add in CO2/N2O/CO/CH4 profile from 1mb to TOA
   pxx.nlevs = pxjunk.nlevs + length(newpoints);
   pxx.plevs(1:length(newpoints),:) = pcrtm_p(newpoints) * ones(1,nnjunk);
   pxx.gas_2(1:length(newpoints),:) = pcrtm(newpoints,1) * ones(1,nnjunk) * sarta_gas_2_6.co2/385.848;
+  pxx.gas_4(1:length(newpoints),:) = pcrtm(newpoints,1) * ones(1,nnjunk);
+  pxx.gas_5(1:length(newpoints),:) = pcrtm(newpoints,1) * ones(1,nnjunk);
   pxx.gas_6(1:length(newpoints),:) = pcrtm(newpoints,4) * ones(1,nnjunk) * sarta_gas_2_6.ch4/1.843;
 
   %% add in WV, O3, T  profile from 1mb to TOA
@@ -92,6 +98,8 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
   pxjunk.gas_1 = pxx.gas_1;
   pxjunk.gas_2 = pxx.gas_2;
   pxjunk.gas_3 = pxx.gas_3;
+  pxjunk.gas_4 = pxx.gas_4;
+  pxjunk.gas_5 = pxx.gas_5;  
   pxjunk.gas_6 = pxx.gas_6;  
   pxjunk.ptemp = pxx.ptemp;
   pxjunk.plevs = pxx.plevs;

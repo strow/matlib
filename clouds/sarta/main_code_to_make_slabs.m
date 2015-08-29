@@ -1,3 +1,8 @@
+%% input  h,p  (levels profile with cc,ciwc,clwc)
+%% output prof (levels profile with cc,ciwc,clwc, and slab cloud info cprtop,cngwat,cfrac,cpsize)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% first do some sanity checks
 
 oo = find(p.cc < 0);   p.cc(oo) = 0.0;

@@ -487,26 +487,26 @@ molindx_str = '     2,    2,      2,    2,      2,   2,      0,    0,    0,    0
 if iUMichCO2 > 0
   molindx_str = molindx_str;                %% unchanged
 
-  woo = num2str(nanmean(co2)/385.848,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = num2str(nanmean(co2)/385.848,'%10.4f');  %% 10.4f ==> 4 sig figs after decimal, 1 decimal, one sig fig before decimal == 6 char
   woo = woo(1:6);
-  scalfac_str(12:17) = woo;                 %% Xiuhong CO2 is 385 ppm at bottom of atmosphere
+  scalfac_str(12:17) = woo;                      %% Xiuhong CO2 is 385 ppm at bottom of atmosphere
   
-  woo = num2str(1.8/1.843,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = num2str(1.843/1.843,'%10.4f');           %% 10.4f ==> 4 sig figs after decimal, 1 decimal, one sig fig before decimal == 6 char
   woo = woo(1:6);
-  scalfac_str(39:44) = woo;                 %% Xiuhong CH4 is 1.843 ppm at bottom of atmosphere
+  scalfac_str(39:44) = woo;                      %% Xiuhong CH4 is 1.843 ppm at bottom of atmosphere
 
   sarta_gas_2_6.co2 = nanmean(co2);
-  sarta_gas_2_6.ch4 = 1.8;
+  sarta_gas_2_6.ch4 = 1.843;
 
 elseif iUMichCO2 < 0
 
   molindx_str(12:12) = num2str(1);          %% change from "2" to "1"
-  woo = num2str(nanmean(co2)/370.00,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = num2str(nanmean(co2)/370.00,'%10.4f');  %% 10.4f ==> 4 sig figs after decimal, 1 decimal, one sig fig before decimal == 6 char
   woo = woo(1:6);  
   scalfac_str(12:17) = woo;                 %% Xu Liu CO2 is 370 ppm at bottom of atmosphere
   
   molindx_str(39:39) = num2str(1);          %% change from "2" to "1"
-  woo = num2str(1.8/1.7,'%10.4f');  %% 10.4f ==> 4 sigfigs after decimal, 1 decimal, one sigfig before decimal == 6 char
+  woo = num2str(1.8/1.7,'%10.4f');  %% 10.4f ==> 4 sig figs after decimal, 1 decimal, one sig fig before decimal == 6 char
   woo = woo(1:6);
   scalfac_str(39:44) = woo;                 %% Xu Liu CH4 is 1.7 ppm
 

@@ -112,6 +112,7 @@ for j = 2 : npfields1;
   fname = pfields1{j};
   eval(sprintf('[m,n] = size(prof1.%s);', fname));
   if n ~= nprof1
+    fprintf(1,'prof1 structure : %s has size [m,n] = %3i %5i; nprof1 = %5i \n',fname,m,n,nprof1)
     error('prof1 structure fields must all have the same number of columns');
   end
 end
@@ -124,6 +125,7 @@ for j = 2 : npfields2;
   fname = pfields2{j};
   eval(sprintf('[m,n] = size(prof2.%s);', fname));
   if n ~= nprof2
+    fprintf(1,'prof2 structure : %s has size [m,n] = %3i %5i; nprof2 = %5i \n',fname,m,n,nprof2)  
     error('prof2 structure fields must all have the same number of columns');
   end
 end

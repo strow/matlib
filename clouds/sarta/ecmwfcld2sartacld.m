@@ -50,6 +50,10 @@ iDoPlot = -1;   %% do not plot stuff
 
 iPrint = +1;    %% do     print chirpy talky comments
 iPrint = -1;    %% do not print chirpy talky comments
+
+iMakeIceWaterCld = -1; %% old style for taking eg cc/ciwc/clwc and smoothing
+iMakeIceWaterCld = +1; %% new style for taking eg cc/ciwc/clwc and smoothing
+
 tic;
 
 jj = 0;
@@ -58,78 +62,12 @@ for iiiiA = 1:length(iiii)
   ii = iiii(iiiiA);
   jj = ii;
 
-  %%% this has all beeen superseded by stuff below *****************
-  iSmoothX = iSmooth;
-  blahW = profX.clwc(:,ii)/(max(profX.clwc(:,ii))+1e-16);
-  blahI = profX.ciwc(:,ii)/(max(profX.ciwc(:,ii))+1e-16);
-  numI = length(find(blahI > rGaussianCutoff*blahI));
-  numW = length(find(blahW > rGaussianCutoff*blahW));
-  iDo = -1;
-  if nlev > 20
-    if numI > 3 & numW > 3
-      iSmoothX = iSmooth;
-      iDo = +1;
-    elseif numW > 3 & numI == 0
-      iSmoothX = iSmooth;
-      iDo = +1;
-    elseif numI > 3 & numW == 0
-      iSmoothX = iSmooth;
-      iDo = +1;
-    else
-      iSmoothX = 0.5;
-      iSmoothX = 2;
-      iDo = -1;         %% no ice or water
-    end
-  end
-
-  if iDo > 0
-    % lots of points
-    [shiftedx,shiftedy,plevs]    = smooth1aa(1:nlev,profX.plevs(:,ii)',iSmoothX);
-    [shiftedx,shiftedy,watercld] = smooth1aa(1:nlev,profX.clwc(:,ii)' ,iSmoothX);
-    [shiftedx,shiftedy,icecld]   = smooth1aa(1:nlev,profX.ciwc(:,ii)' ,iSmoothX);
-
-    %npoly = 1;    nframe = 3;
-    %[sgplevs]    = sgolayfilt(double(profX.plevs(:,ii)') ,npoly,nframe);
-    %[sgwatercld] = sgolayfilt(double(profX.clwc(:,ii)')  ,npoly,nframe);
-    %[sgicecld]   = sgolayfilt(double(profX.ciwc(:,ii)')  ,npoly,nframe);
+  if iMakeIceWaterCld == -1
+    old_style_smooth_cc_ciwc_clwc_to_water_ice_profile
   else
-    % few points
-    plevs    = profX.plevs(:,ii);
-    watercld = profX.clwc(:,ii);
-    icecld   = profX.ciwc(:,ii);
+    new_style_smooth_cc_ciwc_clwc_to_water_ice_profile
   end
-
-  %%% above has all been superseded by *******************************
-  %%% this new code!!!!!!!!!!!!!!!!
-  %% slabs can be resolved better if there are more points
-  plevs = profX.plevs(:,ii);
-  if length(plevs < 80)
-    plevsX = (plevs(1:end-1) + plevs(2:end))/2;
-    plevs = sort([plevs; plevsX]);
-  end
-  if length(plevs < 80)
-    plevsX = (plevs(1:end-1) + plevs(2:end))/2;
-    plevs = sort([plevs; plevsX]);
-  end
-
-  if plevs(1) < plevs(10)
-    cut440 = find(plevs >= 440,1);
-  else
-    cut440 = find(plevs <= 440,1);
-  end
-
-  watercld = interp1(log10(profX.plevs(:,ii)),profX.clwc(:,ii),log10(plevs));
-  icecld   = interp1(log10(profX.plevs(:,ii)),profX.ciwc(:,ii),log10(plevs));
-  ptemp    = interp1(log10(profX.plevs(:,ii)),profX.ptemp(:,ii),log10(plevs));
-
-  if ~exist('aa','var')
-    aa = [];
-  end
-  aa = cloud_mean_press(aa,xcumsum,icecld,watercld,plevs,ii);
-
-  %%% above has all been superseded by *******************************
-  %%% this new code!!!!!!!!!!!!!!!!
-
+  
   [wOUT,wT,wB,wPeak,wN,wmaxN,wminN] = boxshape(watercld,rGaussianCutoff); newwater = wOUT;
   [iOUT,iT,iB,iPeak,iN,imaxN,iminN] = boxshape(icecld,rGaussianCutoff);   newice   = iOUT;
 
@@ -142,49 +80,8 @@ for iiiiA = 1:length(iiii)
     fprintf(1,' processed %5i in %8.6f minutes\n',ii,tnow/60);
   end
 
-  if iN > 3
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds4t3(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
-  end
-  if wN > 3
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds4t3(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);
-  end
-
-  if iN > 2
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
-    end
-  if wN > 2
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds3t2(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);
-  end
-
-  if ((iN == 1 & wN == 2) | (iN == 2 & wN == 1) | (iN == 2 & wN == 2))
-    if iN == 2
-      [iN,iOUT,iT,iB,iPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
-    end
-    if wN == 2
-      [wN,wOUT,wT,wB,wPeak] = combine_clouds2t1(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);  
-    end
-  end
-
-  [cT,cB,cOUT,cngwat,cTYPE,iFound] = combine_clouds(...
-              iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(:,ii),airslevels,airsheights);
-
-  if (length(cTYPE) >= 1)
-    for kk = 1 : length(cTYPE)
-      if cTYPE(kk) == 'I' & plevs(cT(kk)) > 440
-        cT(kk) = cut440 - 10;
-	if iPrint > 0
-          disp('warning had to reset ICE cloudtop, to make it less than 440 mb');
-	end
-      elseif cTYPE(kk) == 'W' & plevs(cT(kk)) < 440
-        cT(kk) = cut440 + 1;
-        cB(kk) = cB(kk)+3;
-	if iPrint > 0	
-          disp('warning had to reset WATER cloudtop, to make it more than 440 mb');
-	end
-      end
-    end
-  end
-
+  cloud_combine_main_code
+  
   prof = put_into_prof(prof,profX,ii,jj,plevs,ptemp,iLevsVers,...
                        cT,cB,cOUT,cngwat,cTYPE,iFound,airslevels,airsheights);
 
@@ -210,6 +107,7 @@ for iiiiA = 1:length(iiii)
     keyboard
   end
 %}
+
 end    %% loop over iiiiA
 
 %% put in the cloud cumulative fraction info, so that it can be used if necessary by "reset_cprtop"

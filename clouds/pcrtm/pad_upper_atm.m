@@ -1,4 +1,18 @@
-function [hx,p0ALL] = pad_upper_atm(h,p0ALL_inputLVLS);
+function [hx,p0ALL,p_co2_n2o_co_ch4_pcrtm] = pad_upper_atm(h,p0ALL_inputLVLS);
+
+%% input
+%%   h,p0ALL_inputLVLS are input header, profile (levels)
+%%   typically p0ALL_inputLVLS geophysical is ERA or ECM, upto 1 mb
+%% output
+%%   hx = h, but with pmin reset to 0.005 mb
+%%   p0ALL has US STd profiles for ptemp,gas_1 and gas_3 tacked on   between 1 mb to 0.005 mb
+%%                                 cc,ciwc,clwc          set to zero between 1 mb to 0.005 mb
+%%                                 nlevs typically increased by a few points (eg from 60 to 64 for ERA)
+%%                                 txover,gxover   reset
+%%      quite a few fields removed, as they will be reset while running this code eg rad_allsky_std, rad_allsky etc
+%%   p_co2_n2o_co_ch4_pcrtm are the PCRTM CO2,N2O,CO,CH4 profile at the same pressure levels as are now in p0ALL, at default gnd 385.84,1.843 ppmv 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 p0ALL = p0ALL_inputLVLS;
 
@@ -76,7 +90,6 @@ for iijunk = 1 : length(p0ALL.stemp)
   woo0 = interp1(log(Pressure(boo)),O3(boo),log(p0ALL.plevs(1,iijunk)),    'linear','extrap');
   offset = p0ALL.gas_3(1,iijunk) ./ woo0;
   pxx.gas_3(1:length(newpoints),iijunk) = woo * offset;
-
 end
 
 p0ALL.gxover = pxx.gxover;
@@ -98,6 +111,47 @@ end
 
 hx      = h;
 hx.pmin = min(pcrtm_p);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% add in CO2/N2O/CH4
+%% see p_add_co2_ch4_simple.m
+pxjunk = struct;
+pxjunk.stemp = p0ALL.stemp;
+pxjunk.nlevs = p0ALL.nlevs;
+pxjunk.plevs = p0ALL.plevs;
+pxjunk.ptemp = p0ALL.ptemp;
+for iijunk = 1 : length(pxjunk.stemp)
+  nlevs = pxjunk.nlevs(iijunk);
+  boo   = pxjunk.plevs(:,iijunk);
+
+  %% co2 = 385.848 ppm at GND
+  junk = interp1(log10(pcrtm_p),pcrtm(:,1),log10(pxjunk.plevs(1:nlevs,iijunk)),'linear','extrap');
+  junky = ones(length(boo),1) * -9999;
+  junky(1:nlevs) = junk;
+  pxjunk.gas_2(:,iijunk) = junky;
+
+  %% n2o
+  junk = interp1(log10(pcrtm_p),pcrtm(:,2),log10(pxjunk.plevs(1:nlevs,iijunk)),'linear','extrap');
+  junky = ones(length(boo),1) * -9999;
+  junky(1:nlevs) = junk;
+  pxjunk.gas_4(:,iijunk) = junky;	    
+
+  %% co
+  junk = interp1(log10(pcrtm_p),pcrtm(:,3),log10(pxjunk.plevs(1:nlevs,iijunk)),'linear','extrap');
+  junky = ones(length(boo),1) * -9999;
+  junky(1:nlevs) = junk;
+  pxjunk.gas_5(:,iijunk) = junky;	    
+
+  %% ch4 = 1.843 ppm at GND
+  junk = interp1(log10(pcrtm_p),pcrtm(:,4),log10(pxjunk.plevs(1:nlevs,iijunk)),'linear','extrap');
+  junky = ones(length(boo),1) * -9999;
+  junky(1:nlevs) = junk;
+  pxjunk.gas_6(:,iijunk) = junky;	    
+
+end
+p_co2_n2o_co_ch4_pcrtm = pxjunk;
+%% add in CO2/N2O/CO/CH4
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %{
 did not find field nrho

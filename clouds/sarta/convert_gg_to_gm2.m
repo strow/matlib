@@ -1,11 +1,18 @@
-function [cngwat_sarta cT cB] = convert_gg_to_gm2(cT,cB,cngwat_ecmwf,rlevs,tlevs,airslevels,airsheights) 
+function [cngwat_g_per_m2_sarta cT cB] = convert_gg_to_gm2(cT,cB,ciwc_clwc_gg_ecmwf,plevs,tlevs,airslevels,airsheights) 
 
-%% changes the [cT,cB,cngwat_ecmwf,rlevs,tlevs] from ECMWF (in kg/kg) to g/m2
-%% where cT,cB         = level number for cloud tops, cloud bottoms
-%%        cngwat_ecmwf = cumulative cloud amt in ECMWF units (kg/kg)
-%%        rlevs,tlevs  = pressure levels and level temps from ECMWF
-%%        cngwat_sarta = cumulative cloud amt in SARTA units (g/m2)
-%%        
+%% this is the conversion from ERA/ECM total profile g/g to SARTA slab g/m2
+%%
+%% changes the [cT,cB,ciwc_clwc_gg_ecmwf,plevs,tlevs] from ECMWF (in g/g) to g/m2
+%%
+%% input
+%%        cT,cB              = level number for cloud tops, cloud bottoms
+%%        ciwc_clwc_gg_ecmwf = cumulative (total) cloud amt in ECMWF units (g/g)
+%%        plevs,tlevs        = pressure levels and level temps from ECMWF
+%% output
+%%        cngwat_g_per_m2_sarta = cumulative (total) cloud amt in SARTA units (g/m2)
+%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% see /asl/packages/klayersV204/Doc/mr_from_amount.txt
 %% Values of important constants: 
 %%   Loschmidt = 2.6867775E+19 molecules per cm^3 (at 1 atm and 273.15 K)
@@ -15,19 +22,28 @@ function [cngwat_sarta cT cB] = convert_gg_to_gm2(cT,cB,cngwat_ecmwf,rlevs,tlevs
 %% For a homogeneous air path, the relationship between column density
 %% and mixing ratio is:
 %%    CD_i = PP_i/kAvogadro * dz *  T0/T * Loschmidt    where
-%%      PP_i = MR_i * Ptotal 
-%%      CD_i is the column density of gas "i" (kilomoles/cm^2)
-%%      PP_i is the partial pressure of gas "i" (atm)
-%%      dz is the pathlength (cm)
-%%      T is the gas temperature (K)
 %%      MR_i is the volume mixing ratio of gas "i" expressed as the
 %%        number of gas "i" molecules per total number of molecules
 %%        making up the air.
 %%      Ptotal is the total air pressure (atm)
-
-%% according to me, 
-%%    CD_i = PP_i/P0 * dz *  T0/T * Loschmidt / kAvogadro 
-%% proof : Po Vo = No k To  where Po, Vo, To = STP values
+%%   so PP_i = MR_i * Ptotal
+%%           = the partial pressure of gas "i" (atm)
+%%      CD_i is the column density of gas "i" (kilomoles/cm^2)
+%%      dz is the pathlength (cm)
+%%      T is the gas temperature (K)
+%%
+%% according to me,
+%%    ---------------------------------------------------
+%%    CD_i = PP_i/P0 * dz *  T0/T * Loschmidt / kAvogadro
+%%    ---------------------------------------------------
+%% proof 1 : by units/ PP_i/PP and T0/T have no units
+%%           dz = units of cm
+%%           Loschmiddt / Avogadro = molecules per cm3 / molecules per kilmole
+%%                                 = kilomole per cm3
+%%           Thus [] [cm] [] [mol/cm3] = kilomol/cm2
+%%                                CD_i = column density of gas "i" (kilomoles/cm^2)
+%% 
+%% proof 2 : Po Vo = No k To  where Po, Vo, To = STP values
 %%         Lo = loschmidt number = No/Vo = Po/(kTo) = 2.6867775E+19 mols/cm^3
 %% also at level z, pV = N k T = n NN k T        N  = number of molecules
 %%                                               NN = Avogadro number
@@ -37,39 +53,41 @@ function [cngwat_sarta cT cB] = convert_gg_to_gm2(cT,cB,cngwat_ecmwf,rlevs,tlevs
 %%                                               NN'= kiloAvogadro
 %%             thus n'/A = kilomoles/cm2 =  p dz/(NN' k T)
 %% but Po Vo = No k To 
-%%     p  V  = No k T  ==> 1/(kT) = No/(pV) = Lo Vo / (pV) = Lo/p Vo/V
+%%     p  V  = No k T           ==> 1/(kT) = No/(pV)
+%%  Recall Loschmidt Lo = No/Vo ==> 1/(kT) = Lo Vo / (pV) = Lo/p Vo/V
 %% Using Po Vo / To = p V / T we have  =  Vo/V = pTo/(PoT)
-
+%%
 %% Thus 1   = Lo p To
 %      ---    -------
 %      kT      p Po T
-
+%%
 %% which means n'     p dz     p dz  Lo p To    p   Lo  To  dz
 %%             -- = ------- =  ---- --------  = -- ---- --
 %%             A    NN' k T     NN' p  Po  T    Po  NN' T
-
+%%
 %% Looking at /asl/packages/klayersV204/Src/toppmv.f
-%% C               PPMV = MRgg*(MDAIR/MASSF)*1E+6      MDAIR=28.966 g/mol
-%%                                                     MASSF=18     g/mol
-
-Loschmidt = 2.6867775E+19; %molecules per cm^3 (at 1 atm and 273.15 K)
-kAvogadro = 6.022142E+26;  %molecules per kilomole
-T0 = 273.15;
-P0 = 1013.5;
+%%                 PPMV = MRgg*(MDAIR/MASSF)*1E+6      MDAIR = 28.966 g/mol
+%%                                                     MASSF = 18     g/mol
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % load airslevels.dat
+
+Loschmidt = 2.6867775E+19; % molecules per cm^3 (at 1 atm and 273.15 K)
+kAvogadro = 6.022142E+26;  % molecules per kilomole
+T0        = 273.15;        % Kelvin
+P0        = 1013.5;        % mb
 
 MDAIR = 28.966; % g/mol
 MASSF = 18;     % g/mol for both water and ice!
 
 for ii = 1 : length(cT)
 
-  if cB(ii) > length(rlevs)
-    cB(ii) = length(rlevs);
+  if cB(ii) > length(plevs)
+    cB(ii) = length(plevs);
   end
 
-  if cT(ii) > length(rlevs)
-    cT(ii) = length(rlevs);
+  if cT(ii) > length(plevs)
+    cT(ii) = length(plevs);
   end
 
   if (cT(ii) == cB(ii))
@@ -85,24 +103,21 @@ for ii = 1 : length(cT)
   end
 
   %% WRONG as this is INTEGRATED amount
-  %% mr = cngwat_ecmwf(ii);   
+  %% mr = ciwc_clwc_gg_ecmwf(ii);   
 
   %% CORRECT  : need to go back to "mr per layer"
-  mr = cngwat_ecmwf(ii)/(cB(ii)-cT(ii)+1);
+  mr = ciwc_clwc_gg_ecmwf(ii)/(cB(ii)-cT(ii)+1);
 
-  tnew = interp1(log(rlevs),tlevs,log(airslevels),'spline','extrap');
-  jjT = find(airslevels <= rlevs(cT(ii))); jjT = min(jjT);
-  jjB = find(airslevels >= rlevs(cB(ii))); jjB = max(jjB);
+  tnew = interp1(log(plevs),tlevs,log(airslevels),'spline','extrap');
+  jjT = find(airslevels <= plevs(cT(ii))); jjT = min(jjT);
+  jjB = find(airslevels >= plevs(cB(ii))); jjB = max(jjB);
   jj = [jjB : jjT];
 
-  pB = rlevs(cB(ii));
-  pT = rlevs(cT(ii));
-
-  clear g_m2new sum_g_m2new
-  g_m2new = 0;
-  sum_g_m2new = 0.0;
   iDoSum = -1;
   if iDoSum > 0
+    clear g_m2new sum_g_m2new
+    g_m2new     = 0.0;
+    sum_g_m2new = 0.0;
     for jjind = 1 : length(jj)
       pB = airslevels(jj(jjind));
       pT = airslevels(jj(jjind)+1);
@@ -121,40 +136,40 @@ for ii = 1 : length(cT)
       pp = ppmv/1e6 * pnew;  %%% use volume mix ratio rather than ppmv
       num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Tnew * dz;
       %%kilomoles -> moles, cm2 -> m2
-      g_m2new(jjind) = num_kmoles_percm2*1000*MASSF*10000;  
+      g_m2new(jjind) = num_kmoles_percm2 * 1000 * MASSF * 10000;  
     end
+    sum_g_m2new = sum(g_m2new);  
   end
-  sum_g_m2new = sum(g_m2new);
 
-  pB = rlevs(cB(ii));
-  pT = rlevs(cT(ii));
-  pold  = pB - (pB-pT)/2;
+  pB = plevs(cB(ii));
+  pT = plevs(cT(ii));
   pnew = (pB-pT)/log(pB/pT);
-  [pT pB pold pnew];
+  % pold  = pB - (pB-pT)/2;  
+  % [pT pB pold pnew];
 
   tB = tlevs(cB(ii));
   tT = tlevs(cT(ii));
-  Told  = tB - (tB-tT)/2;
   slope = (tB-tT)/(log(pB)-log(pT));
   Tnew = tB - slope*(log(pB)-log(pnew));
-  [tT tB Told Tnew];
+  % Told  = tB - (tB-tT)/2;  
+  % [tT tB Told Tnew];
 
   hB = p2hFAST(pB,airslevels,airsheights);
   hT = p2hFAST(pT,airslevels,airsheights);
   dz = (hT - hB)*100;
 
-  ppmv = mr * (MDAIR/MASSF)*1E+6;
-  pp = ppmv/1e6 * pold;  %%% use volume mix ratio rather than ppmv
-  num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Told * dz;
-  g_m2old = num_kmoles_percm2*1000*MASSF*10000; %% kilomoles -> moles, cm2 -> m2
+  % ppmv    = mr * (MDAIR/MASSF)*1E+6;
+  % pp      = ppmv/1e6 * pold;                    %% use volume mix ratio rather than ppmv
+  % num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Told * dz;  %% kilomole/cm2
+  % g_m2old = num_kmoles_percm2*1000*MASSF*10000; %% kilomoles -> moles, cm2 -> m2
 
-  ppmv = mr * (MDAIR/MASSF)*1E+6;
-  pp = ppmv/1e6 * pnew;  %%% use volume mix ratio rather than ppmv
-  num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Tnew * dz;
-  g_m2new = num_kmoles_percm2*1000*MASSF*10000; %% kilomoles -> moles, cm2 -> m2
+  ppmv    = mr * (MDAIR/MASSF) * 1E+6;
+  pp      = ppmv/1e6 * pnew;                      %% use volume mix ratio rather than ppmv
+  num_kmoles_percm2 = pp/P0 * Loschmidt/kAvogadro * T0/Tnew * dz;  %% kilomole/cm2
+  g_m2new = num_kmoles_percm2*1000*MASSF*10000;   %% kilomoles -> moles, cm2 -> m2
 
   g_m2 = g_m2new;
-  cngwat_sarta(ii) = g_m2;
+  cngwat_g_per_m2_sarta(ii) = g_m2;
 
   %format short e
   %[mr g_m2 g_m2new sum_g_m2new]

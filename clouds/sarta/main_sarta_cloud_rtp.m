@@ -92,44 +92,15 @@ addpath([base_dir2 '/h4tools'])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+pINPUT = p;
+
 %% defaults
 check_sarta_cloud_rtp_defaults
 
 %% turn profiles into slabs
 main_code_to_make_slabs
 
-%% add on co2
-prof_add_co2
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% now turn off ice, change water!!!!!!!!
-%% this is kinda doing what "driver_sarta_cloud_rtp_onecldtest.m" is meant to do
-if run_sarta.waterORice ~= 0
-  [prof,index] = only_waterORice_cloud(h,prof,run_sarta.waterORice);
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-if run_sarta.clear > 0 
-  disp('running SARTA clear, saving into rclearcalc')
-  tic
-  get_sarta_clear;
-  toc
-  prof.sarta_rclearcalc = profRX2.rcalc;
-else
-  disp('you did not ask for SARTA clear to be run; not changing p.sarta_rclearcalc')  
-end
-
-if run_sarta.cloud > 0 
-  disp('running SARTA cloud')
-  tic
-  get_sarta_cloud;
-  toc
-  prof.rcalc = profRX2.rcalc;
-else
-  disp('you did not ask for SARTA cloudy to be run; not changing p.rcalc')
-end
+main_compute_sarta_rads
 
 tnow = toc;
 fprintf(1,'TOTAL : %8.6f minutes to process \n',tnow/60);

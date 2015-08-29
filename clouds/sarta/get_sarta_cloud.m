@@ -1,6 +1,10 @@
 %% these are required but user needs to add them before using this code
 %% addpath /asl/matlib/aslutil/
 
+disp(' ')
+fprintf(1,'  doing cloud sky SARTA calcs ....\n')
+fprintf(1,'    sarta cloud = %s \n',run_sarta.sartacloud_code);
+
 klayers = run_sarta.klayers_code;
 sarta   = run_sarta.sartacloud_code;
 

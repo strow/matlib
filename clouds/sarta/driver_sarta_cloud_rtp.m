@@ -142,6 +142,8 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+pINPUT = p;
+
 if run_sarta.ForceNewSlabs > 0
   %% force the making of new slab clouds
   disp(' >>>> even though slab cloud params already exist, run_sarta.ForceNewSlabs > 0 ==> make new slab clouds')
@@ -152,39 +154,11 @@ if iAlreadyExistSlabClds < 0
   %% need to add in slab cloud fields
   disp(' >>>>>>>>>>>>> adding in slab cloud fields <<<<<<<<<<<<<<<<<')
   prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta); 
-
 elseif iAlreadyExistSlabClds > 0
   %% slab cloud fields already exist, just run klayers and sarta
   disp(' >>>>>>>>>>>>> slab cloud fields already exist; simply running klayers and sarta <<<<<<<<<<<<<<<<<')  
-
   prof = p;
-  prof_add_co2
-
-  %% now turn off ice, change water!!!!!!!!
-  %% this is kinda doing what "driver_sarta_cloud_rtp_onecldtest.m" is meant to do
-  if run_sarta.waterORice ~= 0
-    [prof,index_kept] = only_waterORice_cloud(h,prof,run_sarta.waterORice);
-  end
-
-  if run_sarta.clear > 0 
-    disp('running SARTA clear, saving into rclearcalc')
-    tic
-    get_sarta_clear;
-    toc
-    prof.sarta_rclearcalc = profRX2.rcalc;
-  else
-    disp('you did not ask for SARTA clear to be run; not changing p.sarta_rclearcalc')
-  end
-  
-  if run_sarta.cloud > 0 
-    disp('running SARTA cloud')
-    tic
-    get_sarta_cloud;
-    toc
-    prof.rcalc = profRX2.rcalc;
-  else
-    disp('you did not ask for SARTA cloudy to be run; not changing p.rcalc')
-  end
+  main_compute_sarta_rads
 end
 
 tnow = toc;

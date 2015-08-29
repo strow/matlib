@@ -1,9 +1,14 @@
-function [y1,y2] = compare_slabVSprofile(p,ii1,ii2)
+function [y1,y2] = compare_slabVSprofile(p,ii1,ii2,figno)
 
-%% this script assume you have profile "p" and allows you to compare slab vs cloud profile for water and ice
+%% this script assume you have profile "p" and allows you to compare slab vs cloud for water and ice, for the ii1-th and ii2-th fovs
 
-% ii = input('Enter profile number : ');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if nargin == 3
+  figno = 1;
+end
+
+figure(figno); clf;
 
 ii = ii1;
 

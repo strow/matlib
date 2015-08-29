@@ -29,8 +29,10 @@ ibad = find(prof.cfrac12 > prof.cfrac | prof.cfrac12 > prof.cfrac2);
 ibadlist = [ibadlist ibad];
 iNotOK = iNotOK + length(ibad);
 prof.cfrac12(ibad) = min(prof.cfrac(ibad), prof.cfrac2(ibad));
-fprintf(1,'  stage1 : fixing  %6i        ibad cfracs \n',length(ibad));
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;
+  fprintf(1,'  stage1 : fixing  %6i        ibad cfracs \n',length(ibad));
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
 %% need cprtop > 0
 ibad = find(prof.cprtop <= 0 & prof.cprbot > 0);
@@ -43,8 +45,10 @@ ibadlist = [ibadlist ibad2];
 iNotOK = iNotOK + length(ibad2);
 prof.cprtop2(ibad2) = prof.cprtop2(ibad2) + 50;
 prof.cprbot2(ibad2) = prof.cprbot2(ibad2) + 50;
-fprintf(1,'  stage2 : fixing  %6i %6i ibad cprtop < 0, cprbot > 0 \n',length(ibad),length(ibad2));
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;
+  fprintf(1,'  stage2 : fixing  %6i %6i ibad cprtop < 0, cprbot > 0 \n',length(ibad),length(ibad2));
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
 %% need cprbot > 0, added Nov 14, 2014
 ibad = find(prof.cprbot <= 0 & prof.cprtop > 0);
@@ -56,14 +60,18 @@ ibad2 = find(prof.cprbot2 <= 0 & prof.cprtop2 > 0);
 ibadlist = [ibadlist ibad2];
 iNotOK = iNotOK + length(ibad2);
 prof.cprbot2(ibad2) = prof.cprtop2(ibad2) + 50;
-fprintf(1,'  stage2A :fixing  %6i %6i ibad cprbot < 0, cprtop > 0 \n',length(ibad),length(ibad2));
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;
+  fprintf(1,'  stage2A :fixing  %6i %6i ibad cprbot < 0, cprtop > 0 \n',length(ibad),length(ibad2));
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
 %% need cprbot < cprtop2 
 %% need to be smart about this ... mebbe everything is OK, just need to swap the cloud fields
 %% new, added Nov 15, 2014
 ibadX = find(prof.cprbot >= prof.cprtop2 & prof.cprtop > 0 & prof.cprbot > 0 & prof.cprtop2 > 0 & prof.cngwat > 0 & prof.cngwat2 > 0);
-fprintf(1,'  stage3X : fixing  %6i        ibad cprbot > cprtop2 \n',length(ibadX));
+if iDebug > 0
+  fprintf(1,'  stage3X : fixing  %6i        ibad cprbot > cprtop2 \n',length(ibadX));
+end
 for ii = 1 : length(ibadX)
   if prof.cprtop(ibadX(ii)) < prof.cprbot(ibadX(ii)) & prof.cprtop2(ibadX(ii)) < prof.cprbot2(ibadX(ii)) & ...
      prof.cprbot(ibadX(ii)) > prof.cprtop2(ibadX(ii))
@@ -90,8 +98,10 @@ ibadlist = [ibadlist ibad];
 iNotOK = iNotOK + length(ibad);
 junk = prof.cprbot(ibad);
 prof.cprbot(ibad) = prof.cprtop2(ibad)-10;
-fprintf(1,'  stage3  : fixing  %6i        ibad cprbot > cprtop2 \n',length(ibad));
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;
+  fprintf(1,'  stage3  : fixing  %6i        ibad cprbot > cprtop2 \n',length(ibad));
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
 % need cprtop < spres
 ibad = find(prof.cprtop >= prof.spres & prof.cprtop > 0);
@@ -100,9 +110,11 @@ prof.cprtop(ibad) = prof.spres(ibad)-50;
 ibad2 = find(prof.cprtop2 >= prof.spres & prof.cprtop2 > 0);
 ibadlist = [ibadlist ibad2];
 prof.cprtop2(ibad2) = prof.spres(ibad2)-50;
-fprintf(1,'  stage4 : fixing  %6i %6i ibad cprtop > spres \n',length(ibad),length(ibad2));
 iNotOK = iNotOK + length(ibad) + length(ibad2);
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;  
+  fprintf(1,'  stage4 : fixing  %6i %6i ibad cprtop > spres \n',length(ibad),length(ibad2));
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
 %% need cprbot < spres
 ibad = find(prof.cprbot >= prof.spres & prof.cprbot > 0);
@@ -111,9 +123,11 @@ prof.cprbot(ibad) = prof.spres(ibad)-25;
 ibad2 = find(prof.cprbot2 >= prof.spres & prof.cprbot2 > 0);
 ibadlist = [ibadlist ibad2];
 prof.cprbot2(ibad2) = prof.spres(ibad2)-25;
-fprintf(1,'  stage5 : fixing  %6i %6i ibad cprbot > spres \n',length(ibad),length(ibad2));
 iNotOK = iNotOK + length(ibad) + length(ibad2);
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;
+  fprintf(1,'  stage5 : fixing  %6i %6i ibad cprbot > spres \n',length(ibad),length(ibad2));
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
 %% need cprtop < cprbot
 ibad = find(prof.cprtop >= prof.cprbot & prof.cprtop > 0 & prof.cprbot > 0);
@@ -130,9 +144,11 @@ if iFixLoop > 5
 else
   prof.cprbot2(ibad) = prof.cprtop2(ibad)+25;
 end
-fprintf(1,'  stage6 : fixing  %6i %6i ibad cprtop > cprbot \n',length(ibad),length(ibad2));
 iNotOK = iNotOK + length(ibad) + length(ibad2);
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;
+  fprintf(1,'  stage6 : fixing  %6i %6i ibad cprtop > cprbot \n',length(ibad),length(ibad2));
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
 ibadlist = unique(ibadlist);
 
@@ -192,5 +208,7 @@ if iFixLoop >= 10 & iNotOK > 0
  end
 end
 
-if iDebug > 0;  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause; end
+if iDebug > 0;
+  plot_hists_cprtop_cprtop2; disp('ret to continue'); pause;
+end
 
