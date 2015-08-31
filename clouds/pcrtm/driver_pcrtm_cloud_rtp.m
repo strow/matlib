@@ -1,5 +1,6 @@
-function [p1ALL,h1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_sarta)
+function [h1ALL,h1aALL,p1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_sarta)
 
+% function [h1ALL,h1aALL,p1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0ALL_inputLVLS,pa,run_sarta)
 %     [this is based on xdriver_PCRTM_compute_for_AIRS_spectra_ERAorECMWF.m]
 %     [takes about 800 secs for 41 chans/2700 profiles]
 %
@@ -82,6 +83,32 @@ addpath([base_dir2 '/rtptools'])
 addpath([base_dir2 '/aslutil'])
 addpath([base_dir2 '/science'])
 addpath([base_dir2 '/h4tools'])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if h_inputLVLS.ngas ~= 2
+  disp('warning expecting TWO input gases (gas_1 and gas_3) ... if you added in gases 2,4,5 or 6, will replace them with PCRTM profiles ....');
+end
+
+if h_inputLVLS.ptype ~= 0
+  error('expecting levels profile (h.ptype == 0) ');
+end
+
+[ijunk,iajunk,ibjunk] = intersect(h_inputLVLS.glist,1);
+if length(ijunk) ~= 1
+  error('expecting one of the iunput gases to be gas_1');
+end
+if h_inputLVLS.glist(iajunk) ~= 1 | h_inputLVLS.gunit(iajunk) ~= 21
+  error('expecting gas_1 in g/g');
+end
+
+[ijunk,iajunk,ibjunk] = intersect(h_inputLVLS.glist,3);
+if length(ijunk) ~= 1
+  error('expecting one of the iunput gases to be gas_3');
+end
+if h_inputLVLS.glist(iajunk) ~= 3 | h_inputLVLS.gunit(iajunk) ~= 21
+  error('expecting gas_3 in g/g');
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -357,21 +384,28 @@ if run_sarta.clear > 0
   disp('added on sarta clear calcs');
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+addpath /asl/matlib/rtptools
+h1ALL       = h;
+h1ALL.ngas  = 6;
+h1ALL.glist = [ 1  2  3  4  5  6]';
+h1ALL.gunit = [21 10 21 10 10 10]';
+h1ALL.pmin  = min(min(p1ALL.plevs));
+h1aALL      = ha;
+
 % now overwrite p.rcalc and replace with pcrtm calcs
 p1ALL.rcalc       = p1ALL.rad_allsky;
 p1ALL.rcalc_std   = p1ALL.rad_allsky_std;
 
 %% in ppmv, GUNITS = 10
 for ij = 1 : length(p1ALL.stemp)
-  p1ALL.co2ppm_used(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_2(:,ij) * co2_all(ij)/385.848;
-  p1ALL.n2oppm_used(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_4(:,ij)
-  p1ALL.coppm_used(:,ij)  = p_co2_n2o_co_ch4_pcrtm.gas_5(:,ij)    
-  p1ALL.ch4ppm_used(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_6(:,ij) * sarta_gas_2_6.ch4/1.843;
+  p1ALL.gas_2(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_2(:,ij) * co2_all(ij)/385.848;
+  p1ALL.gas_4(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_4(:,ij)
+  p1ALL.gas_5(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_5(:,ij)    
+  p1ALL.gas_6(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_6(:,ij) * sarta_gas_2_6.ch4/1.843;
 end
 
-addpath /asl/matlib/rtptools
-h1ALL  = h;
-h1aALL = ha;
 p1aALL = pa;
 p1aALL = set_attr(p1aALL,'sarta_clear',  run_sarta.sartaclear_code);
 p1aALL = set_attr(p1aALL,'sarta_cloud',  run_sarta.sartacloud_code);

@@ -14,6 +14,11 @@ function [hx,p0ALL,p_co2_n2o_co_ch4_pcrtm] = pad_upper_atm(h,p0ALL_inputLVLS);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+i2 = -1;  %% assume no CO2 in input profile
+i4 = -1;  %% assume no N2O in input profile
+i5 = -1;  %% assume no CO  in input profile
+i6 = -1;  %% assume no CH4 in input profile
+
 p0ALL = p0ALL_inputLVLS;
 
 %% does part of the jobs of get_sarta_clear2, get_sarta_clear2 by adding in UpperAtm info (except for CO2/CH4)
@@ -120,6 +125,24 @@ pxjunk.stemp = p0ALL.stemp;
 pxjunk.nlevs = p0ALL.nlevs;
 pxjunk.plevs = p0ALL.plevs;
 pxjunk.ptemp = p0ALL.ptemp;
+
+if length(intersect(hx.glist,2)) == 1
+  disp('oh oh : you have supplied input CO2 profile which will be overwritten here!');
+  i2 = +1;
+end
+if length(intersect(hx.glist,4)) == 1
+  disp('oh oh : you have supplied input N2O profile which will be overwritten here!');
+  i4 = +1;
+end
+if length(intersect(hx.glist,5)) == 1
+  disp('oh oh : you have supplied input CO   profile which will be overwritten here!');
+  i5 = +1;
+end  
+if length(intersect(hx.glist,6)) == 1
+  disp('oh oh : you have supplied input CH4 profile which will be overwritten here!');
+  i6 = +1;
+end  
+
 for iijunk = 1 : length(pxjunk.stemp)
   nlevs = pxjunk.nlevs(iijunk);
   boo   = pxjunk.plevs(:,iijunk);
@@ -147,10 +170,34 @@ for iijunk = 1 : length(pxjunk.stemp)
   junky = ones(length(boo),1) * -9999;
   junky(1:nlevs) = junk;
   pxjunk.gas_6(:,iijunk) = junky;	    
-
 end
 p_co2_n2o_co_ch4_pcrtm = pxjunk;
 %% add in CO2/N2O/CO/CH4
+
+if i2 > 0
+  thediff = 1 - p0ALL.gas_2 ./ pxjunk.gas_2;
+  thediff = nanmean(nanmean(thediff));
+  fprintf(1,'mean ratio diff   1 - (input CO2/PCRTM CO2) = %8.6f \n',thediff);
+  if (abs(thediff-1) > eps)
+    disp('could be that PCRTM default is 385.848 ppm and you had previously asked for eg 385 ppm')
+  end
+end
+if i2 > 0
+  thediff = 1 - p0ALL.gas_4 ./ pxjunk.gas_4;
+  thediff = nanmean(nanmean(thediff));
+  fprintf(1,'mean ratio diff   1 - (input N2O/PCRTM N2O) = %8.6f \n',thediff);
+end
+if i2 > 0
+  thediff = 1 - p0ALL.gas_5 ./ pxjunk.gas_5;
+  thediff = nanmean(nanmean(thediff));
+  fprintf(1,'mean ratio diff   1 - (input CO/PCRTM CO) = %8.6f \n',thediff);
+end
+if i6 > 0
+  thediff = 1 - p0ALL.gas_6 ./ pxjunk.gas_6;
+  thediff = nanmean(nanmean(thediff));
+  fprintf(1,'mean ratio diff   1 - (input CH4/PCRTM CH4) = %8.6f \n',thediff);
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %{

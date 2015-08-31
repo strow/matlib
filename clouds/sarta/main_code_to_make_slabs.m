@@ -4,11 +4,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% first do some sanity checks
-
-oo = find(p.cc < 0);   p.cc(oo) = 0.0;
-oo = find(p.cc > 1);   p.cc(oo) = 1.0;
-oo = find(p.ciwc < 0); p.ciwc(oo) = 0.0;
-oo = find(p.clwc < 0); p.clwc(oo) = 0.0;
+badcc0  = find(p.cc < 0);   p.cc(badcc0) = 0;
+badcc1  = find(p.cc > 1);   p.cc(badcc1) = 1;
+badciwc = find(p.ciwc < 0); p.ciwc(badciwc) = 0;
+badclwc = find(p.clwc < 0); p.clwc(badclwc) = 0;
+junk = [length(badcc0) length(badcc1) length(badciwc) length(badclwc)];
+fprintf(1,'found %4i/%4i cc <0/1> %4i/%4i negative ciwc/clwc \n',junk);
 
 if sum(size(p.ptemp) - size(p.cc)) ~= 0 | sum(size(p.ptemp) - size(p.ciwc)) ~= 0 | sum(size(p.ptemp) - size(p.clwc)) ~= 0
   pjunk.cc    = p.cc;
