@@ -24,7 +24,17 @@ if length(oo) > 0
   profX.cfrac(oo) = 1;
   fprintf(1,'set_fracs_deffs : %5i profX.cfrac > 1 \n',length(oo))
 end
-tcc = profX.cfrac;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% tcc = profX.cfrac;     %% bad, before Aug 2015
+%%%%%% tcc = profX.cfrac;     %% bad, before Aug 2015
+%%%%%% tcc = profX.cfrac;     %% bad, before Aug 2015
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if ~isfield(profX,'tcc')
+  error('looking for tcc from ERA/ECMWF/MERRA')
+end
+tcc = profX.tcc;              %% should be much better
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 oo = find(cfracw < 0); 
 if length(oo) > 0 

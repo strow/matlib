@@ -35,8 +35,8 @@ idd = find(cc<0.001);
 cc(idd) = 0.0;
 
 % add a clear layer over the top of atmosphere   
-tcc(:,2:nlev+1) = cc;
-tcc(:,1) = 0.0;
+temp_cc(:,2:nlev+1) = cc;
+temp_cc(:,1)        = 0.0;
 
 boxpos = zeros(nboxes,ncol);   %% sergio
 for icol=1:ncol      
@@ -70,8 +70,8 @@ for ilev = 1:nlev
     elseif overlap ==3
       % Maximum and Random overlap
       for ibox=1:nboxes
-        tmin(ibox,icol) = min(tcc(ibox,ilev), tcc(ibox,ilev+1));
-        if cloud_threshold(ibox,icol)<min(tcc(ibox,ilev), tcc(ibox,ilev+1)) & cloud_threshold(ibox,icol)>0
+        tmin(ibox,icol) = min(temp_cc(ibox,ilev), temp_cc(ibox,ilev+1));
+        if cloud_threshold(ibox,icol)<min(temp_cc(ibox,ilev), temp_cc(ibox,ilev+1)) & cloud_threshold(ibox,icol)>0
           flag(ibox,icol) = 1;
         else
           flag(ibox,icol) = 0;

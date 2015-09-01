@@ -33,7 +33,8 @@ if nargin == 4
   run_sarta.randomCpsize        = +1;  %% keep randomizing dme for ice and water
   run_sarta.co2ppm              = 385;
   run_sarta.ForceNewSlabs       = -1;  %% keep slab clouds that are found as they are
-
+  run_sarta.tcc                 = +1;  %% if this field exists in input structure p, then set p.cfrac = p.tcc as this is GOOOD
+  
   run_sarta.waterORice = +1; % keep only water clds   %% this is for driver_sarta_cloud_rtp_onecldtest.m
   run_sarta.waterORice = -1; % keep only ice   clds   %% this is for driver_sarta_cloud_rtp_onecldtest.m
   run_sarta.waterORice = 0;  % keep both water and ice clouds ie does nothing
@@ -65,6 +66,10 @@ elseif nargin == 5
   if ~isfield(run_sarta,'ForceNewSlabs')
      run_sarta.ForceNewSlabs       = -1;  %% keep slab clouds that are found as they are; irrelevant for driver_sarta_cloud_rtp
   end
+  if ~isfield(run_sarta,'tcc')
+     run_sarta.tcc  = +1;  %% if this field exists in input structure p, then set p.cfrac = p.tcc as this is GOOOD
+  end
+
   if ~isfield(run_sarta,'co2ppm')
     run_sarta.co2ppm = 385;
   end
@@ -140,13 +145,6 @@ elseif ~isfield(p,'cc')
   error('driver_pcrtm_cloud_rtp.m requires cc');
 elseif h.ptype ~= 0
   error('driver_pcrtm_cloud_rtp.m requires LEVELS profiles (h.ptype = 0)');
-end
-
-if ~isfield(p,'cfrac')
-  %% need random cfracs
-  disp('>>>>>>>> warning : need random cfracs .... initializing')
-  %% want to make sure there are NO zeros cfrac
-  p.cfrac = 0.50*(rand(size(p.stemp)) + rand(size(p.stemp))) ;
 end
 
 if run_sarta.ice_water_separator > 0

@@ -11,7 +11,11 @@ function [h1ALL,h1aALL,p1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0A
 %   however, since we will be adding in Xiuhong CO2 profile, and adding in from 1 mb to 0.005 mb, so we
 %   will be adding in a few levels!!!
 % this means we "pad" p0ALL_inputLVLS to account for this
-% 
+%
+% >>>>>>>>
+% WARNING : all random seeds must be done OUTSIDE the driver code : suggest rng('shuffle','twister')
+% >>>>>>>>
+%
 % can optionally also run SARTA clear and/or SARTA cloud
 %
 % run_sarta = optional structure argument that says
@@ -23,6 +27,8 @@ function [h1ALL,h1aALL,p1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0A
 %          so when SARTA is called it turns off appropriate ice or water slab
 %          this is test of ONE SLAB CLOUD vs ONE COLUMN CLOUD
 %   >>> options for SARTA runs
+%     ***  run_sarta.tcc ***    = +1 if this total cloud cover field exists, then reset p.cfrac with this for making slabs
+%                                         if redoing slabs, this is THE most important variable!!!!
 %     run_sarta.clear           = +/-1 for yes/no, results into prof.sarta_clear
 %     run_sarta.cloud           = +/-1 for yes/no, results into prof.sarta_cloudy
 %     run_sarta.klayers_code    = string to klayers executable
@@ -266,7 +272,7 @@ for iInd = 1 : iIndMax
   ICT = double(p.ciwc);   %% cloud ice    water content in kg/kg
   cc  = double(p.cc);     %% cloud fraction
   if ncol0 == -1
-    disp('FORCE CFRAC = 1 at all levels : TEST CASE');
+    disp('FORCE CC (LEVELS CFRAC) = 1 at all levels : TEST CASE');
     yes_cld = find(cc > eps);
     cc(yes_cld) = 1;
   end
@@ -401,8 +407,8 @@ p1ALL.rcalc_std   = p1ALL.rad_allsky_std;
 %% in ppmv, GUNITS = 10
 for ij = 1 : length(p1ALL.stemp)
   p1ALL.gas_2(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_2(:,ij) * co2_all(ij)/385.848;
-  p1ALL.gas_4(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_4(:,ij)
-  p1ALL.gas_5(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_5(:,ij)    
+  p1ALL.gas_4(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_4(:,ij);
+  p1ALL.gas_5(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_5(:,ij);   
   p1ALL.gas_6(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_6(:,ij) * sarta_gas_2_6.ch4/1.843;
 end
 

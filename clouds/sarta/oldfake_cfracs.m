@@ -69,16 +69,17 @@ end
 %  error('some values of ctype2 outside expected set of {negative, 101, 201}');
 %end
 
-
 % Declare output arrays
 cfrac1 = zeros(1,n);
 cfrac2 = zeros(1,n);
 cfrac12= zeros(1,n);
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Seed random number generater
-rand('state',sum(100*clock));
-
+% rand('state',sum(100*clock));   %% till Aug 31, 2015
+% http://www.mathworks.com/help/matlab/ref/rng.html suggests calling 
+% rng('shuffle') before you call this routine
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Determine which of siz possible cases apply for each index in n
 % case1 = no clouds

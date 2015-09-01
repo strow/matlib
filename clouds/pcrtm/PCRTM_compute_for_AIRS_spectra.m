@@ -109,7 +109,7 @@ elseif ncol == -1
   tmpjunk.ucol_num_same   = ucol_num_same;
   tmpjunk.subcol_frac     = subcol_frac;
 %else
-%  error('oooh have not figured out the ONE COLUMN, CFRAC = 1???  TEST CASE YET!')
+%  error('oooh have not figured out the ONE COLUMN, CC (LEVELS CFRAC) = 1???  TEST CASE YET!')
 end
 
 % convert ozone from g/kg to ppmv
