@@ -37,6 +37,9 @@ function [prof,orig_slabs] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % WARNING : after Sept 2015
 %         : fill_era and fill_ecm will now output p.tcc INSTEAD of p.cfrac, as well as p.cc, p.ciwc, p.clwc
 %         : this "tcc" info is now correctly used in "set_fracs_deffs.m" as the seeds for "fake_cfracs.m"
+%         : ****** p1.cfrac+p1.cfrac2-p1.cfrac12 = p1.tcc **************
+%         : ****** p1.cfrac+p1.cfrac2-p1.cfrac12 = p1.tcc **************
+%         : ****** p1.cfrac+p1.cfrac2-p1.cfrac12 = p1.tcc **************
 % >>>>>>>>
 % WARNING : all random seeds must be done OUTSIDE the driver code : suggest rng('shuffle','twister')
 % >>>>>>>>
