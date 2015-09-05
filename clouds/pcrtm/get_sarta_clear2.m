@@ -2,7 +2,7 @@
 %% addpath /asl/matlib/aslutil/
 
 disp(' ')
-fprintf(1,'  doing clear sky SARTA calcs ....\n')
+fprintf(1,'  inside PCRTM code, doing clear sky SARTA calcs ....\n')
 fprintf(1,'    sarta clear = %s \n',run_sarta.sartaclear_code);  
 
 klayers = run_sarta.klayers_code;

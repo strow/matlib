@@ -2,7 +2,7 @@
 %% addpath /asl/matlib/aslutil/
 
 disp(' ')
-fprintf(1,'  doing cloud sky SARTA calcs ....\n')
+fprintf(1,'  inside PCRTM, doing cloud sky SARTA calcs ....\n')
 fprintf(1,'    sarta cloud = %s \n',run_sarta.sartacloud_code);    
 
 klayers = run_sarta.klayers_code;
