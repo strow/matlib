@@ -97,7 +97,7 @@ elseif run_sarta.cloud < 0
     fieldjunk = listjunk{iijunk};
     if isfield(p,fieldjunk)
       strjunk = ['p1ALL.' fieldjunk '(inds) = p.' fieldjunk ';'];
-      eval(str)
+      eval(strjunk)
     end
   end
   clear listjunk iijunk fieldjunk

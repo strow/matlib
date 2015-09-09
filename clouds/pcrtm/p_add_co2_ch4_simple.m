@@ -1,3 +1,5 @@
+function [hxjunk,pxjunk] = p_add_co2_ch4_simple(h,p,sarta_gas_2_6);
+
 pcrtm_p = load('/home/sergio/PCRTM_XIANGLEI/PCRTM_V2.1/code_changed/InputDir/Atm_prof/lev-101_nMol-6/pbnd.dat');
 pcrtm = load('/home/sergio/PCRTM_XIANGLEI/PCRTM_V2.1/code_changed/InputDir/par_constant.dat');
 %% should be CO2 N2O CO CH4

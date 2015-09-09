@@ -1,11 +1,12 @@
+function  [hxjunk,pxjunk] =  p_add_co2_ch4_complete(h,p,sarta_gas_2_6,p0ALL,iDoKlayersHard);
+
 if iDoKlayersHard < 0   %% simple, just add in CO2 profiles
   disp(' adding in ONLY co2/n2o/co/ch4 profile using current plevs')
-  p_add_co2_ch4_simple   %% loads in pcrtm CO2/N2O/CO/CH4 and pressure profiles, and interpolates them onto p.plevs
+  [hxjunk,pxjunk] = p_add_co2_ch4_simple(h,p,sarta_gas_2_6); %% loads in pcrtm CO2/N2O/CO/CH4 and pressure profiles, and interpolates them onto p.plevs
 
 elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3,T form USSTD
   disp(' adding in co2/n2o/co/ch4 profile using current plevs PLUS adding on info from top-of-input-plevs to 0.005 mb')
-  
-  p_add_co2_ch4_simple   %% loads in pcrtm CO2/N2O/CO/CH4 and pressure profiles, and interpolates them onto p.plevs
+  [hxjunk,pxjunk] = p_add_co2_ch4_simple(h,p,sarta_gas_2_6);  %% loads in pcrtm CO2/N2O/CO/CH4 and pressure profiles, and interpolates them onto p.plevs
 
   %%%%%%%%%%%%%%%%%%%%%%%%%
   %%% NEW %%%
@@ -19,6 +20,10 @@ elseif iDoKlayersHard > 0   %% just add in CO2 profiles from Xiahoong plus WV,O3
   H2O = ppmv2gg(Pressure,Temperature,H2O,18);
   O3  = ppmv2gg(Pressure,Temperature,O3,48);
 
+  pcrtm_p = load('/home/sergio/PCRTM_XIANGLEI/PCRTM_V2.1/code_changed/InputDir/Atm_prof/lev-101_nMol-6/pbnd.dat');
+  pcrtm = load('/home/sergio/PCRTM_XIANGLEI/PCRTM_V2.1/code_changed/InputDir/par_constant.dat');
+  %% should be CO2 N2O CO CH4
+  
   woop = pxjunk.plevs;
   woop(woop < 0) = NaN;
   minp1 = min(pxjunk.plevs(:));

@@ -17,7 +17,8 @@ if h.ptype == 0
   %   p_add_co2_ch4_simple    %% just adds in CO2 profiles to 0.1 mb (top of ERA and ECM atm); also add in CH4
   % end
   
-  p_add_co2_ch4_complete  %% adds in CO2/CH4 profile, and WV and O3 and Tz upto 0.005 mb, essentially calls p_add_co2_simple
+  %% adds in CO2/CH4 profile, and WV and O3 and Tz upto 0.005 mb, essentially calls p_add_co2_simple
+  [hxjunk,pxjunk] =  p_add_co2_ch4_complete(h,p,sarta_gas_2_6,p0ALL,iDoKlayersHard);
   
 else
   disp(' OOPS cannot alter co2 profile as h.ptype is NOT 0')
