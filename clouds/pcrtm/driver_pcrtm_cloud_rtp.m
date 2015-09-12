@@ -29,8 +29,17 @@ function [h1ALL,h1aALL,p1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0A
 %   >>> options for SARTA runs
 %     ***  run_sarta.tcc ***    = +1 if this total cloud cover field exists, then reset p.cfrac with this for making slabs
 %                                         if redoing slabs, this is THE most important variable!!!!
+%
 %     run_sarta.clear           = +/-1 for yes/no, results into prof.sarta_clear
 %     run_sarta.cloud           = +/-1 for yes/no, results into prof.sarta_cloudy
+%     note that
+%               if run_sarta.clear = +1 and run_sarta.cloud = +1 then we want SARTA clear/cloud, so we similarly do PCRTM clear/cloud
+%               if run_sarta.clear = +1 and run_sarta.cloud = -1 then we only want SARTA clear, so we similarly only do PCRTM clear
+%               if run_sarta.clear = -1 and run_sarta.cloud = +1 then we only want SARTA cloud, but we do PCRTM clear/cloud
+%               if run_sarta.clear = -1 and run_sarta.cloud = -1 then DO NOT want SARTA clear/cloud, but do PCRTM clear/cloud
+%               if run_sarta.clear = +2 and run_sarta.cloud = +2 then we ONLY DO SARTA clear/cloud (way of debugging this wrapper, as
+%                                                                may as well just directly call driver_sarta_cloud_rtp in that case
+%
 %     run_sarta.klayers_code    = string to klayers executable
 %     run_sarta.sartaclear_code = string to sarta clear executable
 %     run_sarta.sartacloud_code = string to sarta cloud executable
@@ -326,11 +335,17 @@ for iInd = 1 : iIndMax
   %whos P WCT ICE cc TT q o3 Ps Ts sfctype efreq emis zen_ang co2 
   fprintf(1,'making PCRTM input file %s for iChunk %3i of %3i \n',parname,iInd,iIndMax)
 
-  iDoCalcPCRTM = -1;  %% for fast SARTA debugging
-  iDoCalcPCRTM = +1;  %% what we want : PCRTM calcs!!!
+  if run_sarta.clear == +2 & run_sarta.cloud == +2
+    iDoCalcPCRTM = -1;  %% for fast SARTA debugging, no PCRTM calcs
+  elseif  run_sarta.clear == +1 & run_sarta.cloud == -1
+    iDoCalcPCRTM =  0;  %% what we want : PCRTM and SARTA clear calcs only!!!
+  else
+    iDoCalcPCRTM = +1;  %% what we want : PCRTM clear and clouds calcs!!!, and see wahat SARTA calcs are needed
+  end
   
   if iDoCalcPCRTM > 0
-    %% note that internally this soubroutine uses abs(ncol) so if we use ncol0 = -1, we have ONE column  
+    %% note that internally this soubroutine uses abs(ncol) so if we use ncol0 = -1, we have ONE column
+    disp('PCRTM clear and cloud calcs')
     [rad_allsky rad_clrsky tmpjunk rad_allsky_std sarta_gas_2_6] = ...
                                     PCRTM_compute_for_AIRS_spectra(nboxes,nlev, ncol, overlap, ...
                                                            P, WCT, ICT, cc, TT, q, o3, Ps, Ts, ...
@@ -341,6 +356,32 @@ for iInd = 1 : iIndMax
 %                                                           P, WCT, ICT, cc, TT, q, o3, Ps, Ts, ...
 %                                                           sfctype, efreq,emis, ...
 %                                                           zen_ang, co2, parname,ppath,run_sarta);
+							   
+  elseif iDoCalcPCRTM == 0
+    %% note that internally this soubroutine uses abs(ncol) so if we use ncol0 = -1, we have ONE column
+    disp('PCRTM supposedly clear calcs only')
+    rad_allsky     = zeros(2378,length(p.stemp));   %% this is reset below for one cloud
+    rad_allsky_std = zeros(2378,length(p.stemp));
+    
+    tmpjunk.totalODice  = zeros(1,length(p.stemp));
+    tmpjunk.meanDMEice  = zeros(1,length(p.stemp));    
+    tmpjunk.maxCTOPice  = zeros(1,length(p.stemp));
+    tmpjunk.totalODiceX = zeros(1,length(p.stemp));
+    tmpjunk.lvlODice    = zeros(max(p.nlevs),length(p.stemp));
+    
+    tmpjunk.totalODwater  = zeros(1,length(p.stemp));
+    tmpjunk.meanDMEwater  = zeros(1,length(p.stemp));    
+    tmpjunk.maxCTOPwater  = zeros(1,length(p.stemp));
+    tmpjunk.totalODwaterX = zeros(1,length(p.stemp));
+    tmpjunk.lvlODwater    = zeros(max(p.nlevs),length(p.stemp));    
+
+    ncolONECLD = -1;
+    [rad_allsky rad_clrsky tmpjunk rad_allsky_std sarta_gas_2_6] = ...
+                                    PCRTM_compute_for_AIRS_spectra(nboxes,nlev, ncolONECLD, overlap, ...
+                                                           P, WCT, ICT, cc, TT, q, o3, Ps, Ts, ...
+                                                           sfctype, efreq, emis, ...
+                                                           zen_ang, co2, parname, ppath, ...
+                                                           run_sarta.randomCpsize, modis_waterDME(inds),run_sarta);
   else
     disp('skipped PCRTM/MRO ... going straight on to SARTA 2S')
     sarta_gas_2_6.co2 = 385.848;

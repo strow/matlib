@@ -18,7 +18,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% ice
-list = {'sarta_wgtI',sarta_index_wgtpeakI','sarta_wgtpeakI','sarta_lvlDMEice',...
+list = {'sarta_wgtI','sarta_index_wgtpeakI','sarta_wgtpeakI','sarta_lvlDMEice',...
         'sarta_iceOD_warn','sarta_lvl_iceOD_1','icecldX','icecldY'};
 for ii = 1 : length(list)
   xfield = list{ii};
@@ -32,7 +32,7 @@ end
 
 %% water
 %% ice
-list = {'sarta_wgtW',sarta_index_wgtpeakW','sarta_wgtpeakW','sarta_lvlDMEwater',...
+list = {'sarta_wgtW','sarta_index_wgtpeakW','sarta_wgtpeakW','sarta_lvlDMEwater',...
         'sarta_waterOD_warn','sarta_lvl_waterOD_1','watercldX','watercldY'};
 for ii = 1 : length(list)
   xfield = list{ii};

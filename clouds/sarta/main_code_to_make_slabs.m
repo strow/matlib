@@ -1,15 +1,18 @@
-%% input  h,p  (levels profile with cc,ciwc,clwc)
-%% output prof (levels profile with cc,ciwc,clwc, and slab cloud info cprtop,cngwat,cfrac,cpsize)
+%% this script is the main slab maker
+%%   input  h,p  (levels profile with cc,ciwc,clwc)
+%%   output prof (levels profile with cc,ciwc,clwc, and slab cloud info cprtop,cngwat,cfrac,cpsize)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% first do some sanity checks
+badtcc0  = find(p.tcc < 0); p.tcc(badtcc0) = 0;
+badtcc1  = find(p.tcc > 1); p.tcc(badtcc1) = 1;
 badcc0  = find(p.cc < 0);   p.cc(badcc0) = 0;
 badcc1  = find(p.cc > 1);   p.cc(badcc1) = 1;
 badciwc = find(p.ciwc < 0); p.ciwc(badciwc) = 0;
 badclwc = find(p.clwc < 0); p.clwc(badclwc) = 0;
-junk = [length(badcc0) length(badcc1) length(badciwc) length(badclwc)];
-fprintf(1,'found %4i/%4i cc <0/1> %4i/%4i negative ciwc/clwc \n',junk);
+junk = [length(badtcc0) length(badtcc1) length(badcc0) length(badcc1) length(badciwc) length(badclwc)];
+fprintf(1,'found %4i/%4i tcc <0/1> %4i/%4i cc <0/1> %4i/%4i negative ciwc/clwc \n',junk);
 
 if sum(size(p.ptemp) - size(p.cc)) ~= 0 | sum(size(p.ptemp) - size(p.ciwc)) ~= 0 | sum(size(p.ptemp) - size(p.clwc)) ~= 0
   pjunk.cc    = p.cc;
