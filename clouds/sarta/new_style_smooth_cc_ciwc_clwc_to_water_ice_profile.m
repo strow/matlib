@@ -1,3 +1,5 @@
+function [watercld,icecld,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
+
 %%% old_style_smooth_cc_ciwc_clwc_to_water_ice_profile been superseded by this new code
 
 %% slabs can be resolved better if there are more points

@@ -63,9 +63,12 @@ for iiiiA = 1:length(iiii)
   jj = ii;
 
   if iMakeIceWaterCld == -1
-    old_style_smooth_cc_ciwc_clwc_to_water_ice_profile
+    [watercld,icecld] = old_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii,nlev,iSmooth,rGaussianCutoff);
+    aa        = [];
+    ptemp     = [];
+    cutoff440 = [];    
   else
-    new_style_smooth_cc_ciwc_clwc_to_water_ice_profile
+    [watercld,icecld,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
   end
   
   [wOUT,wT,wB,wPeak,wN,wmaxN,wminN] = boxshape(watercld,rGaussianCutoff); newwater = wOUT;
@@ -92,21 +95,6 @@ for iiiiA = 1:length(iiii)
   if iDoPlot > 0
     plot_ecmwfcld2sartacld
   end
-
-%{
-  %% debug
-  if iiiiA == 1833
-    iiiiA
-    cT
-    cB
-    [iT iB wT wB]
-    junky = iiiiA;
-    [profIN.cprtop(junky) profIN.cprbot(junky) profIN.cprtop2(junky) profIN.cprbot2(junky) profIN.udef(13,junky) profIN.udef(14,junky)]
-    [prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky) prof.udef(13,junky) prof.udef(14,junky)]
-    plot(profX.plevs(:,ii),profX.clwc(:,ii),'bo-',plevs,watercld,'r-',plevs([wT wB]),[1 1]*wPeak,'kx-')
-    keyboard
-  end
-%}
 
 end    %% loop over iiiiA
 
