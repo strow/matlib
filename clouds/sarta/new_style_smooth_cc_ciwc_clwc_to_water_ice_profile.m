@@ -1,4 +1,4 @@
-function [watercld,icecld,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
+function [watercld,icecld,plevs,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
 
 %%% old_style_smooth_cc_ciwc_clwc_to_water_ice_profile been superseded by this new code
 

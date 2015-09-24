@@ -61,22 +61,29 @@ end
 if iFound > 0
   fprintf(1,'   found %2i of total 13 possible cloud fields in orig structure \n',iFound)
   fprintf(1,'   saving them so you can compare old vs new cloud slabs \n\n')
-else
-  disp('did not find any cloud fields, including cfrac!!!! in orig input structure, returning "orig_slabs = []" ...');
+elseif iFound == 0 & ~isfield(p,'tcc')
+  disp('did not find any cloud fields, including cfrac OR tcc !!!! in orig input structure, returning "orig_slabs = []" ...');
   disp('this means need to initialize cfracs ... and get pretty bad biases overall ... ugh')
+  disp(' ')
+elseif iFound == 0 & isfield(p,'tcc')
+  disp('did not find any cloud fields, but found tcc !!!! in orig input structure, returning "orig_slabs = []" ...');
+  disp('this means need to initialize cfracs ... ')
   disp(' ')
 end
 
-if ~isfield(p,'cfrac')
+if ~isfield(p,'cfrac') & ~isfield(p,'tcc')
   %% need random cfracs
-  disp('>>>>>>>> warning : need random cfracs .... initializing')
+  disp('>>>>>>>> warning : need random cfracs, and NO tcc .... initializing')
   %% want to make sure there are NO zeros cfrac
-  p.cfrac = 0.50*(rand(size(p.stemp)) + rand(size(p.stemp))) ;
+  p.cfrac = 0.50*(rand(size(p.stemp)) + rand(size(p.stemp)));
+elseif ~isfield(p,'cfrac') & isfield(p,'tcc')
+  %% need random cfracs
+  disp('>>>>>>>> warning : need random cfracs, and YES tcc .... initializing')
+  %% want to make sure there are NO zeros cfrac
+  p.cfrac = p.tcc;
 end
 
 if isfield(p,'tcc') & run_sarta.tcc > 0
-  disp(' woohoo : you have field "tcc" so resetting "cfrac" with this!!!')
-  disp(' woohoo : you have field "tcc" so resetting "cfrac" with this!!!')
   disp(' woohoo : you have field "tcc" so resetting "cfrac" with this!!!')
   p.cfrac = p.tcc;
 elseif isfield(p,'tcc') & run_sarta.tcc < 0

@@ -63,12 +63,12 @@ for iiiiA = 1:length(iiii)
   jj = ii;
 
   if iMakeIceWaterCld == -1
-    [watercld,icecld] = old_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii,nlev,iSmooth,rGaussianCutoff);
+    [watercld,icecld,plevs] = old_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii,nlev,iSmooth,rGaussianCutoff);
     aa        = [];
     ptemp     = [];
     cutoff440 = [];    
   else
-    [watercld,icecld,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
+    [watercld,icecld,plevs,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
   end
   
   [wOUT,wT,wB,wPeak,wN,wmaxN,wminN] = boxshape(watercld,rGaussianCutoff); newwater = wOUT;
@@ -80,7 +80,7 @@ for iiiiA = 1:length(iiii)
     fprintf(1,'%5i %3i %3i | %8.6e \n',poink);
   elseif iPrint < 0 & mod(jj,1000) == 0
     tnow = toc;
-    fprintf(1,' processed %5i in %8.6f minutes\n',ii,tnow/60);
+    fprintf(1,' processed %5i of %5i in %8.6f minutes\n',iiiiA,length(iiii),tnow/60);
   end
 
   cloud_combine_main_code
