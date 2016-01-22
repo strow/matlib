@@ -1,4 +1,4 @@
-function [] = aslprint(fn);
+function [] = aslprint_breno(fn);
 
 % Filter for export_fig.  Seems it can't handle ~ for .pdf files.
 % L. Strow, Aug. 17, 2013.
@@ -8,7 +8,7 @@ function [] = aslprint(fn);
 
 % Path to export_fig
 %addpath /asl/matlib/fileexchange/export_fig
-addpath ~/Matlab/export_fig
+addpath /asl/matlib/fileexchange/export_fig
 
 % First get username (works on Mac too), space at end of command?
 [stat username] = system('id -u -n');
@@ -17,11 +17,7 @@ username = username(1:(end-1));
 % Replace ~ with appropriate full path
 if length(fn) > 1
    if fn(1) == '~'
-      if computer == 'MACI64'
-         fn = strrep(fn,'~',['/Users/' username]);
-      elseif computer == 'GLNXA64'
          fn = strrep(fn,'~',['/home/' username]);
-      end
    end
 end
 
