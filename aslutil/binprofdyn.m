@@ -79,6 +79,9 @@ nlat = length(lat_edges)-1;
 bin(:,1) = min(bin(:,1),nlat); % prevent inf from adding a bin
 
 % bin the longitudes
+if(nanmax(lon(:)) < nanmin(lon_edges(:)))
+    lon = lon + 360;
+end
 [dum,bin(:,2)] = histc(lon(:),lon_edges,1);
 nlon = length(lon_edges)-1;
 bin(:,2) = min(bin(:,2),nlon); % prevent inf from adding a bin

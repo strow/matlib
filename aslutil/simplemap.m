@@ -125,8 +125,8 @@ if nargin > 1
         lon_range = [nanmin(to_bin{2}(:)) nanmax(to_bin{2}(:))]/to_bin{4};
         lon_range = [floor(lon_range(1)) ceil(lon_range(2))]*to_bin{4};
       else
-        lon_range = (minmax(find(any(data))-.5)+[-.5 .5])/size(data,2)*360 - 180;
-        lat_range = (minmax(find(any(data'))-.5)+[-.5 .5])/size(data,1)*180 - 90;
+        lon_range = ([nanmin(find(any(data))-.5) nanmax(find(any(data))-.5)]+[-.5 .5])/size(data,2)*360 - 180;
+        lat_range = ([nanmin(find(any(data'))-.5) nanmax(find(any(data'))-.5)]+[-.5 .5])/size(data,1)*180 - 90;
         data = data(any(data'),any(data));
       end
       varargin = varargin(2:end); continue
@@ -184,6 +184,9 @@ if length(to_bin) > 0
   %  to_bin{2} = wrapTo180(to_bin{2});
   %end
   to_bin{2} = mod(to_bin{2} - shift_to,360) + shift_to;
+  to_bin{1} = to_bin{1}(~isnan(to_bin{3}(:)));
+  to_bin{2} = to_bin{2}(~isnan(to_bin{3}(:)));
+  to_bin{3} = to_bin{3}(~isnan(to_bin{3}(:)));
 
   if size(to_bin{3},2) == 3 % color binning
     for c = 1:3
