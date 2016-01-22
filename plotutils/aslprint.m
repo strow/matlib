@@ -1,13 +1,14 @@
-function [] = aslprint_breno(fn);
+function [] = aslprint(fn);
 
 % Filter for export_fig.  Seems it can't handle ~ for .pdf files.
 % L. Strow, Aug. 17, 2013.
 %
 % Usage: llsprint(filename.ext)
 %   Be sure to include either .pdf or .png extension (.ext)
+%  
+% Bugs: Can't specify the directory, must be "in-place"
 
 % Path to export_fig
-%addpath /asl/matlib/fileexchange/export_fig
 addpath /asl/matlib/fileexchange/export_fig
 
 % First get username (works on Mac too), space at end of command?
@@ -17,7 +18,11 @@ username = username(1:(end-1));
 % Replace ~ with appropriate full path
 if length(fn) > 1
    if fn(1) == '~'
+      if computer == 'MACI64'
+         fn = strrep(fn,'~',['/Users/' username]);
+      elseif computer == 'GLNXA64'
          fn = strrep(fn,'~',['/home/' username]);
+      end
    end
 end
 
@@ -37,14 +42,15 @@ if fn(end-3:end) == '.png'
 elseif  fn(end-3:end) == '.pdf'
    fn = fn(1:end-4);
 end
+
 % export figure
 export_fig([fn '.png'],'-m2','-transparent');
 export_fig([fn '.pdf'],'-m2','-transparent');
-% export_fig([fn '.png'],'-m2');
-% export_fig([fn '.pdf'],'-m2');
+
 % Set the background color back to Matlab default
-set(gcf,'color',[0.8 0.8 0.8]);
+set(gcf,'color',[0.94 0.94 0.94]);
 % Set the dockstate back to what it was
 set(gcf,'windowstyle',dockstate)
 fnfig = fn;
 hgsave(gcf,fnfig);
+
