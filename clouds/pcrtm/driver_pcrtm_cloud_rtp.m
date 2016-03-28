@@ -460,4 +460,6 @@ p1aALL = set_attr(p1aALL,'iUMichCO2',    num2str(run_sarta.iUMichCO2));
 p1aALL = set_attr(p1aALL,'cumsum',       num2str(run_sarta.cumsum));
 p1aALL = set_attr(p1aALL,'ncol0',        num2str(run_sarta.ncol0));
 p1aALL = set_attr(p1aALL,'co2ppm',       num2str(run_sarta.co2ppm));
-p1aALL = set_attr(p1aALL,'ForceNewSlabs',num2str(run_sarta.ForceNewSlabs));
+if isfield(run_sarta,'ForceNewSlabs')
+  p1aALL = set_attr(p1aALL,'ForceNewSlabs',num2str(run_sarta.ForceNewSlabs));
+end

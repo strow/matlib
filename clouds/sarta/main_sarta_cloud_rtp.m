@@ -83,6 +83,8 @@ base_dir = fileparts(mfilename('fullpath')); % current directory
 base_dir1 = fileparts(base_dir);  % dir:  ../
 base_dir2 = fileparts(base_dir1); % dir:  ../../
 
+base_dir2 = '/asl/matlib';
+
 % Airs Matlab utility box
 addpath([base_dir2 '/gribtools'])
 addpath([base_dir2 '/rtptools'])

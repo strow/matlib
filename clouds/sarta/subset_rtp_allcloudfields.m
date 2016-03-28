@@ -443,7 +443,7 @@ if (isfield(profin,'calflag'))
    prof.calflag=profin.calflag(indc,indp);
 end
 if (isfield(profin,'robsqual'))
-   prof.robsqual=profin.robsqual(indp);
+   prof.robsqual=profin.robsqual(indc,indp);
 end
 if (isfield(profin,'freqcal'))
    prof.freqcal=profin.freqcal(indp);
