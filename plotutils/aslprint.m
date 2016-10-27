@@ -37,7 +37,7 @@ end
 
 % Make background white for printing, then reset to Matlab default color
 % Put the figure back into the docked/undocked state it started in
-dockstate = get(gcf,'windowstyle')
+dockstate = get(gcf,'windowstyle');
 % Temporarily make it a normal window so we can change it's size
 set(gcf,'windowstyle','normal')
 % Want figure background transparent, looks nicer in beamer slides
@@ -51,6 +51,8 @@ if fn(end-3:end) == '.png'
 elseif  fn(end-3:end) == '.pdf'
    fn = fn(1:end-4);
 end
+
+warning('off');
 
 % export figure
 export_fig([fn '.png'],'-m2','-transparent');
@@ -67,4 +69,5 @@ if ~save_png_only
    hgsave(gcf,fnfig);
 end
 
+warning('on');
 
