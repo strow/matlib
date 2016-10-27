@@ -1,12 +1,18 @@
-function [] = aslprint(fn);
+function [] = aslprint(varargin);
 
-% Filter for export_fig.  Seems it can't handle ~ for .pdf files.
-% L. Strow, Aug. 17, 2013.
+% Filter for export_fig.
 %
-% Usage: llsprint(filename.ext)
-%   Be sure to include either .pdf or .png extension (.ext)
+% Usage: aslprint(filename,anyvar)
+%   Do not include filename extension!
+%   If anyvar exists, only png output
 %  
-% Bugs: Can't specify the directory, must be "in-place"
+nargs = length(varargin);
+fn = varargin{1}
+if nargs == 2
+   save_png_only = true;
+else
+   save_png_only = false;
+end
 
 % Path to export_fig
 addpath /asl/matlib/fileexchange/export_fig
@@ -18,10 +24,13 @@ username = username(1:(end-1));
 % Replace ~ with appropriate full path
 if length(fn) > 1
    if fn(1) == '~'
-      if computer == 'MACI64'
+      switch computer
+         case 'MACI64'
          fn = strrep(fn,'~',['/Users/' username]);
-      elseif computer == 'GLNXA64'
+         case 'GLNXA64'
          fn = strrep(fn,'~',['/home/' username]);
+        otherwise
+          disp('Unknown matlab computer type?');
       end
    end
 end
@@ -45,12 +54,17 @@ end
 
 % export figure
 export_fig([fn '.png'],'-m2','-transparent');
-export_fig([fn '.pdf'],'-m2','-transparent');
+if ~save_png_only
+   export_fig([fn '.pdf'],'-m2','-transparent');
+end
 
 % Set the background color back to Matlab default
 set(gcf,'color',[0.94 0.94 0.94]);
 % Set the dockstate back to what it was
 set(gcf,'windowstyle',dockstate)
 fnfig = fn;
-hgsave(gcf,fnfig);
+if ~save_png_only
+   hgsave(gcf,fnfig);
+end
+
 
