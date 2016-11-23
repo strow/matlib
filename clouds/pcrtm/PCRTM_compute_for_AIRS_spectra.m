@@ -620,6 +620,13 @@ elseif iNewVSOrig == +1
   disp(['iNewVSOrig = +1 CALLING PCRTM for ' num2str(length(co2)) ' profiles; mean CO2 = ' num2str(mean(co2)) ' ppm'])
   runner = ['!time ./PCRTM_V2.1.exe < ' lalaNAME1];
   eval(runner)
+
+elseif iNewVSOrig == -999
+  disp('no PCRTM calcs!!!!')
+
+else
+  iNewVSOrig
+  error('huh unknown iNewVSOrig') 
 end
 
 if iNewVSOrig == +1
@@ -627,120 +634,129 @@ if iNewVSOrig == +1
   eval(rmer)
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%% Prof. Huang  revised %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-disp('RECONSTRUCTING RADS')
-% coefficients database used for compute spectral Jacob 
-% the PC loadings are precomputed with fixed size
-fid=fopen(['../InputDir/Pc60_data_AIRS.dat'],'rb','l');
+%%%%%%%%%%%%%%%%%%%%%%%%%% Prof. Huang  revised %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if iNewVSOrig ~= -999
+  disp('RECONSTRUCTING RADS')
+  % coefficients database used for compute spectral Jacob 
+  % the PC loadings are precomputed with fixed size
+  fid=fopen(['../InputDir/Pc60_data_AIRS.dat'],'rb','l');
 
-% data structure 
-% num of bands, number of PCs in each band, and number of channels in each band
-% these are all fixed value, reading them just for double-check
-numbnd		= fread(fid, 1, 'float'); % should equal to 3
-numPC 		= fread(fid, numbnd, 'float'); % should be [60, 60, 60]
-					  % 60 PC in each band
-numch		= fread(fid, numbnd, 'float'); %should be [1262, 602, 514]
+  % data structure 
+  % num of bands, number of PCs in each band, and number of channels in each band
+  % these are all fixed value, reading them just for double-check
+  numbnd	= fread(fid, 1, 'float');      % should equal to 3
+  numPC 	= fread(fid, numbnd, 'float'); % should be [60, 60, 60]
+  		 			       % 60 PC in each band
+  numch		= fread(fid, numbnd, 'float'); %should be [1262, 602, 514]
 					  % number of channels in each band 
 					  % in total 2378 channels
 						
-% 1500 is used here for no numch >1500. Not all 1500 columns to be used
-PCcoef = zeros(numbnd,numPC(1),1500)+NaN; % Each band has 60 PC loadings, 
+  % 1500 is used here for no numch >1500. Not all 1500 columns to be used
+  PCcoef = zeros(numbnd,numPC(1),1500)+NaN; % Each band has 60 PC loadings, 
 				 % each loading has a dimension of numch (<1500)
-Pstd = zeros(numbnd,1500)+NaN;
+  Pstd = zeros(numbnd,1500)+NaN;
 
-IDX = cell(numbnd, 1);
+  IDX = cell(numbnd, 1);
 
-for i = 1:numbnd
-  IDX{i} = 1:numch(i);
-  if i >1
-    IDX{i} = IDX{i} + sum(numch(1:i-1));
+  for i = 1:numbnd
+    IDX{i} = 1:numch(i);
+    if i >1
+      IDX{i} = IDX{i} + sum(numch(1:i-1));
+    end
   end
-end
 
-for ib =1:numbnd
-  for ip =1:numPC(ib)
-    PCcoef(ib, ip, 1:numch(ib)) = reshape(fread(fid, numch(ib), 'float'), 1, 1, numch(ib));
+  for ib =1:numbnd
+    for ip =1:numPC(ib)
+      PCcoef(ib, ip, 1:numch(ib)) = reshape(fread(fid, numch(ib), 'float'), 1, 1, numch(ib));
+    end
+    Pstd(ib,1:numch(ib))= reshape(fread(fid, numch(ib), 'float'), 1, numch(ib));
   end
-  Pstd(ib,1:numch(ib))= reshape(fread(fid, numch(ib), 'float'), 1, numch(ib));
-end
-fclose(fid);
+  fclose(fid);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      
-cd (homepath);
+  cd (homepath);
      
-if exist([parname,'.out'], 'file')
-  tmp = load([parname,'.out']);
-  PClen = sum(numPC);
+  if exist([parname,'.out'], 'file')
+    tmp = load([parname,'.out']);
+    PClen = sum(numPC);
     
-  count = 0;
-  PC_allsky =0;
-  PC_clrsky =0;  
+    count = 0;
+    PC_allsky =0;
+    PC_clrsky =0;  
 
-  for ibox = 1: nboxes
-    % for each box, there are (PCend - PCstart)= PClen * (ucol_num(ibox) +1) PC scores  
-    PCstart = count * PClen +1;
-    count = count + ucol_num(ibox) +1;
-    PCend = count * PClen ;
+    for ibox = 1: nboxes
+      % for each box, there are (PCend - PCstart)= PClen * (ucol_num(ibox) +1) PC scores  
+      PCstart = count * PClen +1;
+      count = count + ucol_num(ibox) +1;
+      PCend = count * PClen ;
 
-    %[ibox PClen PCstart PCend]
-    %whos tmp ucol_num
-                 
-    tmprad = reshape(tmp(PCstart:PCend, 2), PClen,ucol_num(ibox) +1);
+      %[ibox PClen PCstart PCend]
+      %whos tmp ucol_num
+                  
+      tmprad = reshape(tmp(PCstart:PCend, 2), PClen,ucol_num(ibox) +1);
         
-    % calculate average PCs of the box for all condition       
-    rad=zeros(PClen,1);
-    for j = 1:ucol_num(ibox)
-      rad = rad + tmprad(:,j) .* ucol_num_same(ibox,j);
-    end
-    PC_allsky = reshape(rad/abs(ncol),numPC(1),numbnd);
-        
-    % clear sky spectra
-    PC_clrsky = reshape(tmprad(:, ucol_num(ibox) +1),numPC(1), numbnd );  
-        
-    % individual allsky spectra
-    for j = 1:ucol_num(ibox)
-      PC_allsky_ind(j,:,:) = reshape(tmprad(:, j),numPC(1), numbnd );  
-    end
-
-    % convert PC domain to channel domain    
-
-    for ib =1:numbnd  % band 1 to 3
-      % for all-sky
-      aa = PC_allsky(:, ib)' * reshape(PCcoef(ib, :, 1:numch(ib)), numPC(ib), numch(ib));
-      rad_allsky(IDX{ib},ibox) = ((aa +1) .* Pstd(ib,1:numch(ib)))'*1e-3; % W per m^2 per sr per cm^-1
-
-      %  for clear-sky
-      bb = PC_clrsky(:, ib)' * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
-      rad_clrsky(IDX{ib},ibox) = ((bb+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
-
-      %% for individual allsky
+      % calculate average PCs of the box for all condition       
+      rad=zeros(PClen,1);
       for j = 1:ucol_num(ibox)
-        cc = squeeze(PC_allsky_ind(j,:,ib));
-        cc = cc * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
-        rx =  ((cc+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
-        %rad_allsky_xind(IDX{ib},ibox,j) = rx;
-        rad_allsky_xind(IDX{ib},j) = rx;
-      end    
-    end  % end of bands
-    [mbox,nbox] = size(rad_allsky_xind);
-    %fprintf(1,' finding means and stddev : mbox,nbox = %4i %4i \n',mbox,nbox);
-    if nbox == 1
-      rad_allsky_mean(:,ibox) = (rad_allsky_xind);
-      rad_allsky_std(:,ibox)  = (rad_allsky_xind)*0;
-    else
-      rad_allsky_mean(:,ibox) = nanmean(rad_allsky_xind');
-      rad_allsky_std(:,ibox)  = nanstd(rad_allsky_xind');
-    end
-  end    % end of boxes
-end      % end of output file
+        rad = rad + tmprad(:,j) .* ucol_num_same(ibox,j);
+      end
+      PC_allsky = reshape(rad/abs(ncol),numPC(1),numbnd);
+        
+      % clear sky spectra
+      PC_clrsky = reshape(tmprad(:, ucol_num(ibox) +1),numPC(1), numbnd );  
+        
+      % individual allsky spectra
+      for j = 1:ucol_num(ibox)
+        PC_allsky_ind(j,:,:) = reshape(tmprad(:, j),numPC(1), numbnd );  
+      end
 
+      % convert PC domain to channel domain    
+
+      for ib =1:numbnd  % band 1 to 3
+        % for all-sky
+        aa = PC_allsky(:, ib)' * reshape(PCcoef(ib, :, 1:numch(ib)), numPC(ib), numch(ib));
+        rad_allsky(IDX{ib},ibox) = ((aa +1) .* Pstd(ib,1:numch(ib)))'*1e-3; % W per m^2 per sr per cm^-1
+
+        %  for clear-sky
+        bb = PC_clrsky(:, ib)' * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
+        rad_clrsky(IDX{ib},ibox) = ((bb+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
+
+        %% for individual allsky
+        for j = 1:ucol_num(ibox)
+          cc = squeeze(PC_allsky_ind(j,:,ib));
+          cc = cc * reshape(PCcoef(ib,:,1:numch(ib)), numPC(ib), numch(ib));
+          rx =  ((cc+1) .* Pstd(ib,1:numch(ib)))'*1e-3;  % W per m^2 per sr per cm^-1
+          %rad_allsky_xind(IDX{ib},ibox,j) = rx;
+          rad_allsky_xind(IDX{ib},j) = rx;
+        end    
+      end  % end of bands
+      [mbox,nbox] = size(rad_allsky_xind);
+      %fprintf(1,' finding means and stddev : mbox,nbox = %4i %4i \n',mbox,nbox);
+      if nbox == 1
+        rad_allsky_mean(:,ibox) = (rad_allsky_xind);
+        rad_allsky_std(:,ibox)  = (rad_allsky_xind)*0;
+      else
+        rad_allsky_mean(:,ibox) = nanmean(rad_allsky_xind');
+        rad_allsky_std(:,ibox)  = nanstd(rad_allsky_xind');
+      end
+    end    % end of boxes
+  end      % end of output file
+
+else
+  disp('no calcs done at all since run_sarta.iNewVSOrig = -999 !!!!')
+end
 
 if exist('rad_allsky') & exist('rad_clrsky')
   plot(1:length(tmpjunk.totalODice),rad_allsky(1291,:),'bs-',...
        1:length(tmpjunk.totalODice),rad_clrsky(1291,:),'kx-')
   title('PCRTM cals for Rad 1231 : (b) cloudy (k) clear sky')
   pause(0.1)
+else
+  rad_allsky = zeros(2378,length(Ts));
+  rad_clrsky = zeros(2378,length(Ts));
+  rad_allsky_mean = zeros(2378,length(Ts));
+  rad_allsky_std = zeros(2378,length(Ts));
 end
 
 

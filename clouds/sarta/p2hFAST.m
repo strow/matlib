@@ -9,6 +9,11 @@ p = airslevels;
 for ii = 1:100
   pavg(ii) = (p(ii+1)-p(ii))/log(p(ii+1)/p(ii));
 end
+if length(h) ~= length(pavg)
+  fprintf(1,'length(height) length9(pavg) = %3i %3i \n',length(h),length(pavg))
+  error('in p2hFAST length(h) ~= length(pavg)')
+end  
+%whos h pavg
 %plot(h,pavg)
 
 ht = interp1(pavg,h,pin);

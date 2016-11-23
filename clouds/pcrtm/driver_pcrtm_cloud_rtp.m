@@ -39,6 +39,7 @@ function [h1ALL,h1aALL,p1ALL,p1aALL] = driver_pcrtm_cloud_rtp(h_inputLVLS,ha,p0A
 %               if run_sarta.clear = -1 and run_sarta.cloud = -1 then DO NOT want SARTA clear/cloud, but do PCRTM clear/cloud
 %               if run_sarta.clear = +2 and run_sarta.cloud = +2 then we ONLY DO SARTA clear/cloud (way of debugging this wrapper, as
 %                                                                may as well just directly call driver_sarta_cloud_rtp in that case
+%               if run_sarta.clear = -999 and run_sarta.cloud = -999 then do NEITHER sarta not PCRTM calcs ... just do the basics!!!!
 %
 %     run_sarta.klayers_code    = string to klayers executable
 %     run_sarta.sartaclear_code = string to sarta clear executable
@@ -337,12 +338,15 @@ for iInd = 1 : iIndMax
 
   if run_sarta.clear == +2 & run_sarta.cloud == +2
     iDoCalcPCRTM = -1;  %% for fast SARTA debugging, no PCRTM calcs
+  elseif run_sarta.clear == -999 & run_sarta.cloud == -999
+    iDoCalcPCRTM = +1;  %% this is just to get ODs as function of level, no SARTA and no PCRTM calcs
+    run_sarta.iNewVSOrig = -999;
   elseif  run_sarta.clear == +1 & run_sarta.cloud == -1
     iDoCalcPCRTM =  0;  %% what we want : PCRTM and SARTA clear calcs only!!!
   else
     iDoCalcPCRTM = +1;  %% what we want : PCRTM clear and clouds calcs!!!, and see wahat SARTA calcs are needed
   end
-  
+
   if iDoCalcPCRTM > 0
     %% note that internally this soubroutine uses abs(ncol) so if we use ncol0 = -1, we have ONE column
     disp('PCRTM clear and cloud calcs')
@@ -457,9 +461,13 @@ p1aALL = pa;
 p1aALL = set_attr(p1aALL,'sarta_clear',  run_sarta.sartaclear_code);
 p1aALL = set_attr(p1aALL,'sarta_cloud',  run_sarta.sartacloud_code);
 p1aALL = set_attr(p1aALL,'iUMichCO2',    num2str(run_sarta.iUMichCO2));
-p1aALL = set_attr(p1aALL,'cumsum',       num2str(run_sarta.cumsum));
 p1aALL = set_attr(p1aALL,'ncol0',        num2str(run_sarta.ncol0));
-p1aALL = set_attr(p1aALL,'co2ppm',       num2str(run_sarta.co2ppm));
+if isfield(run_sarta,'cumsum')
+  p1aALL = set_attr(p1aALL,'cumsum',       num2str(run_sarta.cumsum));
+end
+if isfield(run_sarta,'co2ppm')
+  p1aALL = set_attr(p1aALL,'co2ppm',       num2str(run_sarta.co2ppm));
+end  
 if isfield(run_sarta,'ForceNewSlabs')
   p1aALL = set_attr(p1aALL,'ForceNewSlabs',num2str(run_sarta.ForceNewSlabs));
 end
