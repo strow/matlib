@@ -25,7 +25,7 @@ function [rad_allsky rad_clrsky tmpjunk rad_allsky_std sarta_gas_2_6] = PCRTM_co
 % WCT            water content in kg/kg
 % ICT            ice content in kg/kg
 % cc             cloud fraction profile, 0-1
-% P              pressure profile in hPa
+% P              pressure profile in hPa (1 hPa = 1 mb)
 % TT             temperature profile in k
 % q              specific humidity in g/kg
 % o3             ozone mass mixing ratio in g/kg
@@ -334,7 +334,7 @@ for ibox = 1:nboxes
       ice_opt =  (0.003448 + 2.431/cldde_ice(ilev))*qi/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3; 
                       % * 0.5 * (P(ilev)+P(max(ilev-1,1)))/g *1e4;
     else
-      ice_opt =0;
+      ice_opt = 0;
       qi = 0;
     end
                 
@@ -348,9 +348,19 @@ for ibox = 1:nboxes
     sub_qi(ilev) = qi/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3;
     sub_qw(ilev) = qw/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3;
 
+    %% this gets sent into pcrtm_cloud_stats.m, from which
+    %% tmpjunk.lvlODice(:,ibox)   = sergio_ice_opt;
+    %% tmpjunk.lvlODwater(:,ibox) = sergio_water_opt;
+    %% and
+    %% totalODiceX(icol)   = sum(sergio_ice_opt);
+    %% totalODwaterX(icol) = sum(sergio_water_opt);
+    %% but
+    %% totalODice(icol) = sum(cldopt(icol,da_i));     %% only uses lower clouds
+    %% totalODwater(icol) = sum(cldopt(icol,da_w));   %% only uses lower clouds
+    %% 
     sergio_ice_opt(ilev)   = ice_opt;
     sergio_water_opt(ilev) = water_opt;
-
+    
   end
   %$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     
