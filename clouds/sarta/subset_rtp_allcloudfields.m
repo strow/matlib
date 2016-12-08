@@ -278,6 +278,7 @@ end
 if (isfield(profin,'gtotal'))
    prof.gtotal=profin.gtotal(indg,indp);
 end
+
 if (isfield(profin,'gxover'))
    prof.gxover=profin.gxover(indg,indp);
 end

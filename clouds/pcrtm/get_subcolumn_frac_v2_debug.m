@@ -1,4 +1,4 @@
-function [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = get_subcolumn_frac_v2(nboxes, nlev, ncol, cc, overlap)
+function [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = get_subcolumn_frac_v2_debug(nboxes, nlev, ncol, cc, overlap)
 
 % this subroutinue is to assign cloud or clear to each sub-column of each of the "nboxes"
 % box by threecloud overlap schemes
@@ -34,6 +34,11 @@ function [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = get_subcolumn_fr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% need nboxes == 1
+if nboxes ~= 1
+  error('cannot debug')
+end
+
 [mm,nn] = size(cc);
 if mm ~= nboxes
   error('mm ~= nboxes')
@@ -41,6 +46,11 @@ end
 
 idd = find(cc<0.001);
 cc(idd) = 0.0;
+
+if sum(cc) < 0.01
+  disp('oops no point debugging as sum(cc) < 0.01 .. clear sky ..')
+  return
+end
 
 % add a clear layer over the top of atmosphere   
 temp_cc(:,2:nlev+1) = cc;
@@ -51,6 +61,8 @@ boxpos = zeros(nboxes,ncol);   %% sergio
 for icol=1:ncol      
   boxpos(:,icol) = (icol - 0.5)/ncol;  %% so go between 0.5/ncol and (1 - 0.5/ncol)
 end
+figure(1); clf; plot(boxpos); title('boxpos');
+%%disp('rett tto continue'); pause
 
 % initialize the sub-column with 0 (clear sky)
 subcol_frac = zeros(nboxes,ncol,nlev);
@@ -88,16 +100,16 @@ for ilev = 1:nlev
         end
       end
     end
-  
+    
     %ranx=get_ran(nboxes, seed);
-    %% CT(ilev+1) --> CT(ilev) * flag +  (1-flag)*(tmin + (1-tmin)*ran))    
+    %% CT(ilev+1) --> CT(ilev) * flag +  (1-flag)*(tmin + (1-tmin)*ran))
     %% so for max,     cloud_threshold(ilev+1,icol) -> cloud_threshold(ilev,icol) == boxpos
     %%    for random,  cloud_threshold(ilve+1,icol) -> ran
     %%    for MR,      cloud_threshold(ilev+1,icol) -> cloud_threshold(ilev,icol) * flag +  (1-flag)*(tmin + (1-tmin)*ran))
     cloud_threshold(:,icol) = cloud_threshold(:,icol) .*flag(:,icol) + ...
                     (1-flag(:,icol)) .* (tmin(:,icol) + (1 - tmin(:,icol)) .* ran(:,icol));
   end
-      
+
   % effectively code below is (ibox = 1)
   % for icol = 1:ncol
   %   if cc(ilev) > cloud_threshold(icol)
@@ -148,6 +160,7 @@ for ilev = 1:nlev
   %       N +----+---+---------+>               +-----+-+------+->
   %         0   N1   N2       Ncol               1  N1   N2     Ncol  
   %
+  %
   % (b) for RANDOM at each level, RH plot is replaced   ^
   %     by random numbers (between 0 and 1)         1.0 |                                   +
   %                                                     |                     + +
@@ -173,7 +186,7 @@ for ilev = 1:nlev
   % (c) for MAX RAN, this is a beast!! but seems to work because of tmin = min(cc(i),cc(i+1)) :
   %        if there is no cloud at any of those two then tmin becomes 0,   and essentially flag --> 0 which means we get the RANDOM OVERLAP
   %        if there is    cloud at any of those two then tmin becomes > 0, and essentially flag --> 1 which means we get the MAXIMUM OVERLAP  
-  %  
+  %
   % cloud assignment
   for icol = 1:ncol
     for ibox = 1:nboxes
@@ -183,12 +196,32 @@ for ilev = 1:nlev
         subcol_frac(ibox, icol, ilev) = 0;
       end
     end
-  end  
+  end
+
+  ibox = 1;
+  bwah = find(cc(ilev) > cloud_threshold);
+  jett = jet; jett(1,:) = 1;
+  figure(1); clf; plot(1:ncol,cloud_threshold,'+-',1:ncol,cc(ibox,ilev)*ones(1,ncol),'r'); title(['lev = ' num2str(ilev) ' cloud threshold']);
+  if length(bwah) > 0
+    fprintf(1,'lev %2i found %2i points satisfying cc > cloud_threshold \n',ilev,length(bwah));
+    hold on; plot(bwah,cloud_threshold(bwah),'ro'); hold off
+  end
+    axis([0 ncol 0 1])
+  figure(2); clf; plot(flag,'+-');                                                         title(['lev = ' num2str(ilev) ' flag']);
+    axis([0 ncol -0.1 1.1])  
+  figure(3); clf; plot(tmin,'+-');                                                         title(['lev = ' num2str(ilev) ' tmin']);
+    axis([0 ncol -0.1 1.1])  
+  figure(4); clf; imagesc(squeeze(subcol_frac(1,:,:))'); colormap(jett); colorbar; title(['lev = ' num2str(ilev) ' subcol frac']);
+  if length(bwah) > 0 & overlap > 1
+    pause(0.1)
+  end
 end
 
 unique_col_frac = zeros(nboxes,ncol,nlev);
 for ibox=1:nboxes
   subcol = reshape(subcol_frac(ibox,:,:),ncol,nlev);
+  figure(5); clf; imagesc(subcol'); colormap(jett); colorbar; title(['lev = ' num2str(ilev) ' subcol']);
+  
   [fracnew,pos1,pos2] = unique(subcol, 'rows');
       
   ucol_num(ibox) = length(pos1); % the number of unique cloud profiles
@@ -200,3 +233,14 @@ for ibox=1:nboxes
     ucol_num_same(ibox,i) = length(find (ismember(subcol, fracnew(i,:),'rows') ==1 ));
   end
 end
+
+figure(6); plot(cc,1:length(cc),'+-'); title('cc'); set(gca,'ydir','reverse')
+ax = axis; axis([0 1 1 length(cc)])
+
+if overlap == 1
+  disp('rettt to exit get_subcolumn_frac_v2_debug MAXIMUM'); pause
+elseif overlap == 2
+  disp('rettt to exit get_subcolumn_frac_v2_debug RANDOM'); pause
+elseif overlap == 3
+  disp('rettt to exit get_subcolumn_frac_v2_debug MAXIMUM RANDOM'); pause
+end  

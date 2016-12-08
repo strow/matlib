@@ -371,12 +371,12 @@ for ibox = 1:nboxes
   % only input one profile if some profiles are the same
   % ucol_num(ibox) is the number of unique profiles    
      
-  cldpres = zeros(ucol_num(ibox),nlev);
-  cldopt  = zeros(ucol_num(ibox),nlev);
-  cldde   = zeros(ucol_num(ibox),nlev);
+  cldpres  = zeros(ucol_num(ibox),nlev);
+  cldopt   = zeros(ucol_num(ibox),nlev);
+  cldde    = zeros(ucol_num(ibox),nlev);
   cldphase = zeros(ucol_num(ibox),nlev);
-  cld_id = zeros(ucol_num(ibox),nlev);
-  cldnum = zeros(1,ucol_num(ibox));
+  cld_id  = zeros(ucol_num(ibox),nlev);
+  cldnum  = zeros(1,ucol_num(ibox));
     
   cld_qw = zeros(ucol_num(ibox),nlev);
   cld_qi = zeros(ucol_num(ibox),nlev);
@@ -385,7 +385,7 @@ for ibox = 1:nboxes
   for icol = 1:ucol_num(ibox)  
 
     % find cloud levels over unique sub-column
-    idx = find (unique_col_frac(ibox,icol,:) ==1);
+    idx = find (unique_col_frac(ibox,icol,:) == 1);
     % If this sub-column has clouds
     cldnum(icol) = length(idx);  % number of cloud layers
     if ~isempty(idx)
@@ -394,7 +394,7 @@ for ibox = 1:nboxes
         cldpres(icol,ic) = cldpres_layer(idx(ic));
         cldphase(icol,ic) = cldphase_layer(idx(ic));   
         cldde(icol,ic) = cldde_layer(idx(ic));
-        cld_id(icol,ic) = idp(idx(ic));
+        cld_id(icol,ic) = idp(idx(ic));   %% we go from 60 level ERA clouds to 100 level AIRS clouds
         % cloud optical depth
         cldopt(icol,ic) = sub_opt(idx(ic));
         % cloud amount in g/m2
@@ -406,6 +406,15 @@ for ibox = 1:nboxes
 
   pcrtm_cloud_stats    %% sets most of "tmpjunk" here
 
+  %% so eg nboxes = 100 = number of FOVS to process (this is iChunk in driver_pcrtm_cloud_rtp.m)
+  %% while ibox = where in this loop are you????
+  iXdebug = +1;  %% debug, slow since it is interactive
+  iXdebug = -1;  %% no debug  
+  if ibox == iXdebug
+    plot_the_mro_clouds
+    %keyboard
+  end
+  
 %  ibox
 %  tmpjunk    
 %%%% gets dumped out in tmp.in as 

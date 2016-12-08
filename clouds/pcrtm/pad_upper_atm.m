@@ -50,8 +50,9 @@ end
 %% initial set of xover
 pxx.txover      = ones(size(p0ALL.stemp)) * minp1;
 pxx.txover      = ones(size(p0ALL.stemp)) * minp1;
-pxx.gxover(1,:) = ones(size(p0ALL.stemp)) * minp1;
-pxx.gxover(2,:) = ones(size(p0ALL.stemp)) * minp1;
+for ix = 1 : h.ngas
+  pxx.gxover(ix,:) = ones(size(p0ALL.stemp)) * minp1;
+end
 
 %% initial replacement with current profile
 newpoints = find(pcrtm_p < minp1);

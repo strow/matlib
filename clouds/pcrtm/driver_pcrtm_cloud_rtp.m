@@ -263,9 +263,9 @@ iIndMax = ceil(length(p0ALL.xtrack)/iChunk);
 fprintf(1,'num of input profiles = %4i will be processed in %4i chunks \n',length(p0ALL.xtrack),iIndMax);
 
 for iInd = 1 : iIndMax
-
   inds = (1:iChunk) + (iInd-1)*iChunk;
   inds = intersect(1:length(p0ALL.xtrack),inds);
+  fprintf(1,' processing chunkloop %4i of %4i, using chunks of length %3i; min ind/max ind = %6i %6i; numfovs = %6i \n',iInd,iIndMax,iChunk,min(inds),max(inds),length(p0ALL.xtrack))
 
   %p0 = index_subset(inds,p0ALLX); 
   %[h,ha,p,pa] = rtpgrow(h,ha,p0,pa);
@@ -287,16 +287,19 @@ for iInd = 1 : iIndMax
     cc(yes_cld) = 1;
   end
 
+  iG1 = find(h.glist == 1);
+  iG3 = find(h.glist == 3);  
   TT = double(p.ptemp);        %% temperature profile
-  if h.gunit(1) == 21 & h.gunit(2) == 21
+  if h.gunit(iG1) == 21 & h.gunit(iG3) == 21
     %% need to change from g/g to g/kg
     q  = 1000*double(p.gas_1);   %% wv profile in g/kg
     o3 = 1000*double(p.gas_3);   %% o3 profile in g/kg
-  elseif h.gunit(1) == 20 & h.gunit(2) == 20
+  elseif h.gunit(iG1) == 20 & h.gunit(iG3) == 20
     %% already in g/kg
     q  = double(p.gas_1);   %% wv profile in g/kg
     o3 = double(p.gas_3);   %% o3 profile in g/kg
   else
+    [h.glist h.gunit]
     error('oops check h.gunit!!');
   end
 
@@ -457,7 +460,12 @@ for ij = 1 : length(p1ALL.stemp)
   p1ALL.gas_6(:,ij) = p_co2_n2o_co_ch4_pcrtm.gas_6(:,ij) * sarta_gas_2_6.ch4/1.843;
 end
 
+
 p1aALL = pa;
+if length(pa) == 0
+  p1aALL = {{'profiles','rtime','seconds since 1958'}};
+end
+
 p1aALL = set_attr(p1aALL,'sarta_clear',  run_sarta.sartaclear_code);
 p1aALL = set_attr(p1aALL,'sarta_cloud',  run_sarta.sartacloud_code);
 p1aALL = set_attr(p1aALL,'iUMichCO2',    num2str(run_sarta.iUMichCO2));
