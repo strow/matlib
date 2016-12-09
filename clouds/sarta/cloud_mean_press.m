@@ -41,6 +41,7 @@ aa.watercldX(ii) = nansum((plevs.*(watercldXW.^0)).*watercldX);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% this is where we already have xcumsum of column total
+%% xcumsum == run_sarta.cumsum
 bonk = find(icecldYW > xcumsum,1);
 if length(bonk) > 0 & xcumsum > 0 & xcumsum <= 1
   aa.icecldY(ii) = plevs(bonk);
@@ -55,3 +56,13 @@ else
   aa.watercldY(ii) = 1200;  
 end
 
+iDebug = -1;
+if iDebug > 0
+  disp('setting cloud_mean_press.m')
+  com.mathworks.services.Prefs.setBooleanPref('EditorGraphicalDebugging',false)   
+  keyboard
+  [aa.icecldX(ii) aa.watercldX(ii) aa.icecldY(ii) aa.watercldY(ii)]
+  figure(1); subplot(121); plot(icecldX, plevs,watercldX ,plevs); set(gca,'ydir','reverse')
+  figure(1); subplot(122); plot(icecldXW,plevs,watercldXW,plevs); set(gca,'ydir','reverse')
+%  figure(1); subplot(122); plot(1-icecldXW,plevs,1-watercldXW,plevs); set(gca,'ydir','reverse')
+end

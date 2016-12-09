@@ -58,6 +58,8 @@ tic;
 
 jj = 0;
 iiii = 1 : length(profX.plat);
+aa = struct;
+
 for iiiiA = 1:length(iiii)
   ii = iiii(iiiiA);
   jj = ii;
@@ -68,7 +70,7 @@ for iiiiA = 1:length(iiii)
     ptemp     = [];
     cutoff440 = [];    
   else
-    [watercld,icecld,plevs,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
+    [watercld,icecld,plevs,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,aa,ii);
   end
   
   [wOUT,wT,wB,wPeak,wN,wmaxN,wminN] = boxshape(watercld,rGaussianCutoff); newwater = wOUT;
@@ -94,12 +96,18 @@ for iiiiA = 1:length(iiii)
 
   if iDoPlot > 0
     plot_ecmwfcld2sartacld
+    %iiiiA
+    %disp('ret'); pause
   end
 
 end    %% loop over iiiiA
 
 %% put in the cloud cumulative fraction info, so that it can be used if necessary by "reset_cprtop"
-prof.watercldX = aa.watercldX;
-prof.icecldX   = aa.icecldX;
-prof.watercldY = aa.watercldY;
-prof.icecldY   = aa.icecldY;
+prof.watercldX = aa.watercldX;    %% water cloud mean pressure based on normalized pdf
+prof.icecldX   = aa.icecldX;      %%   ice cloud mean pressure based on normalized pdf
+prof.watercldY = aa.watercldY;    %% water cloud mean pressure based on run_sarta.cumsum
+prof.icecldY   = aa.icecldY;      %%   ice cloud mean pressure based on run_sarta.cumsum
+
+%  com.mathworks.services.Prefs.setBooleanPref('EditorGraphicalDebugging',false)
+%  disp('here key')
+%  keyboard

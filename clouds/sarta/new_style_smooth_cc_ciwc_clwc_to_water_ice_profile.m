@@ -1,4 +1,4 @@
-function [watercld,icecld,plevs,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii);
+function [watercld,icecld,plevs,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,aa,ii);
 
 %%% old_style_smooth_cc_ciwc_clwc_to_water_ice_profile been superseded by this new code
 
@@ -24,7 +24,8 @@ icecld   = interp1(log10(profX.plevs(:,ii)),profX.ciwc(:,ii),log10(plevs));
 ptemp    = interp1(log10(profX.plevs(:,ii)),profX.ptemp(:,ii),log10(plevs));
 
 if ~exist('aa','var')
-  aa = [];
+  %aa = [];
+  aa = struct;  
 end
 aa = cloud_mean_press(aa,xcumsum,icecld,watercld,plevs,ii);
 

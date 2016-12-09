@@ -42,7 +42,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nlev     = ceil(mean(p.nlevs));
-nlev_std = (std(double(p.nlevs)));
+nlev_std = (std(double(p.nlevs)));   %% are number of levels different?????
 
 if h.ptype ~= 0
   error('need levels input!')
@@ -85,6 +85,8 @@ end
 %% sets fracs and particle effective sizes eg cfrac2
 prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta.randomCpsize);
 
+%% ecmwfcld2sartacld.m -- > new_style_smooth_cc_ciwc_clwc_to_water_ice_profile --> cloud_mean_press 
+%% sets prof.watercldX,prof.watercldY, prof.icecldX, prof.icecldY which are used in reset_cprtop
 if run_sarta.cumsum > 0 & run_sarta.cumsum <= 1
   %% set cloud top according to cumulative sum fraction of ciwc or clwc
   profXYZ = prof;
@@ -115,8 +117,8 @@ iFix = 0;
 %% before used to give up at iFix == 10
 while iFix < 12 & iNotOK > 0
   iFix = iFix + 1;
+  fprintf(1,' doing n = %2i try at checking clouds \n',iFix)  
   [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac,iFix);  %% see possible pitfalls in clouds
-  fprintf(1,' did n=%2i try at checking clouds \n',iFix)
 end
 if iFix >= 12 & iNotOK > 0
   %disp('oops, could not fix cprtop vs cprbot vs spres'); %keyboard

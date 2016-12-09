@@ -9,6 +9,7 @@ line([prof.cprtop(ii) prof.cprtop(ii)],[0 max(iOUT)*1.25],'color','k')
 line([prof.cprbot(ii) prof.cprbot(ii)],[0 max(iOUT)*1.25],'color','k')
 line([prof.cprtop(ii) prof.cprbot(ii)],[max(iOUT)*1.25 max(iOUT)*1.25],'color','k')
 line([meanpI meanpI],[0 max(lalam)],'color','r','linewidth',2)
+title('ICE')
 
 figure(2); clf
 lalap = profX.plevs(:,ii);
@@ -19,18 +20,23 @@ line([prof.udef(13,ii) prof.udef(13,ii)],[0 max(wOUT)*1.25],'color','k')
 line([prof.udef(14,ii) prof.udef(14,ii)],[0 max(wOUT)*1.25],'color','k')
 line([prof.udef(13,ii) prof.udef(14,ii)],[max(wOUT)*1.25 max(wOUT)*1.25],'color','k')
 line([meanpI meanpI],[0 max(lalam)],'color','r','linewidth',2)
+title('WATER')
+
+whos cOUT
 
 figure(3);  clf
 plot(profX.ciwc(:,ii),profX.plevs(:,ii),'b',...
-icecld,plevs,'b--',newice,plevs,'bo-',...
-        profX.clwc(:,ii),profX.plevs(:,ii),'r',watercld,plevs,'r--',...
-        newwater,plevs,'ro-'); hold on
+     icecld,plevs,'b--',newice,plevs,'bo-',...
+     profX.clwc(:,ii),profX.plevs(:,ii),'r',watercld,plevs,'r--',...
+     newwater,plevs,'ro-'); hold on
 plot(profX.ciwc(:,ii),profX.plevs(:,ii),'b',...
      profX.clwc(:,ii),profX.plevs(:,ii),'r',...
      cOUT,profX.plevs(:,ii),'k','LineWidth',3 )
 set(gca,'ydir','Reverse'); 
 grid
 hold off
-legend('Ice','SmoothIce','NewIce','Water','SmoothWater','NewWater',...
-     'Location','NorthEast')
+hl = legend('Ice','SmoothIce','NewIce','Water','SmoothWater','NewWater',...
+     'Location','NorthEast');
+set(hl,'fontsize',8);
+title('BOTH')     
 pause(0.1);
