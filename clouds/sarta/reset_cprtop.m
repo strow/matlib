@@ -5,6 +5,13 @@ p1.orig_ctop  = p1.cprtop;
 p1.orig_ctop2 = p1.cprtop2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ecmwfcld2sartacld.m -- > new_style_smooth_cc_ciwc_clwc_to_water_ice_profile --> cloud_mean_press --> set icecldY,watercldY
+%% from cloud_mean_press we get
+%%   xcumsum = run_sarta.cumsum so can be -9999,-1,0-1,1-9998,9999
+%%   aa.icecldX,aa.watercldX = mean(CIWC), mean(CLWC) pressure level
+%%   aa.icecldY,aa.watercldY = pressure level where normalized CIWC/CLWC exceed xcumsum if 0 < xcumsum < 1
+%%                             else set to 1200 mb
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% this is ice
 
 ice = find(p1.ctype == 201 & p1.ctype2 ~= 201);

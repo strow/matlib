@@ -50,10 +50,12 @@ function [prof,orig_slabs] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 %                                         if redoing slabs, this is THE most important variable!!!!
 %     run_sarta.clear               = +/-1 for yes/no, results into prof.clearcalc (DEFAULT -1)
 %     run_sarta.cloud               = +/-1 for yes/no, results into prof.rcalc     (DEFAULT +1)
-%     run_sarta.cumsum = < 0           : ORIG DEFAULT go with "ecmwf2sarta" results (default before March 2012), mean of ciwc/clwc
+%     run_sarta.cumsum = -1           : ORIG DEFAULT go with "ecmwf2sarta" results (default before March 2012), mean of ciwc/clwc "GeorgeAumann pick"
 %                        0 -- 1        : set cloud pressure based on cumulative sum of p.ciwc and p.clwc, 
 %                        >  1--9998    : go for where cumsum(cloudOD) ~ N/100 (if that can be found)
-%                        >= 9999       : NEW DEFAULT go for peak of wgt fcn of cloud ice, cloud liquid (ie go HIGH in atm, good for DCC)
+%                        >= +9999      : NEW DEFAULT go for peak of wgt fcn of cloud ice, cloud liquid (ie go HIGH in atm, good for DCC) "Strow pick"
+%                        <= -9999      :             go for peak of wgt fcn of cloud ice, cloud liquid (ie go HIGH in atm, good for DCC)
+%                                      :             differs from +9999 ice clouds are limited be 400 mb >= icetop >= 0 ("Strow pick" has 1000 mb > icetop > 0)
 %     run_sarta.cfrac < 0              : use random (DEFAULT)
 %                     > 0 to < 1       : use fixed amount specified by user
 %     run_sarta.klayers_code        = string to klayers
@@ -99,6 +101,7 @@ function [prof,orig_slabs] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  02/26/2017 : run_sarta.cumsum = N <= -9999 option allows the clouds to be placed at peak of cloud wgt fcn, with ice cloud top 400 mb >= icetop >= 0 mb
 %  09/01/2015 : cleaned up random seeds (all must be done OUTSIDE the code), and include "tcc" as a run_sarta option
 %  08/15/2015 : cleaned up code by including lots of common functions for driver_sarta_cloud_rtp.m driver_sarta_cloud100layer_rtp.m
 %  08/14/2015 : f cprtop,cprbot,cngwat,cpsize exist, code no longer redoes profile--> slab unless forced to do so (run_sarta.ForceNewSlabs)
@@ -153,6 +156,7 @@ addpath([base_dir2 '/h4tools'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% defaults
+narginx = nargin;
 check_sarta_cloud_rtp_defaults
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -199,7 +203,7 @@ if iAlreadyExistSlabClds < 0
   %% need to add in slab cloud fields
   disp(' >>>>>>>>>>>>> adding in slab cloud fields <<<<<<<<<<<<<<<<<')
   [orig_slabs,p] = get_orig_slabs_info(p,run_sarta);
-  prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta); 
+  prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta,narginx); 
 elseif iAlreadyExistSlabClds > 0
   %% slab cloud fields already exist, just run klayers and sarta
   disp(' >>>>>>>>>>>>> slab cloud fields already exist; simply running klayers and sarta <<<<<<<<<<<<<<<<<')

@@ -1,203 +1,74 @@
 function p1 = reset_cprtop_cloudOD(p0,cumsumOD,airslevels,airsheights);
 
+disp('computing level ODs and wgt functions')
+%% basically same as reset_cprtop_cloudOD.m
+%% first part is same as compute_cloudOD.m but then this routine does much more
+
 %% computes cloud ODs based on formulas given by Xianglei and Xiuhong
 %% see PCRTM_compute_for_AIRS_spectra.m
-%% if cumsumOD < 99 then look for where cumulative cloudOD == cumsum
-%%    cumsumOD > 99 then look for peak of cloud wgt fcn
+%% if abs(cumsumOD) < 99   then look for where cumulative cloudOD == cumsum
+%%    abs(cumsumOD) = 9999 then look for peak of cloud wgt fcn, if abs(cumsumOD) == +9999 do          STROW PICK (ice cloud can be between 0 < p < 1000 mb),
+%%                                                              if abs(cumsumOD) == -9999 do MODIFIED STROW PICK (ice cloud can be between 0 < p < 400 mb),
+
+%% see cloud_mean_press.m
+%%   aa.icecldX,aa.watercldX = mean(CIWC), mean(CLWC) pressure level
+%%   aa.icecldY,aa.watercldY = pressure level where normalized CIWC/CLWC exceed xcumsum if 0 < xcumsum < 1
+%%                             else set to 1200 mb
 
 p1 = p0;
 p1.orig_ctop  = p1.cprtop;
 p1.orig_ctop2 = p1.cprtop2;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+iDebug = -1;
+if iDebug > 0
+  keyboard
+  oo = find(p0.cprtop > 0 & p0.icecldX > 0);
+  plot(p0.icecldX(oo)-p0.cprtop(oo))
+  plot(p0.icecldX(oo),p0.cprtop(oo),'.',p0.icecldX(oo),p0.icecldX(oo))  %% so typically icecldX > cprtop ==> icecldX is lower than cprtop
+  plotclouds(p0,1,2)
+end
 
-R = 287.05;
-g = 9.806;
-
-% coefficents from S-C Ou, K-N. Liou, Atmospheric Research
-% 35(1995):127-138.
-% for computing ice cloud effective size
-c0 = 326.3;
-c1 = 12.42;
-c2 = 0.197;
-c3 = 0.0012;
-
+disp('    computing ice/water ODs at each level, each profile .... ')
 for ii = 1 : length(p0.stemp)
-  ciwc = p0.ciwc(:,ii);
-  clwc = p0.clwc(:,ii);
-  cc   = p0.cc(:,ii);
-  ptemp = p0.ptemp(:,ii);
-  gas_1 = p0.gas_1(:,ii);
-  press = p0.plevs(:,ii);
+  [p1,iceOD,waterOD] = ice_water_deff_od(p1,airslevels,airsheights,ii);
+  [p1] = sarta_level_ice_water_OD_1(iceOD,waterOD,cumsumOD,p1,ii);    %% NOTE THE cumsumOD here -- have to be careful in calling routine
+                                                                      %% it may be looking for 0 <= cumsumOD <= 9999/100 in which case it is looking for that value of cumulative OD from TOA to GND
+                                                                      %% it may be looking for abs(cumsumOD) = 9999      in which case it is looking for cumulative OD from TOA to GND == 1
+								      %% sets p1.sarta_lvl_iceOD_1, p1.sarta_lvl_waterOD_1
+end
 
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-  %% code works assming press(1) < press(2) etc ie TOA is at LVL1, GND = LVLN
-  if press(1) > press(2)
-    [Y,I] = sort(press);
-    clwc  = clwc(I);
-    ciwc  = ciwc(I);
-    cc    = cc(I);
-    ptemp = ptemp(I);
-    gas_1 = gas_1(I);
-    press = press(I);
-  end
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-  tcld = ptemp - 273.16;                   %% change to deg C
-  boo = find(tcld < -50); tcld(boo) = -50; %% set minimum as -50 C
-  boo = find(tcld > -25); tcld(boo) = -25; %% set maximum as -50 C
-
-  cldde_ice = c0 + c1 * tcld + c2 * tcld.^2 + c3 * tcld.^3;
-
-  tav = (ptemp(1:end-1)+ptemp(2:end))/2; tav(end) = ptemp(end);
-  pav = (press(1:end-1)+press(2:end))/2; pav(end) = press(end);
-  scaleH = R*tav/g/1000;    %% in km
-  dz = scaleH .* log(press(2:end)./press(1:end-1)); dz(length(dz)+1) = 0;
-  Z = cumsum(dz);
-  diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
-
-  %% bugfix on 6.3.2013 ... this was mistakenly ptemp before early June, 2013
-  Z = p2hFAST(press,airslevels,airsheights)/1000;
-  diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
-
-  % compute ice cloud optical depth from Ebert and Curry (1992, J. Geophys. Res.,  
-  qi = ciwc ./ ptemp .* press *100/R * 1e3;  %%change IWC from kg/kg to g/m3  
-  iceOD = (0.003448 + 2.431./cldde_ice) .*qi ./ cc .* diffZ *1e3;
-
-  bad = find(isnan(cldde_ice)); cldde_ice(bad) = -9999;
-  p1.sarta_lvlDMEice(:,ii) = cldde_ice;
-  bad = find(isnan(iceOD) | isinf(iceOD)); iceOD(bad) = 0;
-
-  %% now check things are ok ie where there is iwc, there is finite cc
-
-  p1.sarta_lvlODice(:,ii) = iceOD;
-  p1.sarta_lvlZ(:,ii) = Z;
-
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  cldde_liq = 20 * ones(size(press));
-
-  qw = clwc ./ ptemp .* press *100/R *1e3;  %change liquid water content from kg/kg to g/m^3
-  % ECMWF technical report, Klein S. A., 1999
-  waterOD = 3 * qw ./ cldde_liq ./cc .*diffZ  *1e3;
-
-  bad = find(isnan(cldde_liq)); cldde_liq(bad) = -9999;
-  p1.sarta_lvlDMEwater(:,ii) = cldde_liq;
-  bad = find(isnan(waterOD) | isinf(waterOD)); waterOD(bad) = 0;
-  p1.sarta_lvlODwater(:,ii) = waterOD;
-
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  icesum = cumsum(iceOD);
-  watersum = cumsum(waterOD);
-
-  od_ice1_top = find(icesum >= cumsumOD,1);
-  if length(od_ice1_top) > 0
-    p1.sarta_lvl_iceOD_1(ii) = press(od_ice1_top);
-  else
-    oo = find(iceOD > 0);
-    if length(oo) > 0
-      %% cumulative OD < 1, put as low as possible
-      oo = oo(end);
-      od_ice1_top = oo;
-      p1.sarta_lvl_iceOD_1(ii) = press(oo);
-    else
-      od_ice1_top = NaN;
-      p1.sarta_lvl_iceOD_1(ii) = -9999;
-    end
-  end
-
-  od_water1_top = find(watersum >= cumsumOD,1);
-  if length(od_water1_top) > 0
-    p1.sarta_lvl_waterOD_1(ii) = press(od_water1_top);
-  else
-    oo = find(waterOD > 0);
-    if length(oo) > 0
-      %% cumulative OD < 1, put as low as possible
-      oo = oo(end);
-      od_water1_top = oo;
-      p1.sarta_lvl_waterOD_1(ii) = press(oo);
-    else
-      od_water1_top = NaN;
-      p1.sarta_lvl_waterOD_1(ii) = -9999;
-    end
-  end
-
-  p1.sarta_iceOD_warn(ii) = -1;  %% assume things ok between ciwc and cc
-  if sum(iceOD) < eps & sum(ciwc)*1e5 > 0
-    p1.sarta_iceOD_warn(ii) = +1;
-  end
-  p1.sarta_waterOD_warn(ii) = -1;  %% assume things ok between clwc and cc
-  if sum(waterOD) < eps & sum(clwc)*1e5 > 0
-    p1.sarta_waterOD_warn(ii) = +1;
-  end
-
-%{
-  plot(1:length(press),iceOD/nansum(iceOD),'b',1:length(press),waterOD/nansum(waterOD),'r',...
-       od_ice1_top,0.1,'bo',       od_water1_top,0.1,'ro')
-  plot(1:length(press),iceOD,'b',1:length(press),waterOD,'r',...
-       od_ice1_top,0.1,'bx',       od_water1_top,0.2,'ro')
-  title(num2str(ii));
-  pause(0.1)
-%}
-
+if iDebug > 0
+  p10 = p1;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% do the weighting functions
-wgtI = zeros(size(p0.ptemp));
-ii = 1;
-wgtI(ii,:) = 0;
-for ii = 2 : p0.nlevs(1)
-  wgtI(ii,:) = wgtI(ii-1,:) + p1.sarta_lvlODice(ii,:);
-end
-wgtI = exp(-wgtI) .* (1-exp(-p1.sarta_lvlODice));
-for ii = 1 : length(p1.stemp)
-  dodo = wgtI(:,ii);
-  if sum(dodo) > 0
-    bop = find(dodo == max(dodo),1);
-    wgtpeakIindex(ii) = bop;
-    wgtpeakI_tempr(ii) = p1.ptemp(bop,ii);
-    wgtpeakI(ii) = p1.plevs(bop,ii);
-  else
-    wgtpeakIindex(ii) = -1;
-    wgtpeakI_tempr(ii) = -9999;
-    wgtpeakI(ii) = -9999;
-  end
-end
+[wgtW,wgtpeakWindex,wgtpeakW_tempr,wgtpeakW,wgtI,wgtpeakIindex,wgtpeakI_tempr,wgtpeakI] = cld_wgt_fcn(p1); %% leave p1 alone, sets cloud weight functions
 
-wgtW = zeros(size(p0.ptemp));
-ii = 1;
-wgtI(ii,:) = 0;
-for ii = 2 : p0.nlevs(1)
-  wgtW(ii,:) = wgtW(ii-1,:) + p1.sarta_lvlODwater(ii,:);
-end
-wgtW = exp(-wgtW) .* (1-exp(-p1.sarta_lvlODwater));
-for ii = 1 : length(p1.stemp)
-  dodo = wgtW(:,ii);
-  if sum(dodo) > 0
-    bop = find(dodo == max(dodo),1);
-    wgtpeakWindex(ii) = bop;
-    wgtpeakW_tempr(ii) = p1.ptemp(bop,ii);
-    wgtpeakW(ii) = p1.plevs(bop,ii);
-  else
-    wgtpeakWindex(ii) = -1;
-    wgtpeakW_tempr(ii) = -9999;
-    wgtpeakW(ii) = -9999;
-  end
+%% now set p1 fields
+p1.sarta_wgtI     = wgtI;   %% nlevs X nprof array of ice   cloud weight functions, assuming no atmosphere
+p1.sarta_wgtW     = wgtW;   %% nlevs X nprof array of water cloud weight functions, assuming no atmosphere
+
+p1.sarta_index_wgtpeakW = wgtpeakWindex;  %% index where wgtI peaks
+p1.sarta_index_wgtpeakI = wgtpeakIindex;  %% index where wgtW peaks
+
+p1.sarta_wgtpeakW = wgtpeakW;  %% pressure level where wgtI peaks, depends on sarta_lvlODice
+p1.sarta_wgtpeakI = wgtpeakI;  %% pressure level where wgtW peaks, depends on sarta_lvlODwater
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% now do the actual replacement of cprtop/cprbot with above info
+p1 = do_the_reset_cprtop_cloudOD(p0,p1,cumsumOD);
+
+if iDebug > 0
+  oo = find(p1.cprtop > 0 & wgtpeakI > 0);
+  plot(oo,p10.cprtop(oo)-wgtpeakI(oo),oo,p1.cprtop(oo)-wgtpeakI(oo))
 end
 
-p1.sarta_wgtI     = wgtI;
-p1.sarta_wgtW     = wgtW;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-p1.sarta_index_wgtpeakW = wgtpeakWindex;
-p1.sarta_index_wgtpeakI = wgtpeakIindex;
-
-p1.sarta_wgtpeakW = wgtpeakW;
-p1.sarta_wgtpeakI = wgtpeakI;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
 iJunk = -1;
 if iJunk > 0
   %% this shows that wgtpeakW < sarta_lvl_waterOD_1 ie higher up!!!!!
@@ -236,13 +107,4 @@ if iJunk > 0
   lala = sum(p1.sarta_lvlODwater);
   scatter(ttorad(1231,wgtpeakW_tempr),radW(1,:),30,lala,'filled'); colorbar
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% now do the actual replacement of cprtop/cprbot with above info
-p1 = do_the_reset_cprtop_cloudOD(p0,p1,cumsumOD);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

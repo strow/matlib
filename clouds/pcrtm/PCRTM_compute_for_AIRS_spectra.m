@@ -328,8 +328,8 @@ for ibox = 1:nboxes
     end
               
     if ICT(ilev,ibox)>1e-10
-      % compute ice cloud optical depth from Ebert and Curry (1992, J. Geophys. Res., 
-      %    vol. 97, pp. 3831-3836.
+      % compute ice cloud optical depth from "A parameterization of ice cloud optical properties for climate models"
+      %% Ebert and Curry (1992, J. Geophys. Res., vol. 97, pp. 3831-3836.
       qi = ICT(ilev,ibox)/ TT(ilev,ibox) *P(ilev,ibox)*100/R *1e3;  %change ice water content from kg/kg to g/m^3  
       ice_opt =  (0.003448 + 2.431/cldde_ice(ilev))*qi/cc(ilev,ibox)*(Z(ilev)-Z(min(ilev+1,nlev))) *1e3; 
                       % * 0.5 * (P(ilev)+P(max(ilev-1,1)))/g *1e4;

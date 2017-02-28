@@ -21,6 +21,38 @@ frp = mktemp('temp.rp.rtp');
 ugh1 = mktemp('ugh1');
 ugh2 = mktemp('ugh2');
 
+%{
+%% sometimes the files get toooooo large
+%%%>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+if isfield(prof,'rcalc')
+  prof = rmfield(prof,'rcalc');
+end
+if isfield(prof,'rcalc_std')
+  prof = rmfield(prof,'rcalc_std');
+end
+if isfield(prof,'rad_allsky_std')
+  prof = rmfield(prof,'rad_allsky_std');
+end
+if isfield(prof,'rad_clrsky')
+  prof = rmfield(prof,'rad_clrsky');
+end
+if isfield(prof,'sarta_cloud')
+  prof = rmfield(prof,'sarta_cloud');
+end
+if isfield(prof,'sarta_rclear')
+  prof = rmfield(prof,'sarta_rclear');
+end
+if isfield(prof,'sarta_xclear')
+  prof = rmfield(prof,'sarta_xclear');
+end
+h
+ha
+pa
+prof
+fprintf(1,'removed pcrtm \n')
+%%%>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+%}
+
 rtpwrite(fip,h,ha,prof,pa);
 klayerser = ['!' klayers ' fin=' fip ' fout=' fop ' >& ' ugh1];
   eval(klayerser);

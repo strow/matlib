@@ -11,7 +11,7 @@ if iFixLoop == 10
 end
 
 iDebug = -1;  %% do not plot stuff
-if (iFixLoop >= 10)
+if (iFixLoop >= 12)
   iDebug = +1;  %% plot stuff
 end
 

@@ -19,7 +19,7 @@
 
 %% defaults
 
-if nargin == 4
+if narginx == 4
   %% default to running sarta_cloudy
   run_sarta.clear   = -1;  %% do not run clear code
   run_sarta.cloud   = +1;  %% run cloudy code
@@ -57,7 +57,7 @@ if nargin == 4
        '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3_100layerNEW';
   end
     
-elseif nargin == 5
+elseif narginx == 5
   if ~isfield(run_sarta,'waterORice')
     run_sarta.waterORice = +1; % keep only water clds   %% this is for driver_sarta_cloud_rtp_onecldtest.m
     run_sarta.waterORice = -1; % keep only ice   clds   %% this is for driver_sarta_cloud_rtp_onecldtest.m

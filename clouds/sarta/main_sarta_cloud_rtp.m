@@ -1,4 +1,4 @@
-function prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
+function prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta,narginx)
 
 %% modelled on MATLABCODE/CLOUD_ECMWF_ERA/PACKAGE_CFRAC/readecmwf91_nearest_gasNcloud_slabprof.m
 %% also see /asl/rtp_prod/airs/rtp/create_rcalc_ecm_cld_allfov.m
@@ -11,10 +11,11 @@ function prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % >>> options for SARTA runs
 %     run_sarta.clear = +/-1 for yes/no, results into prof.clearcalc (DEFAULT -1)
 %     run_sarta.cloud = +/-1 for yes/no, results into prof.rcalc     (DEFAULT +1)
-%     run_sarta.cumsum = < 0           : DEFAULT go with "ecmwf2sarta" results (default before March 2012)
+%     run_sarta.cumsum = -1            : ORIG DEFAULT go with "ecmwf2sarta" results (default before March 2012) GEORGE AUMANN PICK
 %                        0 -- 1        : set cloud pressure based on cumulative sum of p.ciwc and p.clwc, 
 %                        >  1--9998    : go for where cumsum(cloudOD) ~ N/100 (if that can be found)
-%                        >= 9999       : go for peak of wgt fcn of cloud ice, cloud liquid
+%                        >= +9999      : NEW DEFAULT go for peak of wgt fcn of cloud ice, cloud liquid (1000 mb >= icetop > 0 mb) STROW PICK
+%                        <= =9999      :             go for peak of wgt fcn of cloud ice, cloud liquid ( 400 mb >= icetop > 0 mb) MODIFIED
 %     run_sarta.cfrac < 0              : use random (DEFAULT)
 %                     > 0 to < 1       : use fixed amount specified by user
 %     run_sarta.klayers_code        = string to klayers
@@ -49,6 +50,7 @@ function prof = main_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  02/26/2017 : run_sarta.cumsum = N <= -9999 option allows the clouds to be placed at peak of cloud wgt fcn, with ice cloud top 400 mb >= icetop >= 0 mb
 %  08/18/2013 : introduced run_sarta.randomCpsize, default = +1  to keep randomizing deff; 
 %                                                             20 to keep ice = ice(T,pcrtm), water = 20 um
 %                                                             -1 to use MODIS water DME

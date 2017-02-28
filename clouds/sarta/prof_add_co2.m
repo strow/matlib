@@ -1,4 +1,4 @@
-prof.co2ppm = -9999 * ones(length(prof.stemp));
+prof.co2ppm = -9999 * ones(size(prof.stemp));
 if run_sarta.co2ppm == -1
   % 12784 * 86400 + 27 = 1.1045e+09;
   if nanmean(prof.rtime) > 1e9
@@ -22,5 +22,5 @@ if ~isfield(p,'gas_2') & length(intersect(h.glist,2)) == 0
 else
   disp('in driver_sarta_cloud_rtp.m we ALREADY have gas2 in h,p')
   disp('will use this profile instead of p.co2ppm')
-  prof.co2ppm = -9999 * ones(length(prof.stemp));
+  prof.co2ppm = -9999 * ones(size(prof.stemp));
 end
