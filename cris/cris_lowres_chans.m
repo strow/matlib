@@ -1,7 +1,7 @@
 function [n1,n2,n3,userLW,userMW,userSW,ichan_hires] = cris_lowres_chans();
 
-addpath /asl/ccast/motmsc/rtp_sarta
-addpath /asl/ccast/source
+addpath /asl/packages/ccast/motmsc/rtp_sarta
+addpath /asl/packages/ccast/source
 
 wlaser = 773.1307;
 opts.resmode = 'lowres';
