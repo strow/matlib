@@ -1,4 +1,4 @@
-function [] = fit_robust_one_lat(fin,fout,latid,fit_type,start_time,stop_time);
+function [] = fit_robust_one_lat_subset(fin,fout,latid,fit_type,start_time,stop_time);
 
 smallsave = false;
 
@@ -8,6 +8,13 @@ addpath /asl/matlib/aslutil
 latid_out = latid;
 
 load([fin int2str(latid)])
+
+load ~/Work/Airs/Random/era_indices_for_merra
+rcal = rcal(ia,:);
+robs = robs(ia,:);
+rclr = rclr(ia,:);
+rtime = rtime(ia);
+count = count(ia,:);
 
 [nd,nf] = size(robs);
 
@@ -28,9 +35,8 @@ nd = length(ndi);
 
 dmtime = dmtime(ndi);
 robs = robs(ndi,:);
-rcal = rcal(ndi,:);
-rclr = rclr(ndi,:);
-count = count(ndi,:);
+%rcal = rcal(ndi,:);
+%rclr = rclr(ndi,:);
 
 
 all_b        = NaN(nf,10);
