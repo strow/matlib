@@ -1,4 +1,10 @@
-function [p1,iceOD,waterOD] = ice_water_deff_od(p0,airslevels,airsheights,ii)
+function [p1,iceOD,waterOD] = ice_water_deff_od(p0,airslevels,airsheights,ii,iNew_or_Orig_CXWC2OD)
+
+if nargin == 4
+  iNew_or_Orig_CXWC2OD =  0;  %%% change to OD = blah * qBlah / cc * diffZ; OD(cc < 1e-3) = 0 WHAT PCRTM DOES
+  iNew_or_Orig_CXWC2OD = +1;  %%% change to OD = blah * qBlah * cc * diffZ                    Mar 2017 SERGIO
+  iNew_or_Orig_CXWC2OD = -1;  %%% stick  to OD = blah * qBlah / cc * diffZ                    Pre March 2017  DEFAULT
+end
 
 theeps = 1e-15;
 
@@ -53,19 +59,19 @@ diffZ = abs(diff(Z)); diffZ(length(diffZ)+1) = diffZ(length(diffZ));
 
 p1.sarta_lvlZ(:,ii) = Z;
 
-iNew_or_Orig = -1;  %%% stick  to OD = blah * qBlah / cc * diffZ pre March 2017
-iNew_or_Orig = +1;  %%% change to OD = blah * qBlah * cc * diffZ post March 2017
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 cldde_ice = c0 + c1 * tcld + c2 * tcld.^2 + c3 * tcld.^3;
 
 % compute ice cloud optical depth from Ebert and Curry (1992, J. Geophys. Res.) 
 qi = ciwc ./ ptemp .* press *100/R * 1e3;  %%change IWC from kg/kg to g/m^3
-if iNew_or_Orig == -1
+if iNew_or_Orig_CXWC2OD == -1
   iceOD = (0.003448 + 2.431./cldde_ice) .* qi ./ cc .* diffZ *1e3;   %% ORIG
-else  
-  iceOD = (0.003448 + 2.431./cldde_ice) .* qi .* cc .* diffZ *1e3;   %% TEST
+elseif iNew_or_Orig_CXWC2OD == 0
+  iceOD = (0.003448 + 2.431./cldde_ice) .* qi ./ cc .* diffZ *1e3;   %% XIUHONG
+  iceOD(cc < 1e-3) = 0.0;
+elseif iNew_or_Orig_CXWC2OD == +1
+  iceOD = (0.003448 + 2.431./cldde_ice) .* qi .* cc .* diffZ *1e3;   %% SERGIO
 end
 
 bad = find(ciwc < theeps);
@@ -91,10 +97,13 @@ cldde_liq = 20 * ones(size(press));
 
 % compute water cloud optical depth, % ECMWF technical report, Klein S. A., 1999
 qw = clwc ./ ptemp .* press *100/R *1e3;  %change liquid water content from kg/kg to g/m^3
-if iNew_or_Orig == -1
+if iNew_or_Orig_CXWC2OD == -1
   waterOD = 3 * qw ./ cldde_liq ./cc .*diffZ  *1e3;  %% ORIG
-else  
-  waterOD = 3 * qw ./ cldde_liq .*cc .*diffZ  *1e3;  %% TEST
+elseif iNew_or_Orig_CXWC2OD == 0  
+  waterOD = 3 * qw ./ cldde_liq ./cc .*diffZ  *1e3;  %% XIUHONG
+  waterOD(cc < 1e-3) = 0.0;
+elseif iNew_or_Orig_CXWC2OD == +1  
+  waterOD = 3 * qw ./ cldde_liq .*cc .*diffZ  *1e3;  %% SERGIO
 end
 
 bad = find(isnan(cldde_liq)); cldde_liq(bad) = -9999;

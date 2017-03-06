@@ -1,6 +1,5 @@
-function p1 = reset_cprtop_cloudOD(p0,cumsumOD,airslevels,airsheights);
+function p1 = reset_cprtop_cloudOD(p0,cumsumOD,airslevels,airsheights,iNew_or_Orig_CXWC2OD);
 
-disp('computing level ODs and wgt functions')
 %% basically same as reset_cprtop_cloudOD.m
 %% first part is same as compute_cloudOD.m but then this routine does much more
 
@@ -14,6 +13,14 @@ disp('computing level ODs and wgt functions')
 %%   aa.icecldX,aa.watercldX = mean(CIWC), mean(CLWC) pressure level
 %%   aa.icecldY,aa.watercldY = pressure level where normalized CIWC/CLWC exceed xcumsum if 0 < xcumsum < 1
 %%                             else set to 1200 mb
+
+disp('computing level ODs and wgt functions')
+
+if nargin == 4
+  iNew_or_Orig_CXWC2OD =  0;  %%% change to OD = blah * qBlah / cc * diffZ; OD(cc < 1e-3) = 0 WHAT PCRTM DOES
+  iNew_or_Orig_CXWC2OD = +1;  %%% change to OD = blah * qBlah * cc * diffZ                    Mar 2017 SERGIO
+  iNew_or_Orig_CXWC2OD = -1;  %%% stick  to OD = blah * qBlah / cc * diffZ                    Pre March 2017  DEFAULT
+end
 
 p1 = p0;
 p1.orig_ctop  = p1.cprtop;
@@ -30,7 +37,7 @@ end
 
 disp('    computing ice/water ODs at each level, each profile .... ')
 for ii = 1 : length(p0.stemp)
-  [p1,iceOD,waterOD] = ice_water_deff_od(p1,airslevels,airsheights,ii);
+  [p1,iceOD,waterOD] = ice_water_deff_od(p1,airslevels,airsheights,ii,iNew_or_Orig_CXWC2OD);
   [p1] = sarta_level_ice_water_OD_1(iceOD,waterOD,cumsumOD,p1,ii);    %% NOTE THE cumsumOD here -- have to be careful in calling routine
                                                                       %% it may be looking for 0 <= cumsumOD <= 9999/100 in which case it is looking for that value of cumulative OD from TOA to GND
                                                                       %% it may be looking for abs(cumsumOD) = 9999      in which case it is looking for cumulative OD from TOA to GND == 1

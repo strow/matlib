@@ -39,6 +39,8 @@ if narginx == 4
   run_sarta.waterORice = -1; % keep only ice   clds   %% this is for driver_sarta_cloud_rtp_onecldtest.m
   run_sarta.waterORice = 0;  % keep both water and ice clouds ie does nothing
 
+  run_sarta.iNew_or_Orig_CXWC2OD = -1;                %% (default) is to do OD = blah * qBlah / cc * diffZ almost PCRTM way
+  
   addpath ../
   choose_klayers_sarta   %% this is for two slab only
 
@@ -58,6 +60,10 @@ if narginx == 4
   end
     
 elseif narginx == 5
+  if ~isfield(run_sarta,'iNew_or_Orig_CXWC2OD')
+    run_sarta.iNew_or_Orig_CXWC2OD = -1;  %%% stick  to OD = blah * qBlah / cc * diffZ                    Pre March 2017  DEFAULT
+  end
+  
   if ~isfield(run_sarta,'waterORice')
     run_sarta.waterORice = +1; % keep only water clds   %% this is for driver_sarta_cloud_rtp_onecldtest.m
     run_sarta.waterORice = -1; % keep only ice   clds   %% this is for driver_sarta_cloud_rtp_onecldtest.m

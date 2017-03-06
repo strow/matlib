@@ -84,12 +84,13 @@ end
 
 %% sets fracs and particle effective sizes eg cfrac2
 prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta.randomCpsize);
+fprintf(1,'when setting cloud ice/water ODs, use iNew_or_Orig_CXWC2OD = %2i \n',run_sarta.iNew_or_Orig_CXWC2OD)
 
 if run_sarta.cumsum == -1
   %% find cumulative OD, basically same as reset_cprtop_cloudOD
   profXYZ = prof;
   %plotclouds(prof,5,6,'init')
-  prof = compute_cloudOD(prof,airslevels,airsheights);
+  prof = compute_cloudOD(prof,airslevels,airsheights,run_sarta.iNew_or_Orig_CXWC2OD);
   %plotclouds(prof,7,8,'cumsum = -1')  
 else
   %% ecmwfcld2sartacld.m -- > new_style_smooth_cc_ciwc_clwc_to_water_ice_profile --> cloud_mean_press 
@@ -102,13 +103,13 @@ else
   elseif run_sarta.cumsum > 1 & run_sarta.cumsum < 9999
     %% set cloud top according to where cumulative cloud OD = run_sarta.cumsum/100 so input param to reset_cprtop_cloudOD is between 0 and 100, 
     profXYZ = prof;
-    prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum/100,airslevels,airsheights);   %% same as next case, but note cumsumOD/100   --- then sarta_level_ice_water_OD_1.m, do_the_reset_cprtop_cloudOD are different  
+    prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum/100,airslevels,airsheights,run_sarta.iNew_or_Orig_CXWC2OD);   %% same as next case, but note cumsumOD/100   --- then sarta_level_ice_water_OD_1.m, do_the_reset_cprtop_cloudOD are different  
   elseif abs(run_sarta.cumsum) == 9999
     %% set cloud top according to where cumulative cloud OD = run_sarta.cumsum/100, 
     %%      or if >= +/- 9999, set at peak of cloud wgt fcn
     profXYZ = prof;
     %plotclouds(prof,1,2,'init')  
-    prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum,airslevels,airsheights);       %% same as prev case, but note cumsum         --- then sarta_level_ice_water_OD_1.m, do_the_reset_cprtop_cloudOD are different
+    prof = reset_cprtop_cloudOD(prof,run_sarta.cumsum,airslevels,airsheights,run_sarta.iNew_or_Orig_CXWC2OD);       %% same as prev case, but note cumsum         --- then sarta_level_ice_water_OD_1.m, do_the_reset_cprtop_cloudOD are different
     %if run_sarta.cumsum == +9999
     %  plotclouds(prof,3,4,'cumsum = +9999')
     %elseif run_sarta.cumsum == -9999

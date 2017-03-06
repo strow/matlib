@@ -101,6 +101,9 @@ function [prof,orig_slabs] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta)
 % Written by Sergio DeSouza-Machado (with a lot of random cloud frac and dme by Scott Hannon)
 %
 % updates
+%  03/06/2017 : introduce run_sarta.iNew_or_Orig_CXWC2OD : -1 (default) is to do OD = blah * qBlah / cc * diffZ                   almost PCRTM way
+%                                                        : 0  is to do OD = blah * qBlah / cc * diffZ and then OD(cc < 1e-3) = 0  PCRTM way
+%                                                        : +1 is to do OD = blah * qBlah * cc * diffZ                             SERGIO way
 %  02/26/2017 : run_sarta.cumsum = N <= -9999 option allows the clouds to be placed at peak of cloud wgt fcn, with ice cloud top 400 mb >= icetop >= 0 mb
 %  09/01/2015 : cleaned up random seeds (all must be done OUTSIDE the code), and include "tcc" as a run_sarta option
 %  08/15/2015 : cleaned up code by including lots of common functions for driver_sarta_cloud_rtp.m driver_sarta_cloud100layer_rtp.m
