@@ -133,9 +133,14 @@ end
 
 % Apply randomization (if desired)
 if (randomCpsize == 1)
-   randn('state',sum(100*clock));
-   junk = randn(1,n) .* cpstd;
-   cpsize = cpsize + junk;
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Seed random number generater
+  % randn('state',sum(100*clock));   %% till Aug 31, 2015
+  % http://www.mathworks.com/help/matlab/ref/rng.html suggests calling 
+  % rng('shuffle') before you call this routine
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  junk = randn(1,n) .* cpstd;
+  cpsize = cpsize + junk;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

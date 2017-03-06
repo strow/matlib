@@ -24,9 +24,12 @@ function [yOUT,wT,wB,peakN,N,maxN,minN] = boxshape(yIN,rGaussianCutoff);
 %%            are separate
 %%  if wT(jj) <= wB(jj-1)
 %%    wT(jj) = wB(jj-1) + 1;
-%%    end
+%%  end
 
 global iDoPlot
+
+iPrint = +1; %% talky
+iPrint = -1; %% quiet
 
 %% example 
 iExample = -1;
@@ -52,7 +55,7 @@ if iExample > 0
   yIN = y;
 
   plot(x,yIN)
-  end
+end
 
 clear wT wB
 peakN = [0 0 0];
@@ -60,7 +63,7 @@ peakN = [0 0 0];
 if iDoPlot > 0
   clf; 
   plot(yIN); grid
-  end
+end
 
 [maxN,minN] = localmaxmin(yIN);
 
@@ -70,16 +73,16 @@ minN0 = minN;
 
 if maxN(1) == 1
   maxN(1) = 0;
-  end
+end
 if maxN(length(maxN)) == 1
   maxN(length(maxN)) = 0;
-  end
+end
 if minN(1) == 1
   minN(1) = 0;
-  end
+end
 if minN(length(minN)) == 1
   minN(length(minN)) = 0;
-  end
+end
 
 sumYmax = sum(maxN);
 sumYmin = sum(minN);
@@ -98,14 +101,14 @@ if (zsum == zsumabs & zsum == 0)
   peakN = [0];
   yOUT = ones(1,length(yIN)) * yIN(1); 
   iFound = +1;
-  end
+end
 
 if sumYmax >= 6 & iFound < 0
-  disp(' simplifying more than 5 maxima')
+  % disp(' simplifying more than 5 maxima')
   if iDoPlot > 0
     plot(1:length(yIN),yIN); grid
-    end
   end
+end
 
 if sumYmax == 1 
   N = 1;
@@ -120,11 +123,11 @@ if sumYmax == 1
       thediff = abs(iM-wT);
       wB = length(yIN);  %% ORIG before Apr 2013
       wB = min(iM + thediff,length(yIN));
-      end
+    end
   peakN(1) = sum(yIN)/(wB-wT+1);
   yOUT(wT:wB) = yOUT(wT:wB) + peakN(1);
   iFound = +1;
-  end
+end
 
 if sumYmax == 2
   N = 2;
@@ -137,7 +140,7 @@ if sumYmax == 2
   if length(iO) > 1
     iX = find(iO > iM(1) & iO < iM(2));
     iO = iO(iX);
-    end
+  end
 
   jj = 1;
   haha = find(yIN <= rGaussianCutoff*yIN(iM(jj)));
@@ -150,7 +153,7 @@ if sumYmax == 2
       wB(1) = min(hahaB);
     else
       wB(1) = iO;
-      end
+    end
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
@@ -162,22 +165,22 @@ if sumYmax == 2
       wT(2) = max(hahaT);
     else
       wT(2) = iO;
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(2)  = length(yIN);
     else
       wB(2) = min(hahaB);
-      end
+    end
   %wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
   iFound = +1;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if sumYmax == 3
@@ -192,9 +195,9 @@ if sumYmax == 3
     for jj = 1 : 2
       iX      = find(iO > iM(jj) & iO < iM(jj+1));
       iOO(jj) = iO(iX);
-      end
-    iO = iOO;
     end
+    iO = iOO;
+  end
 
   jj = 1;
   haha = find(yIN <= rGaussianCutoff*yIN(iM(jj)));
@@ -207,7 +210,7 @@ if sumYmax == 3
       wB(1) = min(hahaB);
     else
       wB(1) = iO(1);
-      end
+    end
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
@@ -219,19 +222,19 @@ if sumYmax == 3
       wT(2) = max(hahaT);
     else
       wT(2) = iO(1);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(2) = length(yIN);
     else
       wB(2) = min(hahaB);
-      end
+    end
   wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
   jj = 3;
@@ -242,22 +245,22 @@ if sumYmax == 3
       wT(3) = max(hahaT);
     else
       wT(3) = iO(2);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(3) = length(yIN);
     else
       wB(3) = min(hahaB);
-      end
+    end
   %wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
   iFound = +1;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if sumYmax == 4
@@ -272,9 +275,9 @@ if sumYmax == 4
     for jj = 1 : 3
       iX      = find(iO > iM(jj) & iO < iM(jj+1));
       iOO(jj) = iO(iX);
-      end
-    iO = iOO;
     end
+    iO = iOO;
+  end
 
   jj = 1;
   haha = find(yIN <= rGaussianCutoff*yIN(iM(jj)));
@@ -287,7 +290,7 @@ if sumYmax == 4
       wB(1) = min(hahaB);
     else
       wB(1) = iO(1);
-      end
+    end
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
@@ -299,19 +302,19 @@ if sumYmax == 4
       wT(2) = max(hahaT);
     else
       wT(2) = iO(1);
-      end
+    end
   hahaB = find(haha > iM(jj));
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(2) = length(yIN);
     else
       wB(2) = min(hahaB);
-      end
+    end
   wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
   jj = 3;
@@ -322,19 +325,19 @@ if sumYmax == 4
       wT(3) = max(hahaT);
     else
       wT(3) = iO(2);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(3) = length(yIN);
     else
       wB(3) = min(hahaB);
-      end
+    end
   wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
   jj = 4;
@@ -345,27 +348,27 @@ if sumYmax == 4
       wT(4) = max(hahaT);
     else
       wT(4) = iO(3);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(4) = length(yIN);
     else
       wB(4) = min(hahaB);
-      end
+    end
   %wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
   iFound = +1;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if sumYmax == 5
-  disp('oh oh  .. too lazy to handle 5 maxima properly -- reset to 4')
+  % disp('oh oh  .. too lazy to handle 5 maxima properly -- reset to 4')
   N = 4;
   yOUT = zeros(1,length(yIN));
 
@@ -379,7 +382,7 @@ if sumYmax == 5
   maxN(iM(get_rid_of)) = 0;
   if (length(iN) >= get_rid_of)
     minN(iN(get_rid_of)) = 0;
-    end
+  end
 
   iM = find(maxN == 1);
   iN = find(minN == 1);
@@ -390,9 +393,9 @@ if sumYmax == 5
     for jj = 1 : 3
       iX      = find(iO > iM(jj) & iO < iM(jj+1));
       iOO(jj) = iO(iX);
-      end
-    iO = iOO;
     end
+    iO = iOO;
+  end
 
   jj = 1;
   haha = find(yIN <= rGaussianCutoff*yIN(iM(jj)));
@@ -405,7 +408,7 @@ if sumYmax == 5
       wB(1) = min(hahaB);
     else
       wB(1) = iO(1);
-      end
+    end
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
@@ -417,19 +420,19 @@ if sumYmax == 5
       wT(2) = max(hahaT);
     else
       wT(2) = iO(1);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(2) = length(yIN);
     else
       wB(2) = min(hahaB);
-      end
+    end
   wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
   jj = 3;
@@ -440,19 +443,19 @@ if sumYmax == 5
       wT(3) = max(hahaT);
     else
       wT(3) = iO(2);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(3) = length(yIN);
     else
       wB(3) = min(hahaB);
-      end
+    end
   wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
   jj = 4;
@@ -463,27 +466,27 @@ if sumYmax == 5
       wT(4) = max(hahaT);
     else
       wT(4) = iO(3);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(4) = length(yIN);
     else
       wB(4) = min(hahaB);
-      end
+    end
   %wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
   iFound = +1;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if sumYmax >= 6
-  disp('oh oh  .. too lazy to handle >= 6 maxima properly -- reset to 4')
+  % disp('oh oh  .. too lazy to handle >= 6 maxima properly -- reset to 4')
   N = 4;
   yOUT = zeros(1,length(yIN));
 
@@ -499,8 +502,8 @@ if sumYmax >= 6
     maxN(iM(get_rid_of(kk))) = 0;
     if (length(iN) >= get_rid_of(kk))
       minN(iN(get_rid_of(kk))) = 0;
-      end
     end
+  end
 
   iM = find(maxN == 1);
   iN = find(minN == 1);
@@ -511,9 +514,9 @@ if sumYmax >= 6
     for jj = 1 : 3
       iX      = find(iO > iM(jj) & iO < iM(jj+1));
       iOO(jj) = iO(iX);
-      end
-    iO = iOO;
     end
+    iO = iOO;
+  end
 
   jj = 1;
   haha = find(yIN <= rGaussianCutoff*yIN(iM(jj)));
@@ -526,7 +529,7 @@ if sumYmax >= 6
       wB(1) = min(hahaB);
     else
       wB(1) = iO(1);
-      end
+    end
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
@@ -538,19 +541,19 @@ if sumYmax >= 6
       wT(2) = max(hahaT);
     else
       wT(2) = iO(1);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(2) = length(yIN);
     else
       wB(2) = min(hahaB);
-      end
+    end
   wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
   jj = 3;
@@ -561,19 +564,19 @@ if sumYmax >= 6
       wT(3) = max(hahaT);
     else
       wT(3) = iO(2);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(3) = length(yIN);
     else
       wB(3) = min(hahaB);
-      end
+    end
   wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
 
   jj = 4;
@@ -584,22 +587,22 @@ if sumYmax >= 6
       wT(4) = max(hahaT);
     else
       wT(4) = iO(3);
-      end
+    end
   hahaB = find(haha > iM(jj));               
     hahaB = haha(hahaB);
     if length(hahaB) == 0
       wB(4) = length(yIN);
     else
       wB(4) = min(hahaB);
-      end
+    end
   %wB(jj) = min(iO(jj),wB(jj));
   peakN(jj) = sum(yIN(wT(jj):wB(jj)))/(wB(jj)-wT(jj)+1);
   if wT(jj) <= wB(jj-1)
     wT(jj) = wB(jj-1) + 1;
-    end
+  end
   yOUT(wT(jj):wB(jj)) = yOUT(wT(jj):wB(jj)) + peakN(jj);
   iFound = +1;
-  end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -625,11 +628,11 @@ if iFound < 0
     if length(wB) == 0
       %%% account for cld at BOTTOM ie gnd
       wB = length(yIN);
-      end
+    end
     if length(wT) == 0
       %%% account for cld at TOP ie toa
       wT = 1;
-      end
+    end
     peakN(1) = sum(yIN)/(wB-wT+1);
     yOUT(wT:wB) = peakN(1);
     iFound = +1;
@@ -647,7 +650,7 @@ if iFound < 0
       peakN(1) = sum(yIN)/(wB-wT+1);
       yOUT(wT:wB) = peakN(1);
       iFound = +1;
-      end
+    end
 
   elseif (sum(maxN0) == 2)
     %% odd mebbe we have something like [0 0 0 0 0   ... 0.0 1.00];
@@ -662,9 +665,9 @@ if iFound < 0
       peakN(1) = sum(yIN)/(wB-wT+1);
       yOUT(wT:wB) = peakN(1);
       iFound = +1;
-      end
     end
   end
+end
 
 peakN = peakN(1:N);
 
@@ -683,12 +686,21 @@ yCHECK = zeros(size(yOUT));
 for kk = 1 : N
   ind = wT(kk) : wB(kk);
   yCHECK(ind) = peakN(kk);
-  end
+end
 thediff = abs(yCHECK - yOUT);
+
 if (sum(thediff) > 0)
-  disp('sum(thediff) > 0')
-  wT
-  wB
+  if iPrint > 0
+    disp('sum(thediff) > 0')
+    wT
+    wB
+  end
+  Ccombine = [];
+  Cseparate = [];
+  wTnew = [];
+  wBnew = [];
+  wPeaknew = [];
+
   if iDoPlot > 0
     h1 = subplot(211);
     plot(1:length(yIN),yIN,1:length(yIN),yOUT,'r',1:length(yIN),yCHECK,'m'); 
@@ -697,14 +709,18 @@ if (sum(thediff) > 0)
     h2 = subplot(212);
     plot(1:length(yIN),yOUT - yCHECK,'m'); grid; title('check mismatch');
     pause;
-    end
+  end
 
-  disp('oops found some overlap inconsistency!!!!')
+  if iPrint > 0
+    disp('oops found some overlap inconsistency!!!!')
+  end
   [wTunique,wIT,wJT] = unique(wT,'first');
   [wBunique,wIB,wJB] = unique(wB,'first');
 
   if length(wB) ~= length(wBunique)
-    disp('inconsistency in cld bottoms');
+    if iPrint > 0  
+      disp('inconsistency in cld bottoms');
+    end
     [wBunique,wIB1,wJB1] = unique(wB,'first');
     [wBunique,wIB2,wJB2] = unique(wB,'last');
     Ccombine  = setxor(wIB1,wIB2);    %% combine these!!!!!!
@@ -713,7 +729,7 @@ if (sum(thediff) > 0)
       wTnew(mm) = wT(Cseparate(mm));
       wBnew(mm) = wB(Cseparate(mm));
       wPeaknew(mm) = peakN(Cseparate(mm));
-      end
+    end
     for mm = 1 : length(Ccombine)/2
       mmm = [1 2] + (mm-1)*2;
       len = length(wTnew);
@@ -721,11 +737,13 @@ if (sum(thediff) > 0)
       wTnew(len) = min(wT(Ccombine(mmm)));
       wBnew(len) = max(wB(Ccombine(mmm)));
       wPeaknew(len) = sum(peakN(Ccombine(mmm)));
-      end
     end
+  end
 
   if length(wT) ~= length(wTunique)
-    disp('inconsistency in cld tops');
+    if iPrint > 0  
+      disp('inconsistency in cld tops');
+    end
     [wBunique,wIB1,wJB1] = unique(wT,'first');
     [wBunique,wIB2,wJB2] = unique(wT,'last');
     Ccombine  = setxor(wIB1,wIB2);    %% combine these!!!!!!
@@ -734,7 +752,7 @@ if (sum(thediff) > 0)
       wTnew(mm) = wT(Cseparate(mm));
       wBnew(mm) = wB(Cseparate(mm));
       wPeaknew(mm) = peakN(Cseparate(mm));
-      end
+    end
     for mm = 1 : length(Ccombine)/2
       mmm = [1 2] + (mm-1)*2;
       len = length(wTnew);
@@ -742,27 +760,27 @@ if (sum(thediff) > 0)
       wTnew(len) = min(wT(Ccombine(mmm)));
       wBnew(len) = max(wB(Ccombine(mmm)));
       wPeaknew(len) = sum(peakN(Ccombine(mmm)));
-      end
     end
+  end
 
   N = N - length(Ccombine)/2;
   yNEW = zeros(size(yOUT));
   for kk = 1 : N
     ind = wTnew(kk) : wBnew(kk);
     yNEW(ind) = wPeaknew(kk);
-    end
+  end
   if iDoPlot > 0
     clf
     plot(1:length(yIN),[yIN; yOUT; yCHECK; yNEW]); title('check new');
     pause(0.1);
-    end
+  end
 
   wT = wTnew;
   wB = wBnew;
   yOUT = yNEW;
   peakN = wPeaknew;
-  end   
+end   
 
 if iDoPlot > 0
   plot(1:length(yIN),yIN,1:length(yIN),yOUT,'r'); grid
-  end
+end

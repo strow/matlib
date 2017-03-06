@@ -1,4 +1,4 @@
-function [cN,cOUT,cT,cB,cPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs)
+function [cN,cOUT,cT,cB,cPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights)
 
 % this takes in ICE  parameters iN,iOUT,iT,iB,iPeak,plevs
 % checks it ; if there are iN = 4, then it combines the four clouds to make
@@ -29,9 +29,9 @@ if iN == 4
   cN = 3;
 
   %% combine the two closest clouds
-  diff12 = abs(p2h(plevs(iB(1))) - p2h(plevs(iT(2))));
-  diff23 = abs(p2h(plevs(iB(2))) - p2h(plevs(iT(3))));
-  diff34 = abs(p2h(plevs(iB(3))) - p2h(plevs(iT(4))));
+  diff12 = abs(p2hFAST(plevs(iB(1)),airslevels,airsheights) - p2hFAST(plevs(iT(2)),airslevels,airsheights));
+  diff23 = abs(p2hFAST(plevs(iB(2)),airslevels,airsheights) - p2hFAST(plevs(iT(3)),airslevels,airsheights));
+  diff34 = abs(p2hFAST(plevs(iB(3)),airslevels,airsheights) - p2hFAST(plevs(iT(4)),airslevels,airsheights));
 
   if ((diff12 <= diff23) & (diff12 <= diff34))
     %% clouds 1 and 2 are close

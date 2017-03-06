@@ -6,7 +6,10 @@ function [cfrac1,cfrac2,cfrac12]=fake_cfracs(tcc,cfracw,cfraci,ctype1,ctype2);
 % cover fractions and the total cloud cover fraction.
 %
 % Input:
-%    tcc     = [1 x n] total cloud cover fraction {0.0 to 1.0}
+%    tcc = [1 x n] total cloud cover fraction {0.0 to 1.0}
+%      NOTE tcc is the same as input p.tcc which came from ERA/ECM
+%      BEFORE Aug 2015 the fill_era/fill_ecm/rtp_add_era/rtp_add_ecm wrappers read in tcc
+%      and put this into cfrac; now they read and save tcc (which is much better) 
 %    cfracw  = [1 x n] water cloud cover fraction {0.0 to 1.0}
 %    cfraci  = [1 x n] ice cloud cover fraction {0.0 to 1.0}
 %    ctype1  = [1 x n] cloud1 type {negative=none, 101=water, or 201=ice}
@@ -20,6 +23,7 @@ function [cfrac1,cfrac2,cfrac12]=fake_cfracs(tcc,cfracw,cfraci,ctype1,ctype2);
 
 % Created: 09 Mar 2009, Scott Hannon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% input_random_number_generator1 = rng
 
 % Min allowed non-zero cloud fraction
 cfracmin = 0.001;
@@ -28,28 +32,35 @@ cfracmin = 0.001;
 if (nargin ~= 5)
    error('Incorrect number of input arguments')
 end
+
 d = size(tcc);
 if (length(d) ~= 2 | min(d) ~= 1)
    error('tcc must be a [1 x n] array')
 end
+
 n = max(d);
 if (min(tcc) < 0 | max(tcc) > 1)
   error('some values of tcc outside expected range of 0-1')
 end
+
 d = size(cfracw);
 if (length(d) ~= 2 | min(d) ~= 1 | max(d) ~= n)
-   error('cfrac1 must be a [1 x n] array')
+   error('cfracw must be a [1 x n] array')
 end
+
 if (min(cfracw) < 0 | max(cfracw) > 1)
   error('some values of cfracw outside expected range of 0-1')
 end
+
 d = size(cfraci);
 if (length(d) ~= 2 | min(d) ~= 1 | max(d) ~= n)
-   error('cfrac2 must be a [1 x n] array')
+   error('cfraci must be a [1 x n] array')
 end
+
 if (min(cfraci) < 0 | max(cfraci) > 1)
   error('some values of cfraci outside expected range of 0-1')
 end
+
 d = size(ctype1);
 if (length(d) ~= 2 | min(d) ~= 1 | max(d) ~= n)
    error('ctype1 must be a [1 x n] array')
@@ -59,6 +70,7 @@ end
 %if (length(junk) > 0)
 %  error('some values of ctype1 outside expected set of {negative, 101, 201}');
 %end
+
 d = size(ctype2);
 if (length(d) ~= 2 | min(d) ~= 1 | max(d) ~= n)
    error('ctype2 must be a [1 x n] array')
@@ -69,15 +81,17 @@ end
 %  error('some values of ctype2 outside expected set of {negative, 101, 201}');
 %end
 
-
 % Declare output arrays
-cfrac1 = zeros(1,n);
-cfrac2 = zeros(1,n);
-cfrac12= zeros(1,n);
+cfrac1  = zeros(1,n);
+cfrac2  = zeros(1,n);
+cfrac12 = zeros(1,n);
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Seed random number generater
-rand('state',sum(100*clock));
+% rand('state',sum(100*clock));   %% till Aug 31, 2015
+% http://www.mathworks.com/help/matlab/ref/rng.html suggests calling 
+% rng('shuffle') before you call this routine
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Determine which of siz possible cases apply for each index in n
 % case1 = no clouds
@@ -127,7 +141,6 @@ if (n45 > 0)
    cfrac2(ic45) = tcc(ic45) - cfrac1(ic45) + cfrac12(ic45);
 end
 
-
 % Do case6: one water and one ice cloud
 % Assume probability of no cloud overlap=(1 - TCC)
 n61 = length(ic61);
@@ -151,7 +164,7 @@ if (n61 > 0)
    sumcfracwi = scfracw + scfraci;
    ibad = find(sumcfracwi < stcc);
    nbad = length(ibad);
-%disp(['n61 = ' int2str(n61) ', nbad ic61 = ' int2str(nbad)])
+   %disp(['n61 = ' int2str(n61) ', nbad ic61 = ' int2str(nbad)])
    if (nbad > 0)
       smin = stcc(ibad)./sumcfracwi(ibad);
       smax = stcc(ibad)./max(scfracw(ibad),scfraci(ibad));
@@ -169,7 +182,7 @@ if (n61 > 0)
    cfrac12(ic61) = scfracw + scfraci - stcc;
    % WARNING: slightly negative values of cfrac12 possible
 end
-%
+
 n62 = length(ic62);
 if (n62 > 0)
    stcc = tcc(ic62);
@@ -191,7 +204,7 @@ if (n62 > 0)
    sumcfracwi = scfracw + scfraci;
    ibad = find(sumcfracwi < stcc);
    nbad = length(ibad);
-%disp(['n62 = ' int2str(n62) ', nbad ic62 = ' int2str(nbad)])
+   %disp(['n62 = ' int2str(n62) ', nbad ic62 = ' int2str(nbad)])
    if (nbad > 0)
       smin = stcc(ibad)./sumcfracwi(ibad);
       smax = stcc(ibad)./max(scfracw(ibad),scfraci(ibad));
@@ -212,4 +225,5 @@ end
 ibad = find(cfrac12 < 0);
 cfrac12(ibad) = 0;
 
+% output_random_number_generator1 = rng
 %%% end of function %%%

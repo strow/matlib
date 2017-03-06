@@ -5,9 +5,12 @@ function [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = get_subcolumn_fr
 %   overlap = 1 maximum overlap
 %           = 2 random overlap
 %           = 3 maximum-random overlap
-%   nlev is the number of layers of cloud profiles
-%   ncol is the number of sub-column
-%   cc is the cloud fraction profile
+%   nboxes is the number of AIRS fovs being processed
+%   nlev   is the number of layers of cloud profiles
+%   ncol   is the number of sub-column
+%   cc     is the cloud fraction profile (nboxes X nlev)
+% so eg for 60 lev ERA, 100 AIRS fovs, and 50 subcolumns we have get_subcolumn_frac_v2(100, 60, 50, cc, 3)
+%
 % output
 %   subcol_frac                    nboxes * ncol * nlev , the cloud assignments
 %   unique_col_frac                nboxes * ucol_num * nlev, unique cloud assignments
@@ -31,16 +34,22 @@ function [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = get_subcolumn_fr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+[mm,nn] = size(cc);
+if mm ~= nboxes
+  error('mm ~= nboxes')
+end
+
 idd = find(cc<0.001);
 cc(idd) = 0.0;
 
 % add a clear layer over the top of atmosphere   
-tcc(:,2:nlev+1) = cc;
-tcc(:,1) = 0.0;
+temp_cc(:,2:nlev+1) = cc;
+temp_cc(:,1)        = 0.0;
 
 boxpos = zeros(nboxes,ncol);   %% sergio
+%% so this is basically delta : delta : 1 where delta = 1/ncol
 for icol=1:ncol      
-  boxpos(:,icol) = (icol - 0.5)/ncol;
+  boxpos(:,icol) = (icol - 0.5)/ncol;  %% so go between 0.5/ncol and (1 - 0.5/ncol)
 end
 
 % initialize the sub-column with 0 (clear sky)
@@ -59,19 +68,20 @@ for ilev = 1:nlev
 
   ran = rand(nboxes,ncol);
   for icol=1:ncol
-    if overlap ==1
+    if overlap == 1
       % Maximum overlap
       tmin(1:nboxes,icol) = 0.0;
       flag(1:nboxes,icol) = 1;
-    elseif overlap ==2
+    elseif overlap == 2
       % Random overlap
       tmin(1:nboxes,icol) = 0.0;
       flag(1:nboxes,icol) = 0;
-    elseif overlap ==3
+    elseif overlap == 3
       % Maximum and Random overlap
       for ibox=1:nboxes
-        tmin(ibox,icol) = min(tcc(ibox,ilev), tcc(ibox,ilev+1));
-        if cloud_threshold(ibox,icol)<min(tcc(ibox,ilev), tcc(ibox,ilev+1)) & cloud_threshold(ibox,icol)>0
+        tmin(ibox,icol) = min(temp_cc(ibox,ilev), temp_cc(ibox,ilev+1));
+        %% if cloud_threshold(ibox,icol) < min(temp_cc(ibox,ilev), temp_cc(ibox,ilev+1)) & cloud_threshold(ibox,icol)>0
+        if cloud_threshold(ibox,icol) > 0 & cloud_threshold(ibox,icol) < tmin(ibox,icol)
           flag(ibox,icol) = 1;
         else
           flag(ibox,icol) = 0;
@@ -79,12 +89,91 @@ for ilev = 1:nlev
       end
     end
   
-    %ranx=get_ran(nboxes, seed);     
-    cloud_threshold(:,icol) = ...
-      cloud_threshold(:,icol) .*flag(:,icol) + ...
-      (1-flag(:,icol)) .* (tmin(:,icol) + (1 - tmin(:,icol)) .* ran(:,icol));
+    %ranx=get_ran(nboxes, seed);
+    %% CT(ilev+1) --> CT(ilev) * flag +  (1-flag)*(tmin + (1-tmin)*ran))    
+    %% so for max,     cloud_threshold(ilev+1,icol) -> cloud_threshold(ilev,icol) == boxpos
+    %%    for random,  cloud_threshold(ilve+1,icol) -> ran
+    %%    for MR,      cloud_threshold(ilev+1,icol) -> cloud_threshold(ilev,icol) * flag +  (1-flag)*(tmin + (1-tmin)*ran))
+    cloud_threshold(:,icol) = cloud_threshold(:,icol) .*flag(:,icol) + ...
+                    (1-flag(:,icol)) .* (tmin(:,icol) + (1 - tmin(:,icol)) .* ran(:,icol));
   end
       
+  % effectively code below is (ibox = 1)
+  % for icol = 1:ncol
+  %   if cc(ilev) > cloud_threshold(icol)
+  %     subcol_frac(icol, ilev) = 1;
+  %   else
+  %     subcol_frac(icol, ilev) = 0;
+  %  end
+  %
+  % (a) for MAXIMUM model this maps to following :
+  %     suppose cc       looks as shown in left panel
+  %     and     boxpos   looks as shown in right panel; note is has a minimum value of delta
+  %
+  %         ^                                   ^
+  %       1 |                             1.0   |          /
+  %  ilev 2 |                                   |         /
+  %       . |                                   |        /
+  %       . |                              cc2  |-------/
+  %       M |---                                |      /|          Slope ~ 1/Ncol
+  %         |   |                          cc1  |-----/ |          Which means to get to ccx you need to
+  %       P |---------                          |    /| |            have gone ccx * Ncol boxes
+  %         |        |                          |   / | |
+  %       Q |---------                          |  /  | |
+  %         |                             delta |-/   | |
+  %       N +------------------+>               +-----+-+------+->
+  %         0                 1.0               1   N1   N2      Ncol    
+  %
+  % then sub_colfrac1 will look exactly like plot on left!!!, except horizontal axis will be between 0 and Ncol
+  % Reason :  for levs 1:M, cc(i) = 0 is always less than boxpos for all columns < Ncol (since min(boxpos) = delta).
+  %           so those subcol_frac are 0
+  %           levs M : Q have cc >= cc1 ==> for the N1 columns where cc1 > boxpos, these will get subcol_frac(icol,ilev) = 1
+  %                      AND THIS WILL STRETCH from icol = 1 to icol = I1 where I1 = cc1 * Ncol!!!!!!!
+  %           levs P : Q have cc = cc2 ==> for the N2 columns where cc2 > boxpos, these will get subcol_frac(icol,ilev) = 1
+  %                      AND THIS WILL STRETCH from icol = 1 to icol = I2 where I2 = cc2 * Ncol!!!!!!!
+  %           for levs Q:N, cc(i) = 0 is always less than boxpos for all columns < Ncol (since min(boxpos) = delta).
+  %           so those subcol_frac are 0
+  %
+  %         ^                                   ^
+  %       1 |                             1.0   |          /
+  %  ilev 2 |                                   |         /
+  %       . |                                   |        /
+  %       . |                              cc2  |-------/
+  %       M |---                                |      /|          Slope ~ 1/Ncol
+  %         |   |                          cc1  |-----/ |          Which means to get to ccx you need to
+  %       P |---------                          |    /| |            have gone ccx * Ncol boxes
+  %         |        |                          |   / | |
+  %       Q |---------                          |  /  | |
+  %         |                             delta |-/   | |
+  %       N +----+---+---------+>               +-----+-+------+->
+  %         0   N1   N2       Ncol               1  N1   N2     Ncol  
+  %
+  % (b) for RANDOM at each level, RH plot is replaced   ^
+  %     by random numbers (between 0 and 1)         1.0 |                                   +
+  %                                                     |                     + +
+  %                                                     |      +                 
+  %                                                 cc2 |-------------------------------+---------------
+  %                                                     |      
+  %                                                     |   +
+  %                                                 cc1 |-----+-----------------------------------------
+  %                                                     |                 
+  %                                                     | +               +
+  %                                                     |              +
+  %                                                 0.0 +----------------------------------------+--->
+  %                                                      1                                      Ncol
+  %
+  % then sub_colfrac1 will look rather random, starting below level M
+  % Reason :  for levs 1:M, cc(i) = 0 is almost always less than random number for all columns < Ncol
+  %           so those subcol_frac are 0
+  %           levs M : Q have cc >= cc1 ==> any of the subcols which have cloud_threshold < cc1 will get populated
+  %           levs P : Q have cc =  cc2 ==> any of the subcols which have cloud_threshold < cc2 will get populated
+  %           for levs Q:N, cc(i) = 0 is always less than boxpos for all columns < Ncol
+  %           so those subcol_frac are 0
+  %
+  % (c) for MAX RAN, this is a beast!! but seems to work because of tmin = min(cc(i),cc(i+1)) :
+  %        if there is no cloud at any of those two then tmin becomes 0,   and essentially flag --> 0 which means we get the RANDOM OVERLAP
+  %        if there is    cloud at any of those two then tmin becomes > 0, and essentially flag --> 1 which means we get the MAXIMUM OVERLAP  
+  %  
   % cloud assignment
   for icol = 1:ncol
     for ibox = 1:nboxes

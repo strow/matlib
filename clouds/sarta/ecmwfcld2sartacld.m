@@ -1,4 +1,4 @@
-function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum);
+function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum,airslevels,airsheights);
 
 %% called by readecmwf91_grid/nearest_gasNcloud.m
 %%     "nlev" is set by readecmwf91_grid/nearest_gasNcloud
@@ -50,80 +50,29 @@ iDoPlot = -1;   %% do not plot stuff
 
 iPrint = +1;    %% do     print chirpy talky comments
 iPrint = -1;    %% do not print chirpy talky comments
+
+iMakeIceWaterCld = -1; %% old style for taking eg cc/ciwc/clwc and smoothing
+iMakeIceWaterCld = +1; %% new style for taking eg cc/ciwc/clwc and smoothing
+
 tic;
 
 jj = 0;
 iiii = 1 : length(profX.plat);
+aa = struct;
+
 for iiiiA = 1:length(iiii)
   ii = iiii(iiiiA);
   jj = ii;
 
-  %%% this has all beeen superseded by stuff below *****************
-  iSmoothX = iSmooth;
-  blahW = profX.clwc(:,ii)/(max(profX.clwc(:,ii))+1e-16);
-  blahI = profX.ciwc(:,ii)/(max(profX.ciwc(:,ii))+1e-16);
-  numI = length(find(blahI > rGaussianCutoff*blahI));
-  numW = length(find(blahW > rGaussianCutoff*blahW));
-  iDo = -1;
-  if nlev > 20
-    if numI > 3 & numW > 3
-      iSmoothX = iSmooth;
-      iDo = +1;
-    elseif numW > 3 & numI == 0
-      iSmoothX = iSmooth;
-      iDo = +1;
-    elseif numI > 3 & numW == 0
-      iSmoothX = iSmooth;
-      iDo = +1;
-    else
-      iSmoothX = 0.5;
-      iSmoothX = 2;
-      iDo = -1;         %% no ice or water
-    end
-  end
-
-  if iDo > 0
-    % lots of points
-    [shiftedx,shiftedy,plevs]    = smooth1aa(1:nlev,profX.plevs(:,ii)',iSmoothX);
-    [shiftedx,shiftedy,watercld] = smooth1aa(1:nlev,profX.clwc(:,ii)' ,iSmoothX);
-    [shiftedx,shiftedy,icecld]   = smooth1aa(1:nlev,profX.ciwc(:,ii)' ,iSmoothX);
-
-    %npoly = 1;    nframe = 3;
-    %[sgplevs]    = sgolayfilt(double(profX.plevs(:,ii)') ,npoly,nframe);
-    %[sgwatercld] = sgolayfilt(double(profX.clwc(:,ii)')  ,npoly,nframe);
-    %[sgicecld]   = sgolayfilt(double(profX.ciwc(:,ii)')  ,npoly,nframe);
+  if iMakeIceWaterCld == -1
+    [watercld,icecld,plevs] = old_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,ii,nlev,iSmooth,rGaussianCutoff);
+    aa        = [];
+    ptemp     = [];
+    cutoff440 = [];    
   else
-    % few points
-    plevs    = profX.plevs(:,ii);
-    watercld = profX.clwc(:,ii);
-    icecld   = profX.ciwc(:,ii);
+    [watercld,icecld,plevs,aa,ptemp,cut440] = new_style_smooth_cc_ciwc_clwc_to_water_ice_profile(xcumsum,profX,aa,ii);
   end
-
-  %%% above has all been superseded by *******************************
-  %%% this new code!!!!!!!!!!!!!!!!
-  %% slabs can be resolved better if there are more points
-  plevs = profX.plevs(:,ii);
-  if length(plevs < 80)
-    plevsX = (plevs(1:end-1) + plevs(2:end))/2;
-    plevs = sort([plevs; plevsX]);
-  end
-  if length(plevs < 80)
-    plevsX = (plevs(1:end-1) + plevs(2:end))/2;
-    plevs = sort([plevs; plevsX]);
-  end
-
-  watercld = interp1(log10(profX.plevs(:,ii)),profX.clwc(:,ii),log10(plevs));
-  icecld   = interp1(log10(profX.plevs(:,ii)),profX.ciwc(:,ii),log10(plevs));
-  ptemp    = interp1(log10(profX.plevs(:,ii)),profX.ptemp(:,ii),log10(plevs));
-
-  if ~exist('aa','var')
-    aa = [];
-  end
-  aa = cloud_mean_press(aa,xcumsum,icecld,watercld,plevs,ii);
-
-  %%% above has all been superseded by *******************************
-  %%% this new code!!!!!!!!!!!!!!!!
-
+  
   [wOUT,wT,wB,wPeak,wN,wmaxN,wminN] = boxshape(watercld,rGaussianCutoff); newwater = wOUT;
   [iOUT,iT,iB,iPeak,iN,imaxN,iminN] = boxshape(icecld,rGaussianCutoff);   newice   = iOUT;
 
@@ -133,37 +82,13 @@ for iiiiA = 1:length(iiii)
     fprintf(1,'%5i %3i %3i | %8.6e \n',poink);
   elseif iPrint < 0 & mod(jj,1000) == 0
     tnow = toc;
-    fprintf(1,' processed %5i in %8.6f minutes\n',ii,tnow/60);
+    fprintf(1,' processed %5i of %5i in %8.6f minutes\n',iiiiA,length(iiii),tnow/60);
   end
 
-  if iN > 3
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds4t3(iN,iOUT,iT,iB,iPeak,plevs);
-  end
-  if wN > 3
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds4t3(wN,wOUT,wT,wB,wPeak,plevs);
-  end
-
-  if iN > 2
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs);
-    end
-  if wN > 2
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds3t2(wN,wOUT,wT,wB,wPeak,plevs);
-  end
-
-  if ((iN == 1 & wN == 2) | (iN == 2 & wN == 1) | (iN == 2 & wN == 2))
-    if iN == 2
-      [iN,iOUT,iT,iB,iPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs);
-    end
-    if wN == 2
-      [wN,wOUT,wT,wB,wPeak] = combine_clouds2t1(wN,wOUT,wT,wB,wPeak,plevs);  
-    end
-  end
-
-  [cT,cB,cOUT,cngwat,cTYPE,iFound] = combine_clouds(...
-              iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(:,ii));
-
+  cloud_combine_main_code
+  
   prof = put_into_prof(prof,profX,ii,jj,plevs,ptemp,iLevsVers,...
-                       cT,cB,cOUT,cngwat,cTYPE,iFound);
+                       cT,cB,cOUT,cngwat,cTYPE,iFound,airslevels,airsheights);
 
   if iPrint > 0
     print_ecmwfcld2sartacld
@@ -171,26 +96,18 @@ for iiiiA = 1:length(iiii)
 
   if iDoPlot > 0
     plot_ecmwfcld2sartacld
+    %iiiiA
+    %disp('ret'); pause
   end
 
-%{
-  %% debug
-  if iiiiA == 1833
-    iiiiA
-    cT
-    cB
-    [iT iB wT wB]
-    junky = iiiiA;
-    [profIN.cprtop(junky) profIN.cprbot(junky) profIN.cprtop2(junky) profIN.cprbot2(junky) profIN.udef(13,junky) profIN.udef(14,junky)]
-    [prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky) prof.udef(13,junky) prof.udef(14,junky)]
-    plot(profX.plevs(:,ii),profX.clwc(:,ii),'bo-',plevs,watercld,'r-',plevs([wT wB]),[1 1]*wPeak,'kx-')
-    keyboard
-  end
-%}
 end    %% loop over iiiiA
 
 %% put in the cloud cumulative fraction info, so that it can be used if necessary by "reset_cprtop"
-prof.watercldX = aa.watercldX;
-prof.icecldX   = aa.icecldX;
-prof.watercldY = aa.watercldY;
-prof.icecldY   = aa.icecldY;
+prof.watercldX = aa.watercldX;    %% water cloud mean pressure based on normalized pdf
+prof.icecldX   = aa.icecldX;      %%   ice cloud mean pressure based on normalized pdf
+prof.watercldY = aa.watercldY;    %% water cloud mean pressure based on run_sarta.cumsum
+prof.icecldY   = aa.icecldY;      %%   ice cloud mean pressure based on run_sarta.cumsum
+
+%  com.mathworks.services.Prefs.setBooleanPref('EditorGraphicalDebugging',false)
+%  disp('here key')
+%  keyboard

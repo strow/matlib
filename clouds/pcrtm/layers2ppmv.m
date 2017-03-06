@@ -1,4 +1,4 @@
-function [ppmvLAY,ppmvAVG,ppmvMAX,pavgLAY,tavgLAY] = layers2ppmv(hIN,pIN,index,gid)
+function [ppmvLAY,ppmvAVG,ppmvMAX,pavgLAY,tavgLAY,ppmv500,ppmv75] = layers2ppmv(hIN,pIN,index,gid)
 
 %% input
 %%   hIN = klayers head structure, giving hIN.ptype
@@ -10,10 +10,10 @@ function [ppmvLAY,ppmvAVG,ppmvMAX,pavgLAY,tavgLAY] = layers2ppmv(hIN,pIN,index,g
 %%   ppmvLAY = ppmv for each layer
 %%   ppmvAVG = avg over the layers
 %%   ppmvMAX = max over the layers
-%%   pavgLAY = layer pressures
+%%   pavgLAY = layer pressures (in mb)
 %%   tavgLAY = layer temps
-
-%% copied from /home/sergio/MATLABCODE/CONVERT_GAS_UNITS/layers2ppmv.m
+%%   ppmv500 = ppmv at 500 mb
+%%   ppmv75  = ppmv at  75 mb
 
 if hIN.ptype == 0
   error('need ptype = 1,2')
@@ -64,9 +64,17 @@ for ii = 1 : length(index)
   qii = qii * 1e4;                    %% moles/m2
   ratio = qii./(Qii+eps) * 1e6; 
   ppmvLAY(1:nlays,ii) = ratio;
-  ppmvAVG(ii) = nanmean(ratio);
+  ppmvAVG(ii) = nanmean(ratio(30:50));
   ppmvMAX(ii) = nanmax(ratio);
+
+  i500 = abs(Pii-500*100);           %% remmeber we changed mb --> N/m2 by multiplying by 100
+  i500 = find(i500 == min(i500),1);
+  ppmv500(ii) = ratio(i500);
+
+  i75 = abs(Pii-75*100);           %% remmeber we changed mb --> N/m2 by multiplying by 100
+  i75 = find(i75 == min(i75),1);
+  ppmv75(ii) = ratio(i75);
+
 end
 
-
-
+pavgLAY = pavgLAY/100;    %% back to mb

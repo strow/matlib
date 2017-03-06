@@ -360,7 +360,7 @@ if sumYmax == 4
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if sumYmax == 5
-%  disp('oh oh  .. too lazy to handle 5 maxima properly -- reset to 4')
+  %  disp('oh oh  .. too lazy to handle 5 maxima properly -- reset to 4')
   N = 4;
   yOUT = zeros(1,length(yIN));
 
@@ -478,7 +478,7 @@ if sumYmax == 5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if sumYmax == 6
-%  disp('oh oh  .. too lazy to handle 6 maxima properly -- reset to 4')
+  %  disp('oh oh  .. too lazy to handle 6 maxima properly -- reset to 4')
   N = 4;
   yOUT = zeros(1,length(yIN));
 

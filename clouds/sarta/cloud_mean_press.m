@@ -1,19 +1,26 @@
 function aa = cloud_mean_press(aaIN,xcumsum,icecld,watercld,plevs,ii)
 
+%% input
+%%   xcumsum = run_sarta.cumsum so can be -9999,-1,0-1,1-9998,9999
+%% output
+%%   aa.icecldX,aa.watercldX = mean(CIWC), mean(CLWC) pressure level
+%%   aa.icecldY,aa.watercldY = pressure level where normalized CIWC/CLWC exceed xcumsum if 0 < xcumsum < 1
+%%                             else set to 1200 mb
+
 aa = aaIN;
 
 icecldX   = icecld;
 watercldX = watercld;
 
-%% these are basically the pdfs
+%% these are basically the pdfs of the CIWC and CLWC profiles ....
 icecldX = icecldX/nansum(icecldX);
 watercldX = watercldX/nansum(watercldX);
 
 %% these are the weights; 
-icecldXW = ones(size(icecldX));%% unit weight
-watercldXW = ones(size(watercldX));%% unit weight
-icecldYW = ones(size(icecldX));%% unit weight
-watercldYW = ones(size(watercldX));%% unit weight
+icecldXW = ones(size(icecldX));     %% unit weight
+watercldXW = ones(size(watercldX)); %% unit weight
+icecldYW = ones(size(icecldX));     %% unit weight
+watercldYW = ones(size(watercldX)); %% unit weight
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,12 +42,13 @@ else
 end
 
 %% this is mean cld pressure (a^0 = 1, so no weighting!!!)
-aa.icecldX(ii) = nansum((plevs.*(icecldXW.^0)).*icecldX);
+aa.icecldX(ii)   = nansum((plevs.*(icecldXW.^0)).*icecldX);
 aa.watercldX(ii) = nansum((plevs.*(watercldXW.^0)).*watercldX);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% this is where we already have xcumsum of column total
+%% xcumsum == run_sarta.cumsum
 bonk = find(icecldYW > xcumsum,1);
 if length(bonk) > 0 & xcumsum > 0 & xcumsum <= 1
   aa.icecldY(ii) = plevs(bonk);
@@ -55,3 +63,13 @@ else
   aa.watercldY(ii) = 1200;  
 end
 
+iDebug = -1;
+if iDebug > 0
+  disp('setting cloud_mean_press.m')
+  com.mathworks.services.Prefs.setBooleanPref('EditorGraphicalDebugging',false)   
+  keyboard
+  [aa.icecldX(ii) aa.watercldX(ii) aa.icecldY(ii) aa.watercldY(ii)]
+  figure(1); subplot(121); plot(icecldX, plevs,watercldX ,plevs); set(gca,'ydir','reverse')
+  figure(1); subplot(122); plot(icecldXW,plevs,watercldXW,plevs); set(gca,'ydir','reverse')
+%  figure(1); subplot(122); plot(1-icecldXW,plevs,1-watercldXW,plevs); set(gca,'ydir','reverse')
+end

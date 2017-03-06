@@ -3,6 +3,11 @@
 #ignore everything in Docs
 Docs/*
 Docs/Figs/*
+#ignore everything in WORKS
+sarta/WORKS_*/*
+pcrtm/WORKS_*/*
+sarta/WORKS_*
+pcrtm/WORKS_*
 
 *junk*
 

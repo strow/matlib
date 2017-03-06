@@ -1,4 +1,4 @@
-function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum);
+function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum,airslevels,airsheights);
 
 %% called by readecmwf91_grid/nearest_gasNcloud.m
 %%     "nlev" is set by readecmwf91_grid/nearest_gasNcloud
@@ -142,33 +142,33 @@ for iiiiA = 1:length(iiii)
   end
 
   if iN > 3
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds4t3(iN,iOUT,iT,iB,iPeak,plevs);
+    [iN,iOUT,iT,iB,iPeak] = combine_clouds4t3(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
   end
   if wN > 3
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds4t3(wN,wOUT,wT,wB,wPeak,plevs);
+    [wN,wOUT,wT,wB,wPeak] = combine_clouds4t3(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);
   end
 
   if iN > 2
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs);
+    [iN,iOUT,iT,iB,iPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
     end
   if wN > 2
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds3t2(wN,wOUT,wT,wB,wPeak,plevs);
+    [wN,wOUT,wT,wB,wPeak] = combine_clouds3t2(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);
   end
 
   if ((iN == 1 & wN == 2) | (iN == 2 & wN == 1) | (iN == 2 & wN == 2))
     if iN == 2
-      [iN,iOUT,iT,iB,iPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs);
+      [iN,iOUT,iT,iB,iPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
     end
     if wN == 2
-      [wN,wOUT,wT,wB,wPeak] = combine_clouds2t1(wN,wOUT,wT,wB,wPeak,plevs);  
+      [wN,wOUT,wT,wB,wPeak] = combine_clouds2t1(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);  
     end
   end
 
   [cT,cB,cOUT,cngwat,cTYPE,iFound] = combine_clouds(...
-              iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(xnlevs,ii));
+              iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(xnlevs,ii),airslevels,airsheights);
 
   prof = put_into_prof(prof,profX,ii,jj,plevs,ptemp,iLevsVers,...
-                       cT,cB,cOUT,cngwat,cTYPE,iFound);
+                       cT,cB,cOUT,cngwat,cTYPE,iFound,airslevels,airsheights);
 
   if iPrint > 0
     print_ecmwfcld2sartacld
