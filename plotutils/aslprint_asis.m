@@ -1,4 +1,4 @@
-function [] = aslprint(varargin);
+function [] = aslprint_asis(varargin);
 
 % Filter for export_fig.
 %
@@ -44,8 +44,8 @@ set(gcf,'windowstyle','normal')
 set(gcf,'color','none');
 %set(gcf,'color',[1 1 1]);
 %  Set figure to default size
-p = get(gcf,'position');
-set(gcf,'position',[p(1) p(2) 560 420]);
+%p = get(gcf,'position');
+%set(gcf,'position',[p(1) p(2) 560 420]);
 % Export both .pdf and .png
 if fn(end-3:end) == '.png'
    fn = fn(1:end-4);

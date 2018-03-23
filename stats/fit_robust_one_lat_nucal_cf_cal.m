@@ -1,4 +1,4 @@
-function [] = fit_robust_one_lat(fin,fout,latid,fit_type,start_time,stop_time,inst);
+function [] = fit_robust_one_lat_nucal_cf_cal(fin,fout,latid,fit_type,start_time,stop_time);
 
 smallsave = false;
 
@@ -7,75 +7,58 @@ addpath /asl/matlib/aslutil
 
 latid_out = latid;
 
-count = 1;  % Needed to diable new Matlab Mfile count (count string occurances)
-            % Now can load in count in command below and not have problems later
 load([fin int2str(latid)])
+load([fin '_nucal' int2str(latid)])
+
+[nd,nf] = size(robs);
+
+if nf == 2378
+   load_fairs
+elseif nf == 8461
+   load_fiasi;
+   f = fiasi;
+elseif nf == 1305
+   load_fcris
+   f = fcris;
+end
+
+robs =bt2rad(f,btobs_nucal')';
 
 % Quick and dirty time for now
 dmtime = datenum(1958,1,1,0,0,rtime);
-dmtime = nanmean(dmtime,2);
 ndi = find( dmtime >= start_time & dmtime <= stop_time);
 nd = length(ndi);
 
-if inst == 'cris'
-   nf = 1305;
-   load_fcris
-   f = fcris;
-   load /asl/matlib/cris/ch_std_from1317  % get ch_std_i
-   count = count(ndi,1);
-   dmtime = dmtime(ndi);
-   robs = squeeze(nanmean(robs(ndi,ch_std_i,:),3));
-   rcal = squeeze(nanmean(rcal(ndi,ch_std_i,:),3));
-   btobs = real(rad2bt(f,robs'));
-   btcal = real(rad2bt(f,rcal'));
-   bias = btobs-btcal;
-   bias = bias';
-else
-   % add robs, rcal, etc. for AIRS and IASI here.
-   dmtime = dmtime(ndi);
-   count = count(ndi,:);
+dmtime = dmtime(ndi);
+robs = robs(ndi,:);
+rcal = rcal(ndi,:);
+switch fit_type
+   case 'cf'
+     rclr = rclr(ndi,:);
 end
+count = count(ndi,:);
 
-if inst == 'iasi'
-   nf = 8461;
-   load_fiasi;
-   f = fiasi;
-   robs = robs(ndi,:);
-   rcal = rcal(ndi,:);
-   btobs = real(rad2bt(f,robs'));
-   btcal = real(rad2bt(f,rcal'));
-   bias = btobs-btcal;
-   bias = bias';
-end
-   
-if inst == 'airs'
-   nf = 2378;
-   load_fairs;
-   robs = robs(ndi,:);
-   rcal = rcal(ndi,:);
-   btobs = real(rad2bt(f,robs'));
-   btcal = real(rad2bt(f,rcal'));
-   bias = btobs-btcal;
-   bias = bias';
-end
-   
-% 
-% 
-% if nf == 2378
-%    load_fairs
-% elseif nf == 8461
-%    load_fiasi;
-%    f = fiasi;
-% elseif nf == 1305
-% end
 
 all_b        = NaN(nf,10);
-pall_berr    = NaN(nf,10);
+all_berr     = NaN(nf,10);
 all_rms      = NaN(nf,10);
 all_resid    = NaN(nd,nf);
 all_bt_resid = NaN(nd,nf);
 all_times    = NaN(nd,nf);
 all_bcorr    = NaN(nf,10,10);
+
+btobs = real(rad2bt(f,robs'))';
+btcal = real(rad2bt(f,rcal'))';
+switch fit_type
+   case 'cf'
+     btclr = real(rad2bt(f,rclr'))';
+end
+bias = btobs-btcal;
+switch fit_type
+   case 'cf'
+     cf = btcal-btclr;
+%     cf = btobs-btclr;
+end
 
 if nf == 2378
    ig = goodchan_for_clear(count);
@@ -85,17 +68,26 @@ elseif nf == 1305
    ig = 1:1305;
 end
 
-for i=ig
-   k = remove_6sigma(robs(:,i));
-   j = remove_6sigma(robs(k,i));
-   ind(i).k = k(j);
-end
+% In addition, remove 3-sigma (double pass) outliers for each channel
+% for i=ig
+%    k = remove_6sigma(robs(:,i));
+%    j = remove_6sigma(robs(k,i));
+%    ind(i).k = k(j);
+% end
+
+%if fit_type == 'rclr'
+   for i=ig
+      kf = find( isinf(robs(:,i)) ~= 1);
+      k = remove_6sigma(robs(kf,i));
+      j = remove_6sigma(robs(kf(k),i));
+      ind(i).k = kf(k(j));
+   end
+   %end
 
 warning('off','all');
-
 for i=ig
-   it = ind(i).k;
-%   it = length(dmtime);it = 1:it;
+%for i=1569
+it = ind(i).k;
    fittime = dmtime(it);
 
    switch fit_type
@@ -106,18 +98,27 @@ for i=ig
      case 'rclr'
        fity = squeeze(rclr(it,i));
      case 'bias'
-       fity = squeeze(bias(it,i));       
+       fity = squeeze(bias(it,i));
+     case 'cf'
+       fity = squeeze(cf(it,i));
    end
+   % Subset to specified times
+%   k = find( fittime >= start_time & fittime <= stop_time);
+%   x = fittime(k) - fittime(k(1));
    x = fittime - fittime(1);
+%   y = squeeze(fity(k));
    y = squeeze(fity);
    [b stats] = Math_tsfit_lin_robust(x,y,4);
    all_b(i,:) = b;
    all_rms(i) = stats.s;
    all_berr(i,:) = stats.se;
    all_bcorr(i,:,:) = stats.coeffcorr;
+%    all_resid(it(k),i) = stats.resid;
+%    all_times(it(k),i) = fittime(k);
    all_resid(it,i) = stats.resid;
    all_times(it,i) = fittime;
 end
+all_times = nanmean(all_times,2);
 warning('on','all');
 
 % Get dr into dbt units
@@ -126,7 +127,7 @@ switch fit_type
     deriv   = drdbt(f,rad2bt(f,all_b(:,1)));
     dbt     = all_b(:,2)./(deriv*1E3);
     dbt_err = all_berr(:,2)./(deriv*1E3);
-  case 'bias'
+  case {'bias', 'cf'}
     dbt     = all_b(:,2);
     dbt_err = all_berr(:,2);
 end
@@ -137,7 +138,7 @@ switch fit_type
     for i=1:nd
        all_bt_resid(i,:) = all_resid(i,:)./(deriv'*1E3);
     end
-  case 'bias'
+  case {'bias', 'cf'}
     for i=1:nd
        all_bt_resid(i,:) = all_resid(i,:);
     end
@@ -155,28 +156,32 @@ for i = 1:nf
    end
 end
 
+% clf;
+% plot(f(ig),dbt(ig));hold on;plot(f(ig),dbt_err(ig));title(['Lat: ' int2str(latid)]);
+% drawnow
+
+% Convert resid to BT units
+
 if ~smallsave
    switch fit_type
      case {'robs', 'rcal', 'rclr'}
        save([fout int2str(latid_out)],'dbt','dbt_err','all*', 'lag','deriv');
        %% Use if fitting clear calcs for cloudy random data
 %    save([fout 'clrcal_' int2str(latid_out)],'dbt','dbt_err','all*', 'lag','deriv');
-     case 'bias'
-       save([fout int2str(latid_out)],'dbt','dbt_err','all*','lag');
+     case {'bias','cf'}
+       save([fout int2str(latid_out)],'dbt','dbt_err','all*', 'lag');
    end
 else % smallsave option
 % less output
    switch fit_type
      case {'robs', 'rcal','rclr'}
-       save([fout int2str(latid_out)],'dbt','dbt_err','all_b','all_berr','all_bcorr','all_rms','lag');
-     case 'bias'
-       save([fout int2str(latid_out)],'dbt','dbt_err','all_b','all_berr','all_bcorr','all_rms','lag');
+       save([fout int2str(latid_out)],'dbt','dbt_err');
+       %% Use if fitting clear calcs for cloudy random data
+%    save([fout 'clrcal_' int2str(latid_out)],'dbt','dbt_err','all*', 'lag','deriv');
+     case {'bias', 'cf'}
+       save([fout int2str(latid_out)],'dbt','dbt_err');
    end
 end
 
-keyboard
-
-% OLD saves
-%    save([fout 'clrcal_' int2str(latid_out)],'dbt','dbt_err','all*', 'lag','deriv');
 
 

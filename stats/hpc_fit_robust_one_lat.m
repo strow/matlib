@@ -1,6 +1,6 @@
 function [] = fit_robust_one_lat(fin,fout,latid,fit_type,start_time,stop_time,inst);
 
-smallsave = false;
+smallsave = true;
 
 addpath ~/Matlab/Math
 addpath /asl/matlib/aslutil
@@ -58,7 +58,21 @@ if inst == 'airs'
    bias = btobs-btcal;
    bias = bias';
 end
-   
+
+if inst == 'al1c'
+   nf = 2645
+   load_fairs;
+%   load /home/sbuczko1/git/rtp_prod2/airs/util/sarta_chans_for_l1c.mat
+%   keyboard
+   f = fairs;
+   robs = robs(ndi,:);
+   rcal = rcal(ndi,:);
+   btobs = real(rad2bt(f,robs'));
+   btcal = real(rad2bt(f,rcal'));
+   bias = btobs-btcal;
+   bias = bias';
+end
+
 % 
 % 
 % if nf == 2378
@@ -83,6 +97,8 @@ elseif nf == 8461
    ig = 1:8461;
 elseif nf == 1305
    ig = 1:1305;
+elseif nf == 2645
+   ig = 1:2645;
 end
 
 for i=ig
@@ -173,8 +189,6 @@ else % smallsave option
        save([fout int2str(latid_out)],'dbt','dbt_err','all_b','all_berr','all_bcorr','all_rms','lag');
    end
 end
-
-keyboard
 
 % OLD saves
 %    save([fout 'clrcal_' int2str(latid_out)],'dbt','dbt_err','all*', 'lag','deriv');

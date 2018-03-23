@@ -79,7 +79,8 @@ ig = setdiff(ig,ibad);
 % %           again in late 2015 with 6-10 fewer counts
 
 % Results from commented out code above
-ibad = [ 497 1355 ];  % Only seem to be in nucal stats
+ibad = [ 312 497 1355 ];  % Only seem to be in nucal stats
+% Channel 312 went bad March 2014, still working kinda, but -1K offset then
 ig = setdiff(ig,ibad);
 
 % AB changes
