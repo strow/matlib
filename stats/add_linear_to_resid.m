@@ -30,3 +30,28 @@ end
 
 full_bt_resid = all_bt_resid + lbt;
    
+
+start_time = datenum(2002,9,1,0,0,0);
+stop_time = datenum(2018,8,31,0,0,0);
+dmtime = datenum(1958,1,1,0,0,rtime_mean);
+dmtime = nanmean(dmtime,2);
+ndi = find( dmtime >= start_time & dmtime <= stop_time);
+nd = length(ndi);
+
+ig = 1:2645;
+for i=ig
+   k = remove_6sigma(robs(:,i));
+   j = remove_6sigma(robs(k,i));
+n   ind(i).k = k(j);
+end
+
+for i=ig
+   it = ind(i).k;
+   fittime = dmtime(it);
+   fity = squeeze(robs(it,i));
+   x = fittime - fittime(1);
+   y = squeeze(fity);
+   dr = (x/365).*all_b(i,2);
+   rnew(it,i) = robs(it,i) -dr;
+end
+
