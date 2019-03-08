@@ -11,12 +11,17 @@ count = 1;  % Needed to diable new Matlab Mfile count (count string occurances)
             % Now can load in count in command below and not have problems later
 load([fin int2str(latid)])
 
+if inst == 'iasi'
+   rtime_mean = rtime;
+end
+
 % Quick and dirty time for now
 dmtime = datenum(1958,1,1,0,0,rtime_mean);
 dmtime = nanmean(dmtime,2);
 ndi = find( dmtime >= start_time & dmtime <= stop_time);
 nd = length(ndi);
 
+%--------------------------------------------------------------------------------
 if inst == 'cris'
    nf = 1305;
    load_fcris
@@ -35,18 +40,20 @@ else
    dmtime = dmtime(ndi);
    count = count(ndi,:);
 end
+%--------------------------------------------------------------------------------
 if inst == 'iasi'
    nf = 8461;
    load_fiasi;
    f = fiasi;
    robs = robs(ndi,:);
-   rcldy = rcldy(ndi,:);
+%   rcldy = rcldy(ndi,:);
+   rcldy = rcal(ndi,:);
    btobs = real(rad2bt(f,robs'));
    btcal = real(rad2bt(f,rcldy'));
    bias = btobs-btcal;
    bias = bias';
 end
-   
+%--------------------------------------------------------------------------------   
 if inst == 'airs'
    nf = 2378;
    load_fairs;
@@ -57,7 +64,7 @@ if inst == 'airs'
    bias = btobs-btcal;
    bias = bias';
 end
-
+%--------------------------------------------------------------------------------
 if inst == 'al1c'
    nf = 2645
    load_fairs;
@@ -73,7 +80,7 @@ if inst == 'al1c'
    bias = btobs-btcal;
    bias = bias';
 end
-
+%--------------------------------------------------------------------------------
 if inst == 'a2cx'
    a2c_fin = strrep(fin,'statlat','a2c_statlat');
    a2c_fin = [a2c_fin int2str(latid)];
@@ -85,7 +92,7 @@ if inst == 'a2cx'
    robs = robs(ndi,:);
    btobs = real(rad2bt(f,robs'));
 end
-
+%--------------------------------------------------------------------------------
 if inst == 'a2cc'   % Mixed a2c and cris
 
    % First subset a2crad to dmtime
@@ -135,30 +142,22 @@ if inst == 'a2cc'   % Mixed a2c and cris
     robs = bt2rad(f,btobs)';
    nf = length(ig.all);
    
-
-
-   
-
 end
+%--------------------------------------------------------------------------------
+% Start common code
 
-% 
-% 
-% if nf == 2378
-%    load_fairs
-% elseif nf == 8461
-%    load_fiasi;
-%    f = fiasi;
-% elseif nf == 1305
-% end
-
+% Build output arrays
 all_b        = NaN(nf,10);
-all_berr    = NaN(nf,10);
+all_berr     = NaN(nf,10);
 all_rms      = NaN(nf,10);
 all_resid    = NaN(nd,nf);
+all_anom     = NaN(nd,nf);
+all_bt_anom  = NaN(nd,nf);
 all_bt_resid = NaN(nd,nf);
 all_times    = NaN(nd,nf);
 all_bcorr    = NaN(nf,10,10);
 
+% Number of channels (should be done earlier??)
 if nf == 2378
    ig = goodchan_for_clear(count);
 elseif nf == 8461
@@ -173,17 +172,20 @@ elseif nf == 980
    ig = 1:980;
 end
 
+% Get rid of gigantic outliers
 for i=ig
    k = remove_6sigma(robs(:,i));
    j = remove_6sigma(robs(k,i));
    ind(i).k = k(j);
 end
 
+% Non-linear fit spits out too much info
 warning('off','all');
 
+% Channel loop
 for i=ig
+   % Subset on good times
    it = ind(i).k;
-%   it = length(dmtime);it = 1:it;
    fittime = dmtime(it);
 
    switch fit_type
@@ -204,9 +206,9 @@ for i=ig
    all_berr(i,:) = stats.se;
    all_bcorr(i,:,:) = stats.coeffcorr;
    all_resid(it,i) = stats.resid;
-   % Put linear back in
+   % Put linear back in for anomaly
    dr = (x/365).*all_b(i,2);
-   all_resid(it,i) = all_resid(it,i) - dr;
+   all_anom(it,i) = all_resid(it,i) - dr;
    all_times(it,i) = fittime;
 end
 warning('on','all');
@@ -227,10 +229,12 @@ switch fit_type
   case {'robs', 'rcld', 'rclr'}
     for i=1:nd
        all_bt_resid(i,:) = all_resid(i,:)./(deriv'*1E3);
+       all_bt_anom(i,:) = all_anom(i,:)./(deriv'*1E3);
     end
   case 'bias'
     for i=1:nd
        all_bt_resid(i,:) = all_resid(i,:);
+       all_bt_anom(i,:) = all_anom(i,:);
     end
 end
 
@@ -249,11 +253,11 @@ end
 if ~smallsave
    switch fit_type
      case {'robs', 'rcld', 'rclr'}
-       save([fout int2str(latid_out)],'dbt','dbt_err','all*', 'lag','deriv');
+       save([fout int2str(latid_out)],'dbt','dbt_err','lag','deriv', 'all_b', 'all_berr', 'all_bt_anom', 'all_bt_resid', 'all_times', 'all_bcorr' );
        %% Use if fitting clear calcs for cloudy random data
 %    save([fout 'clrcldy_' int2str(latid_out)],'dbt','dbt_err','all*', 'lag','deriv');
      case 'bias'
-       save([fout int2str(latid_out)],'dbt','dbt_err','all*','lag');
+       save([fout int2str(latid_out)],'dbt','dbt_err','lag','deriv', 'all_b', 'all_berr', 'all_bt_anom', 'all_bt_resid', 'all_times', 'all_bcorr' );
    end
 else % smallsave option
 % less output
