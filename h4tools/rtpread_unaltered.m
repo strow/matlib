@@ -1,6 +1,4 @@
-
 function [head, hattr, prof, pattr] = rtpread(hfile)
-
 % NAME
 %
 %   rtpread -- read a set of RTP profiles; preserve data type

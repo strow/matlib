@@ -1,39 +1,23 @@
-function [] = fit_robust_one_lat(fin,fincal,fout,foutsm,latid,fit_type,start_time,stop_time,inst,saveopt,ifov);
+function [] = fit_robust_one_lat(fin,fout,foutsm,latid,fit_type,start_time,stop_time,inst,saveopt);
 
 addpath ~/Matlab/Math
 addpath /asl/matlib/aslutil
-addpath /asl/matlib/time
 
 latid_out = latid;
 
 count = 1;  % Needed to diable new Matlab Mfile count (count string occurances)
             % Now can load in count in command below and not have problems later
-
 load([fin int2str(latid)])
-% load([fincal int2str(latid)])
 
 % Quick and dirty time for now
 if inst == 'iasi'
   rtime_mean = rtime;
 end
-if inst == 'iasd'
-  rtime_mean = rtime;
-end
 
 dmtime = datenum(1958,1,1,0,0,rtime_mean);
 dmtime = nanmean(dmtime,2);
-
-if true
-   stop1 = datenum(2019,3,25);
-   start2 = datenum(2019,06,27);
-   ndi = find( dmtime >= start_time & dmtime <= stop_time);
-   ndx = find( dmtime >= stop1 & dmtime <= start2);
-   ndi = setxor(ndi,ndx);
-   nd = length(ndi);
-else
-   ndi = find( dmtime >= start_time & dmtime <= stop_time);
-   nd = length(ndi);
-end   
+ndi = find( dmtime >= start_time & dmtime <= stop_time);
+nd = length(ndi);
 %--------------------------------------------------------------------------------
 if inst == 'cris'
    nf = 1305;
@@ -42,11 +26,10 @@ if inst == 'cris'
    load /asl/matlib/cris/ch_std_from1317  % get ch_std_i
    count = count(ndi,1);
    dmtime = dmtime(ndi);
-   robs = squeeze(nanmean(robs(ndi,:,ch_std_i),2));
-%   rcldy = squeeze(nanmean(rcldcal(ndi,:,ch_std_i),2));
-   rclr = squeeze(nanmean(rclr(ndi,:,ch_std_i),2));
+   robs = squeeze(nanmean(robs(ndi,ch_std_i,:),3));
+   rcldy = squeeze(nanmean(rcldcal(ndi,ch_std_i,:),3));
    btobs = real(rad2bt(f,robs'));
-   btcal = real(rad2bt(f,rclr'));
+   btcal = real(rad2bt(f,rcldy'));
    bias = btobs-btcal;
    bias = bias';
 else
@@ -67,20 +50,6 @@ if inst == 'iasi'
    btcal = real(rad2bt(f,rcldy'));
    bias = btobs-btcal;
    bias = bias';
-end
-%--------------------------------------------------------------------------------
-if inst == 'iasd'
-   rtime_mean = rtime;
-   nf = 8461;
-   load_fiasi;
-   f = fiasi;
-   robs = squeeze(robs(ndi,:,ifov));
-%   rcldy = rcldy(ndi,:);
-%    rcldy = rcal(ndi,:);
-   btobs = real(rad2bt(f,robs'));
-%    btcal = real(rad2bt(f,rcldy'));
-%    bias = btobs-btcal;
-%    bias = bias';
 end
 %--------------------------------------------------------------------------------   
 if inst == 'airs'
@@ -105,8 +74,8 @@ if inst == 'al1c'
    btobs = real(rad2bt(f,robs'));
 %   btcal = real(rad2bt(f,rcldy'));
    btcal = real(rad2bt(f,rclr'));
-    bias = btobs-btcal;
-    bias = bias';
+   bias = btobs-btcal;
+   bias = bias';
 end
 %--------------------------------------------------------------------------------
 if inst == 'a2cx'
@@ -209,6 +178,7 @@ warning('off','all');
 
 % Channel loop
 for i=ig
+   i
    % Subset on good times
    it = ind(i).k;
    fittime = dmtime(it);
@@ -217,7 +187,7 @@ for i=ig
      case 'robs'
        fity = squeeze(robs(it,i));
      case 'rcld'
-       fity = squeeze(rcld(it,i));
+       fity = squeeze(rcldy(it,i));
      case 'rclr'
        fity = squeeze(rclr(it,i));
      case 'bias'
@@ -242,8 +212,8 @@ warning('on','all');
 switch fit_type
   case {'robs', 'rcld', 'rclr'}
     deriv   = drdbt(f,rad2bt(f,all_b(:,1)));
-    dbt     = all_b(:,2)./(deriv*1E3);
-    dbt_err = all_berr(:,2)./(deriv*1E3);
+    dbt     = all_b(:,2)./(deriv);
+    dbt_err = all_berr(:,2)./(deriv);
   case 'bias'
     dbt     = all_b(:,2);
     dbt_err = all_berr(:,2);
@@ -254,8 +224,8 @@ end
 switch fit_type
   case {'robs', 'rcld', 'rclr'}
     for i=1:nd
-       all_bt_resid(i,:) = all_resid(i,:)./(deriv'*1E3);
-       all_bt_anom(i,:) = all_anom(i,:)./(deriv'*1E3);
+       all_bt_resid(i,:) = all_resid(i,:)./(deriv');
+       all_bt_anom(i,:) = all_anom(i,:)./(deriv');
     end
   case 'bias'
     for i=1:nd
@@ -276,30 +246,14 @@ for i = 1:nf
    end
 end
 
-% Stemp fit
-   dtime = tai2dnum(rtime_mean);
-   ks = find(~isnan(dmtime));
-   ks = ks(2:end);  % first point bad??
-   x = dmtime(ks)-dmtime(ks(1));
-   y = stemp_mean(ks);
-   [stemp_b stats] = Math_tsfit_lin_robust(x,y,4);
-   stemp.b_rms = stats.s;
-   stemp.b_err = stats.se;
-   stemp.bcorr = stats.coeffcorr;   
-   stemp.resid = stats.resid;
-   dstemp = (x/365).*stemp_b(2);   
-   stemp.anom = stemp.resid + dstemp;
-   stemp.times = dmtime(ks);
-
-
 switch saveopt
 case 'saveboth'
-       save([fout int2str(latid_out)],'dbt','dbt_err','lag','deriv', 'all_b', 'all_berr', 'all_bt_anom', 'all_bt_resid', 'all_times', 'all_bcorr' ,'stemp');
-       save([foutsm int2str(latid_out)],'dbt','dbt_err','all_b','all_berr','all_bcorr','all_rms','lag', 'stemp');
+       save([fout int2str(latid_out)],'dbt','dbt_err','lag','deriv', 'all_b', 'all_berr', 'all_bt_anom', 'all_bt_resid', 'all_times', 'all_bcorr' );
+       save([foutsm int2str(latid_out)],'dbt','dbt_err','all_b','all_berr','all_bcorr','all_rms','lag');
 case 'savesmall'
-       save([foutsm int2str(latid_out)],'dbt','dbt_err','all_b','all_berr','all_bcorr','all_rms','lag','stemp');
+       save([foutsm int2str(latid_out)],'dbt','dbt_err','all_b','all_berr','all_bcorr','all_rms','lag');
 case 'savebig'
-       save([fout int2str(latid_out)],'dbt','dbt_err','lag','deriv', 'all_b', 'all_berr', 'all_bt_anom', 'all_bt_resid', 'all_times', 'all_bcorr', 'stemp');
+       save([fout int2str(latid_out)],'dbt','dbt_err','lag','deriv', 'all_b', 'all_berr', 'all_bt_anom', 'all_bt_resid', 'all_times', 'all_bcorr' );
 end
 
 % 
