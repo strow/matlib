@@ -66,7 +66,13 @@ set(gcf,'color',[0.94 0.94 0.94]);
 % Set the dockstate back to what it was
 set(gcf,'windowstyle',dockstate)
 fnfig = fn;
+<<<<<<< HEAD
 hgsave(gcf,fnfig);
+=======
+%if ~save_png_only
+   hgsave(gcf,fnfig);
+%end
+>>>>>>> 4a2c357c2e3d163c3982b4822177134b145097d7
 
 warning('on');
 
