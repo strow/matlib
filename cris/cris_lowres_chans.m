@@ -1,4 +1,4 @@
-function [n1,n2,n3,userLW,userMW,userSW,ichan_hires] = cris_lowres_chans();
+function [n1,n2,n3,userLW,userMW,userSW,ichan_hires] = cris_lowres_chans(ng);
 
 addpath /asl/packages/ccast/motmsc/rtp_sarta
 addpath /asl/packages/ccast/source
@@ -15,7 +15,7 @@ n2 = (userMW.v2-userMW.v1)/userMW.dv + 1;
 [instSW, userSW] = inst_params('SW', wlaser,opts);
 n3 = (userSW.v2-userSW.v1)/userSW.dv + 1;
 
-ichan_hires = cris_ichan(2, 4, n1, n2, n3);
+ichan_hires = cris_ichan(ng, 4, n1, n2, n3);
 
 
 

@@ -14,7 +14,7 @@ end
 
 fnpng = [fn '.png'];
 
-eval_str = ['scp -p ' fnpng ' spud:Dropbox'];
+eval_str = ['cp -a ' fnpng ' /home/strow/Dropbox'];
 
 unix(eval_str);
 
