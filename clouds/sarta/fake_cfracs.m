@@ -34,21 +34,57 @@ if (length(d) ~= 2 | min(d) ~= 1)
 end
 n = max(d);
 if (min(tcc) < 0 | max(tcc) > 1)
-  error('some values of tcc outside expected range of 0-1')
+  [min(tcc)  max(tcc)]
+  %error('some values of tcc outside expected range of 0-1')  
+  disp('WARNING some values of tcc outside expected range of 0-1')
+  bad = find(tcc < 0);
+  if length(bad) > 0
+    fprintf(1,'found %5i tcc < 0, resetting \n',length(bad))
+    tcc(bad) = 0.0;
+  end
+  bad = find(tcc > 1);
+  if length(bad) > 0
+    fprintf(1,'found %5i tcc > 1, resetting \n',length(bad))
+    tcc(bad) = 1.0;
+  end
 end
 d = size(cfracw);
 if (length(d) ~= 2 | min(d) ~= 1 | max(d) ~= n)
    error('cfrac1 must be a [1 x n] array')
 end
 if (min(cfracw) < 0 | max(cfracw) > 1)
-  error('some values of cfracw outside expected range of 0-1')
+  [min(cfracw)  max(cfracw)]  
+  %error('some values of cfracw outside expected range of 0-1')
+  disp('WARNING some values of cfracw outside expected range of 0-1')
+  bad = find(cfracw < 0);
+  if length(bad) > 0
+    fprintf(1,'found %5i cfracw < 0, resetting \n',length(bad))
+    cfracw(bad) = 0.0;
+  end
+  bad = find(cfracw > 1);
+  if length(bad) > 0
+    fprintf(1,'found %5i cfracw > 1, resetting \n',length(bad))
+    cfracw(bad) = 1.0;
+  end
 end
 d = size(cfraci);
 if (length(d) ~= 2 | min(d) ~= 1 | max(d) ~= n)
    error('cfrac2 must be a [1 x n] array')
 end
 if (min(cfraci) < 0 | max(cfraci) > 1)
-  error('some values of cfraci outside expected range of 0-1')
+  [min(cfraci)  max(cfraci)]    
+  %error('some values of cfraci outside expected range of 0-1')
+  disp('WARNING some values of cfraci outside expected range of 0-1')
+  bad = find(cfraci < 0);
+  if length(bad) > 0
+    fprintf(1,'found %5i cfraci < 0, resetting \n',length(bad))
+    cfraci(bad) = 0.0;
+  end
+  bad = find(cfraci > 1);
+  if length(bad) > 0
+    fprintf(1,'found %5i cfraci > 1, resetting \n',length(bad))
+    cfraci(bad) = 1.0;
+  end  
 end
 d = size(ctype1);
 if (length(d) ~= 2 | min(d) ~= 1 | max(d) ~= n)

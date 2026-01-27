@@ -103,11 +103,13 @@ for iiiiA = 1:length(iiii)
   %%% this new code!!!!!!!!!!!!!!!!
   %% slabs can be resolved better if there are more points
   plevs = profX.plevs(:,ii);
-  if length(plevs < 80)
+  %if length(plevs < 80)
+  if length(plevs) < 80
     plevsX = (plevs(1:end-1) + plevs(2:end))/2;
     plevs = sort([plevs; plevsX]);
   end
-  if length(plevs < 80)
+  %if length(plevs < 80)
+  if length(plevs) < 80
     plevsX = (plevs(1:end-1) + plevs(2:end))/2;
     plevs = sort([plevs; plevsX]);
   end

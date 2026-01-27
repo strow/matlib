@@ -28,7 +28,9 @@ try
 catch me
   me
   fprintf(1,'oops : error running sarta cloudy, look at ip/op rtp files %s %s \n',fip,fop)
-  fprintf(1,'oops : error running sarta cloudy, look at error log %s \n',ugh2);
+  fprintf(1,'oops : error running sarta cloudy, look at error log - here is a snapshot %s \n',ugh2);
+  morer = ['!more ' ugh2];
+  eval(morer);
   %keyboard
   error('woof! try again!')
 end

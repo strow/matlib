@@ -5,9 +5,11 @@ klayers = run_sarta.klayers_code;
 sarta   = run_sarta.sartaclear_code;
 
 if ~exist(klayers,'file')
+  klayers
   error('klayers exec done not exist')
 end
 if ~exist(sarta,'file')
+  sarta
   error('sarta cloud exec done not exist')
 end
 
@@ -34,7 +36,9 @@ try
   [headRX2 hattrR2 profRX2 pattrR2] = rtpread(frp);
 catch me
   me
-  fprintf(1,'oops : error running sarta clear, look at error log %s \n',ugh);
+  fprintf(1,'oops : error running sarta clear, look at error log - here is a snapshot %s \n',ugh);
+  morer = ['!more ' ugh];
+  eval(morer)
   %keyboard
   error('woof! try again!')
 end

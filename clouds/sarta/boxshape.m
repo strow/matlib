@@ -28,7 +28,7 @@ function [yOUT,wT,wB,peakN,N,maxN,minN] = boxshape(yIN,rGaussianCutoff);
 
 global iDoPlot
 
-%% example 
+%% example %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iExample = -1;
 if iExample > 0
   dx = 2*pi/101;
@@ -53,6 +53,7 @@ if iExample > 0
 
   plot(x,yIN)
   end
+%% example %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear wT wB
 peakN = [0 0 0];
@@ -703,6 +704,12 @@ if (sum(thediff) > 0)
   [wTunique,wIT,wJT] = unique(wT,'first');
   [wBunique,wIB,wJB] = unique(wB,'first');
 
+  %25 Jan 2026
+  Ccombine = [];
+  wTnew = [];
+  wBnew = [];  
+  wPeaknew = [];
+  
   if length(wB) ~= length(wBunique)
     disp('inconsistency in cld bottoms');
     [wBunique,wIB1,wJB1] = unique(wB,'first');
