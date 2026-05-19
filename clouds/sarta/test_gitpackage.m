@@ -41,11 +41,16 @@ addpath /home/sergio/MATLABCODE/matlib/clouds/pcrtm/
   p2X = driver_sarta_cloud100layer_rtp(h0,ha,p0,pa,run_sarta);
   time2X = toc(tstart);
 
+  run_sarta.ice_water_separator = +1;
+  tstart = tic;
+  p2Y = driver_sarta_cloud_rtp(h0,ha,p0,pa,run_sarta);
+  time2X = toc(tstart);
+
   tstart = tic;
   pp = driver_pcrtm_cloud_rtp(h0,ha,p0,pa,run_sarta);
   timep = toc(tstart);
 
-[time1 time2 time2X timep]
+[time1 time2 time2X time2Y timep]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -62,7 +67,8 @@ tobs = real(rad2bt(h0.vchan(g),p0.robs1(g,:)));    %% obs
 t0   = rad2bt(h0.vchan(g),p0.rcalc(g,:));          %% orig cal with slabs
 t1   = rad2bt(h0.vchan(g),p1.rcalc(g,:));          %% redoing the cal with slabs
 t2   = rad2bt(h0.vchan(g),p2.rcalc(g,:));          %% srta100,klayers100 .. with ice_water_separator = +400
-t2X   = rad2bt(h0.vchan(g),p2X.rcalc(g,:));        %% srta100,klayers100 .. with ice_water_separator = -1
+t2X  = rad2bt(h0.vchan(g),p2X.rcalc(g,:));         %% srta100,klayers100 .. with ice_water_separator = -1
+t2Y  = rad2bt(h0.vchan(g),p2Y.rcalc(g,:));         %% srta,klayers .. with ice_water_separator = +1
 tp   = rad2bt(h0.vchan(g),pp.rcalc(g,:));
 
 figure(2)
@@ -79,6 +85,7 @@ t0   = rad2bt(h0.vchan,p0.rcalc);
 t1   = rad2bt(h0.vchan,p1.rcalc);
 t2   = rad2bt(h0.vchan,p2.rcalc);
 t2X  = rad2bt(h0.vchan,p2X.rcalc);
+t2Y  = rad2bt(h0.vchan,p2Y.rcalc);
 tp   = rad2bt(h0.vchan,pp.rcalc);
 
 figure(3);

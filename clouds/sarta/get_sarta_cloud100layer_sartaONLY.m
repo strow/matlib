@@ -1,3 +1,5 @@
+function profRX2 = get_sarta_cloud100layer_sartaONLY(hX,ha,profX,pa,run_sarta);
+
 %% these are required but user needs to add them before using this code
 %% addpath /asl/matlib/aslutil/
 
@@ -7,6 +9,7 @@
 sarta   = run_sarta.sartacloud_code;
 
 if ~exist(sarta,'file')
+  fprintf(1,'looking for %s \n',sarta)
   error('sarta cloud exec done not exist')
 end
 

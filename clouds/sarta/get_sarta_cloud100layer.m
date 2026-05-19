@@ -1,3 +1,9 @@
+function prof = get_sarta_cloud100layer(h,ha,prof0,pa,run_sarta)
+
+tic
+
+prof = prof0;
+
 %% these are required but user needs to add them before using this code
 %% addpath /asl/matlib/aslutil/
 
@@ -41,3 +47,6 @@ catch me
 end
   
 rmer = ['!/bin/rm ' fip ' ' fop ' ' frp ' ' ugh1 ' ' ugh2]; eval(rmer);
+
+toc
+prof.rcalc = profRX2.rcalc;

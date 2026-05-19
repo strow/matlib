@@ -17,14 +17,25 @@ if h.ptype == 0
 
 elseif h.ptype > 0
   good = find(prof.cc >= 0.001);
-   prof.gas_201(good) = prof.gas_201(good) ./ prof.cc(good); 
-   prof.gas_202(good) = prof.gas_202(good) ./ prof.cc(good); 
+    prof.gas_201(good) = prof.gas_201(good) ./ prof.cc(good); 
+    prof.gas_202(good) = prof.gas_202(good) ./ prof.cc(good); 
 
   bad = find(prof.cc < 0.001);
     prof.gas_201(bad) = 0.0;
     prof.gas_202(bad) = 0.0;
 
-  %% xsubcol_frac = 0 or 1
-  prof.gas_201 = prof.gas_201 .* xsubcol_frac';
-  prof.gas_202 = prof.gas_202 .* xsubcol_frac';
+  [mmjunkA,nnjunkA] = size(prof.gas_201);
+  [mmjunkX,nnjunkX] = size(xsubcol_frac);
+
+  if mmjunkX == 101
+    %% xsubcol_frac = 0 or 1
+    prof.gas_201 = prof.gas_201 .* xsubcol_frac;
+    prof.gas_202 = prof.gas_202 .* xsubcol_frac;
+  else
+    %% xsubcol_frac = 0 or 1
+    prof.gas_201 = prof.gas_201 .* xsubcol_frac';
+    prof.gas_202 = prof.gas_202 .* xsubcol_frac';
+  end
+  
 end
+

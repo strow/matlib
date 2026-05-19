@@ -19,14 +19,33 @@ function prof = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta)
 %     run_sarta.klayers_code        = string to klayers
 %     run_sarta.sartaclear_code     = string to sarta clear executable
 %     run_sarta.sartacloud_code     = string to sarta cloud executable
-%     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this 
-%        (default = -1, use ciwc/clwc structures as is)
+%     run_sarta.ice_water_separator = set all ciwc/clwc to ice above this, water below this
+%                                   = -1;  %% DEFAULT = -1, DO NOT CALL convert_ice_water_separator, used since 2010(???) onwards
+%                                                           cloud_combine_main_code uses ISCCP ie ice above 440 mb, water below 440 mb
+%                                   = 0;   %% do not separate out ciwc and clwc by pressure; ie believe the NWP are correct
+%                                                           do NOT CALL convert_ice_water_separator
+%                                                           cloud_combine_main_code uses nothing
+%                                   = +1;  %% use quadratic X = [-60 0 +60]; Y = [6 9 6]; P = polyfit(X,Y,2); X1=[p.rlat];Y1=polyval(P,X1); according to IPCC AR5
+%                                                           DO NOT CALL convert_ice_water_separator
+%                                                           cloud_combine_main_code uses ISCCP ie ice above Y1 mb, water below Y1 mb
+%                                   >>>>>>> these first alter the ciwc and clwc profiles <<<<<<<<<
+%                                   = +2;  %% use quadratic X = [-60 0 +60]; Y = [6 9 6]; P = polyfit(X,Y,2); X1=[p.rlat];Y1=polyval(P,X1); according to IPCC AR5
+%                                                           DO CALL convert_ice_water_separator
+%                                                           cloud_combine_main_code uses ISCCP ie ice above Y1 mb, water below Y1 mb
+%                                   = +440;%% or similar [100 -- 1000] ... almost same as DEFAULT = -1, but
+%                                                           DO CALL convert_ice_water_separator
+%                                                           cloud_combine_main_code uses ISCCP ie ice above 440 mb, water below X mb
 %     run_sarta.randomCpsize        = +1 (default) to randomize BOTH ice (based on Tcld) and water deff
 %                                      20,   then water is ALWAYS 20 um (as in PCRTM wrapper), random ice
 %                                      (based on Tcld)
 %                                      -1, then water is MODIS dme, random ice (based on Scott Tcld)
 %                                      9999, then water is MODIS dme, random ice (based on KNLiou Tcld)
-%
+%     run_sarta.co2ppm          = -1 to use 370 + (yy-2002)*2.2) in pcrtm/sarta
+%                               = +x to use user input value     in pcrtm/sarta 
+%                               =  0 to use DEFAULT klayers = 385 (set in executable by Scott; equivalent to run_sarta.co2ppm = +385)
+%                   this is done to keep it consistent with PCRTM
+%                   however, also have to make sure this is only enabled if h.glist does NOT include gas_2
+%%
 % Requirements : 
 %   p must contain ciwc clwc cc from ERA/ECMWF (ie 91xN or 37xN) as well as gas_1 gas_3 
 %   ptemp etc
@@ -47,6 +66,10 @@ function prof = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta)
 % and instead needs run_sarta.ncol >= 1               : number of subcolumns (if cfrac == 1)
 %
 % updates
+%  04/27/2014 : introduced run_sarta.ice_water_separator + 1 option, which is
+%               quadratic as fcn of latitude separator, acording to IPCC AR5 report (Ch 7, Fig 7.5)
+%               X = [-60 0 +60]; Y = [6 9 6]; P = polyfit(X,Y,2); X1=[-90:5:+90];Y1=polyval(P,X1);
+%               above certain pressure = ice      below certain pressure = water
 %  08/18/2013 : introduced run_sarta.randomCpsize, default = +1 to keep randomizing deff; 
 %                                                             20 to keep ice = ice(T,pcrtm), water = 20 um
 %                                                             -1 to use MODIS water DME
@@ -58,7 +81,25 @@ function prof = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta)
 %  04/04/2013 : introduced/tweaked do_the_reset_cprtop_cloudOD.m
 %  04/04/2013 : mega updates in check_for_errors.m
 %
+%{
+% testing the code for 100layer clouds, random overlap
+  [h,ha,p,pa] = rtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
+  [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
+  run_sarta.clear = +1;
+  run_sarta.cloud = +1;
+  run_sarta.ncol  = 50;
+  run_sarta.cfrac = 1;
+  run_sarta.ice_water_separator = +1;    %% model 1, use X = [-60 0 +60]; Y = [6 9 6];
+                                         %% P = polyfit(X,Y,2); X1=[-90:5:+90];Y1=polyval(P,X1); from IPCC AR5 report (Chapter 7, Fig.7.5):
+					 %% see https://www.gfdl.noaa.gov/clouds-climate-initiative/
+  run_sarta.ice_water_separator = 440;   %% this is from ISCCP (ice clouds above 440 mb)
+  tic
+  p1 = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta);
+  toc
+  rtpwrite('/asl/data/rtprod_airs/2012/05/01/pcrtm_cld_ecm_41ch.airs_ctr.2012.05.01.10_sarta.rtp',h,ha,p1,pa);
+%}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 base_dir = fileparts(mfilename('fullpath')); % current directory
 base_dir1 = fileparts(base_dir);  % dir:  ../
 base_dir2 = fileparts(base_dir1); % dir:  ../../
@@ -72,256 +113,83 @@ addpath([base_dir2 '/h4tools'])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%{
-% testing the code for 100layer clouds, random overlap
-  [h,ha,p,pa] = rtpread('/asl/data/rtprod_airs/2012/05/01/cld_ecm_41ch.airs_ctr.2012.05.01.10.rtp');
-  [h,ha,p,pa] = rtpgrow(h,ha,p,pa);
-  run_sarta.clear = +1;
-  run_sarta.cloud = +1;
-  run_sarta.ncol  = 50;
-  run_sarta.cfrac = 1;
-  run_sarta.ice_water_separator = 440;
-  tic
-  p1 = driver_sarta_cloud100layer_rtp(h,ha,p,pa,run_sarta);
-  toc
-  rtpwrite('/asl/data/rtprod_airs/2012/05/01/pcrtm_cld_ecm_41ch.airs_ctr.2012.05.01.10_sarta.rtp',h,ha,p1,pa);
-%}
+%% defaults
+narginx = nargin;
+if nargin == 4
+  run_sarta = struct;
+end  
+[p,run_sarta,otherstuff] = check_sarta_cloud_rtp_defaults(run_sarta,h,p,narginx);
+
+cmin = otherstuff.cmin;             %% min allowed cfrac
+cngwat_max = otherstuff.cngwat_max; %% max allowed cngwat
+iDebugMain = otherstuff.iDebugMain; %% to debug or not???
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% defaults
-run_sarta.cumsum              = -1;  %% use pre-2012 cloudtop heights, without adjustments
-  %% need this just to do basic calls for the code
+%% do 2 slabclouds
 
-if nargin == 4
-  %% default to running sarta_cloudy100layer for 1 subcolumns
-  run_sarta.clear               = -1;  %% do not run clear code
-  run_sarta.cloud               = +1;  %% run cloudy code
-  run_sarta.ice_water_separator = -1;  %% do not separate out ciwc and clwc by pressure; ie believe the NWP are correct
-  run_sarta.randomCpsize        = +1;  %% keep randomizing dme for ice and water
-  run_sarta.cfrac               = -1;  %% use random (instead of fixed) cfracs
-  run_sarta.ncol                =  1;
-  run_sarta.overlap             = +3;  %% maximal random overlap
+%% turn profiles into slabs, waste of time
+%% prof = main_code_to_make_slabs(h,ha,p,pa,run_sarta,iDebugMain,otherstuff);
+prof = p;
 
-%% SLAB
-  %run_sarta.klayers_code    = '/asl/packages/klayers/Bin/klayers_airs';
-  %run_sarta.sartacloud_code = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-  %run_sarta.klayers_code    = '/asl/packages/klayersV205/BinV201/klayers_airs';
-  %run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-%% SLAB
+%% add on co2
+prof = prof_add_co2(h,prof,run_sarta);
 
-%% PROFILE
-  %% see /home/sergio/klayersV205/Src_rtpV201_100layercloudamountsize
-  run_sarta.klayers_code = ...
-    '/home/sergio/klayersV205/BinV201/klayers_airs_x_testmeCLOUDversion';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if isfield(prof,'rcalc')
+  prof = rmfield(prof,'rcalc');
+end
+if isfield(prof,'rcld')
+  prof = rmfield(prof,'rcld');
+end
 
-  %% see /home/sergio/SARTA_CLOUDY/v108_Src_rtpV201_pclsam_slabcloud_hg3_100layerNEW
-  run_sarta.sartacloud_code = ...
-    '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3_100layerNEW';
-
-elseif nargin == 5
-  if ~isfield(run_sarta,'randomCpsize')
-    run_sarta.randomCpsize = +1;
-  end
-  if ~isfield(run_sarta,'ice_water_separator')
-    run_sarta.ice_water_separator = -1;
-  end
-  if ~isfield(run_sarta,'clear')
-    run_sarta.clear = -1;
-  end
-  if ~isfield(run_sarta,'cloud')
-    run_sarta.cloud = -1;
-   end
-  %if ~isfield(run_sarta,'cumsum')
-  %  run_sarta.cumsum = -1;
-  %end
-  if ~isfield(run_sarta,'cfrac')
-    run_sarta.cfrac = -1;
-  end
+run_sarta.Slab_or_100layer = -1;     %% now explicitly set this
+if run_sarta.Slab_or_100layer == -1  %% which it WILL be, given line above
   if ~isfield(run_sarta,'ncol')
-    run_sarta.ncol = +1;
+    run_sarta.ncol    =  1;  %% number of columns for 100 layer cloud code
+    run_sarta.ncol    = 25;  %% number of columns for 100 layer cloud code
   end
   if ~isfield(run_sarta,'overlap')
-    run_sarta.overlap = +3;
+    run_sarta.overlap = +3;  %% maximal random overlap for 100 layer cloud code
   end
-  if ~isfield(run_sarta,'klayers_code')
-    run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
-    run_sarta.klayers_code = '/home/sergio/klayersV205/BinV201/klayers_airs_x_testmeCLOUDversion';
-  end   
-  if ~isfield(run_sarta,'sartaclear_code')
-    run_sarta.sartaclear_code = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
-  end
-  if ~isfield(run_sarta,'sartacloud_code')
-    run_sarta.sartacloud_code = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-    run_sarta.sartacloud_code = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3_100layerNEW';
-  end
+  %% see /home/sergio/klayersV205/Src_rtpV201_100layercloudamountsize
+  run_sarta.klayers_code = '/home/sergio/klayersV205/BinV201/klayers_airs_x_testmeCLOUDversion';
+  %% see /home/sergio/SARTA_CLOUDY/v108_Src_rtpV201_pclsam_slabcloud_hg3_100layerNEW
+  run_sarta.sartacloud_code = ...
+      '/home/sergio/SARTA_CLOUDY/BinV201/WORKS_Dec2015/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3_100layerNEW';
 end
 
-% Min allowed cloud fraction
-cmin = 0.0001;
-
-% Max allowed cngwat[1,2]
-cngwat_max = 500;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-if ~isfield(p,'ciwc')
-  error('driver_pcrtm_cloud_rtp.m requires ciwc');
-elseif ~isfield(p,'clwc')
-  error('driver_pcrtm_cloud_rtp.m requires clwc');
-elseif ~isfield(p,'cc')
-  error('driver_pcrtm_cloud_rtp.m requires cc');
-elseif h.ptype ~= 0
-  error('driver_pcrtm_cloud_rtp.m requires LEVELS profiles (h.ptype = 0)');
-end
-
-if ~isfield(p,'cfrac')
-  %% need random cfracs
-  disp('>>>>>>>> warning : need random cfracs .... initializing')
-  %% want to make sure there are NO zeros cfrac
-  p.cfrac = 0.50*(rand(size(p.stemp)) + rand(size(p.stemp))) ;
-end
-
-if run_sarta.ice_water_separator > 0
-  disp('>>>>>>>> warning : setting SEPARATOR for ice and water .... initializing')
-  p = convert_ice_water_separator(p,run_sarta.ice_water_separator);
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-head  = h;
-
-nlev     = ceil(mean(p.nlevs));
-nlev_std = (std(double(p.nlevs)));
-
-if nlev_std > 1e-3
-  error('oops : code assumes ERA (37 levs) or ECMWF (91 levs) or other constant numlevs model')
-end
-
-if h.ptype ~= 0
-  error('need levels input!')
-end
-
-tic
-%% run_sarta.cumsum == -1
-[prof,profX] = ecmwfcld2sartacld(p,nlev,run_sarta.cumsum);   %% figure the two slab cloud 
-                  %% profile info here, using profX
-                  %% this then puts the info into "prof" by calling put_into_prof w/in routine
-
-prof = put_into_V201cld_fields(prof);    %% puts cloud info from above into rtpv201 fields 
-  prof.ctype  = double(prof.ctype);
-  prof.ctype2 = double(prof.ctype2);
-
-%% sets fracs and particle effective sizes eg cfrac2
-prof = set_fracs_deffs(head,prof,profX,cmin,cngwat_max,run_sarta.cfrac,run_sarta.randomCpsize);
-
-%disp('3')
-%[prof.cngwat]
-
-%{
-  disp(' ')
-  [prof.cngwat(junky) prof.cngwat2(junky)]
-  [prof.cfrac(junky) prof.cfrac2(junky) prof.cfrac12(junky)]
-  [prof.cprtop(junky) prof.cprbot(junky) prof.cprtop2(junky) prof.cprbot2(junky)]
-  [prof.sarta_wgtpeakI(junky) prof.sarta_wgtpeakW(junky)]
-  [profXYZ.cprtop(junky) profXYZ.cprbot(junky) profXYZ.cprtop2(junky) profXYZ.cprbot2(junky)]
-  keyboard
-
-  aaaa = load('/home/sergio/test_paul_p2.mat');
-  figure(1); plot(prof.sarta_lvlODice,'b');   hold on; plot(aaaa.p2.pcrtm_lvlODice,'r'); hold off
-  figure(2); plot(prof.sarta_lvlODwater,'b'); hold on; plot(aaaa.p2.pcrtm_lvlODwater,'r'); hold off
-  ice = find(prof.ctype == 201);
-  water = find(prof.ctype2 == 101);
-  figure(3); plot(prof.sarta_lvl_iceOD_1(ice),prof.cprtop(ice),'bo',...
-                  prof.sarta_lvl_waterOD_1(water),prof.cprtop2(water),'rx',...
-                  [0 1000],[00 1000],'k')
-             axis([0 1000 0 1000]); grid
-  xlabel('OD = 1'); ylabel('cprtop')
-  keyboard
-%}
-
-disp('---> checking cprtop vs cprbot vs spres')
-iNotOK = +1;
-iFix = 0;
-while iFix < 12 & iNotOK > 0
-  iFix = iFix + 1;
-  [prof,iNotOK] = check_for_errors(prof,run_sarta.cfrac,iFix);           %% see if there are possible pitfalls x1
-  fprintf(1,' did n=%2i try at checking clouds \n',iFix)
-end
-if iFix >= 12 & iNotOK > 0
-  error('oops, could not fix cprtop vs cprbot vs spres')
-end
-
-clear profX
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
 %% now essentially IGNORE the above and instead do the cloud PROFILES stuff
 [h,prof] = reset_cloud_slab_with_cloud_profile(h,prof,run_sarta.cfrac);
 
 %% and add on aux info, such as OD etc
-prof = cloudOD_for100layer(prof,run_sarta.cumsum/100);
+load airsheights.dat
+load airslevels.dat
+
+airsheights = flipud(airsheights);
+airslevels  = flipud(airslevels);
+playsN = airslevels(1:end-1)-airslevels(2:end);
+playsD = log(airslevels(1:end-1)./airslevels(2:end));
+airslayers = playsN./playsD;
+
+prof = cloudOD_for100layer(prof,run_sarta.cumsum/100,airslevels,airslayers,airsheights);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 if run_sarta.clear > 0 
   disp('running SARTA clear, saving into rclearcalc')
-  tic
-  get_sarta_clear;
-  toc
-  prof.sarta_rclearcalc = profRX2.rcalc;
+  prof = get_sarta_clear(h,ha,prof,pa,run_sarta);
+else
+  disp('you did not ask for SARTA clear to be run; not changing p.rcalc')
 end
 
 if run_sarta.cloud > 0 
   if run_sarta.ncol == 1
     %% all you have to do is run ONCE
     disp('running SARTA cloud ONCE')
-    tic
-      get_sarta_cloud100layer;
-    toc
-    prof.rcalc = profRX2.rcalc;
+    prof = get_sarta_cloud100layer(h,ha,prof,pa,run_sarta);
   else
-    profNCOL_IP = prof;   %%%% <<<<<<<<<<<<<<<< save this, need it a lot!!!!!
-    h_IP        = h;
-    get_sarta_cloud100layer_klayersONLY
-    profNCOL_OP = pjunk;
-    h_OP        = hjunk;
-    [mmjunk,nnjunk] = size(profNCOL_OP.plevs);
-    [unique_col_frac,ucol_num,ucol_num_same,subcol_frac] = ...
-       get_subcolumn_frac_v2(length(prof.stemp), mmjunk, run_sarta.ncol, profNCOL_OP.cc',...
-                                    run_sarta.overlap);
-
-    for iCol = 1 : run_sarta.ncol
-      fprintf(1,'running SARTA cloud N times : subcol %3i out of %3i \n',iCol,run_sarta.ncol);
-      prof = profNCOL_OP;
-      [hX,profX] = do_subcol_cloudprofs(h_OP,prof,squeeze(subcol_frac(:,iCol,:)));
-      if hX.ptype == 0
-        xciwc(iCol,:,:) = profX.ciwc;
-        xclwc(iCol,:,:) = profX.clwc;
-      else
-        xciwc(iCol,:,:) = profX.gas_201;
-        xclwc(iCol,:,:) = profX.gas_202;
-      end
-      get_sarta_cloud100layer_sartaONLY;
-      %% junkcalc(iCol,:,:) = profRX2.rcalc;    %% MEMORY HOG
-      if iCol == 1
-        %% slower, but more memory efficient
-        [sumy,sumysqr,Nmatr] = accum_mean_std(0,0,0,profRX2.rcalc,1);
-      else
-        %% slower, but more memory efficient
-        [sumy,sumysqr,Nmatr] = accum_mean_std(sumy,sumysqr,Nmatr,profRX2.rcalc,iCol);
-      end
-    end
-
-    prof = profNCOL_IP;
-
-    %% prof.rcalc     = squeeze(nanmean(junkcalc,1));
-    %% prof.rcalc_std = squeeze(nanstd(junkcalc,1));
-
-    prof.rcalc = sumy./Nmatr;
-    junk_mean = prof.rcalc;
-    %prof.rcalc_std = ...
-    %  real(sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-1)));
-    prof.rcalc_std  = ...
-      real(sqrt((sumysqr - 2*junk_mean.*sumy + Nmatr.*junk_mean.*junk_mean)./(Nmatr-0)));
-
+    disp('running SARTA cloud MANY TIMES')
+    prof = get_sarta_cloud100layerNtimes(h,ha,prof,pa,run_sarta);
   end
 else
   disp('you did not ask for SARTA cloudy to be run; not changing p.rcalc')
@@ -329,5 +197,3 @@ end
 
 tnow = toc;
 fprintf(1,'TOTAL : %8.6f minutes to process \n',tnow/60);
-
- 

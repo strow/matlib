@@ -1,4 +1,4 @@
-function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum);
+function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum,airslevels,airslayers,airsheights);
 
 %% called by readecmwf91_grid/nearest_gasNcloud.m
 %%     "nlev" is set by readecmwf91_grid/nearest_gasNcloud
@@ -23,6 +23,8 @@ function [prof,profX] = ecmwfcld2sartacld(profIN,nlev,xcumsum);
 %% ice_dme   = 60;
 %% water_dme = 15;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+global iWhichInterp  %% 0 = matlab interp1, 1 = interp1qr, set in driver_sarta_cloud_rtp.m
 
 profX = profIN;  %% dummy copy
 prof  = profIN;  %% prof gets updated profile by profile, using "put_into_prof"
@@ -108,20 +110,24 @@ for iiiiA = 1:length(iiii)
   %%% this new code!!!!!!!!!!!!!!!!
   %% slabs can be resolved better if there are more points
   plevs = profX.plevs(xnlevs,ii);
-  %if length(plevs < 80)
-  if length(plevs) < 80
+  if length(plevs < 80)
     plevsX = (plevs(1:end-1) + plevs(2:end))/2;
     plevs = sort([plevs; plevsX]);
   end
-  %if length(plevs < 80)
-  if length(plevs) < 80
+  if length(plevs < 80)
     plevsX = (plevs(1:end-1) + plevs(2:end))/2;
     plevs = sort([plevs; plevsX]);
   end
 
-  watercld = interp1(log10(profX.plevs(xnlevs,ii)),profX.clwc(xnlevs,ii),log10(plevs));
-  icecld   = interp1(log10(profX.plevs(xnlevs,ii)),profX.ciwc(xnlevs,ii),log10(plevs));
-  ptemp    = interp1(log10(profX.plevs(xnlevs,ii)),profX.ptemp(xnlevs,ii),log10(plevs));
+  if iWhichInterp == 0
+    watercld = interp1(log10(profX.plevs(xnlevs,ii)),profX.clwc(xnlevs,ii),log10(plevs));
+    icecld   = interp1(log10(profX.plevs(xnlevs,ii)),profX.ciwc(xnlevs,ii),log10(plevs));
+    ptemp    = interp1(log10(profX.plevs(xnlevs,ii)),profX.ptemp(xnlevs,ii),log10(plevs));
+  elseif iWhichInterp == 1
+    watercld = interp1qr(log10(profX.plevs(xnlevs,ii)),profX.clwc(xnlevs,ii),log10(plevs));
+    icecld   = interp1qr(log10(profX.plevs(xnlevs,ii)),profX.ciwc(xnlevs,ii),log10(plevs));
+    ptemp    = interp1qr(log10(profX.plevs(xnlevs,ii)),profX.ptemp(xnlevs,ii),log10(plevs));
+  end
 
   if ~exist('aa','var')
     aa = [];
@@ -144,33 +150,33 @@ for iiiiA = 1:length(iiii)
   end
 
   if iN > 3
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds4t3(iN,iOUT,iT,iB,iPeak,plevs);
+    [iN,iOUT,iT,iB,iPeak] = combine_clouds4t3(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
   end
   if wN > 3
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds4t3(wN,wOUT,wT,wB,wPeak,plevs);
+    [wN,wOUT,wT,wB,wPeak] = combine_clouds4t3(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);
   end
 
   if iN > 2
-    [iN,iOUT,iT,iB,iPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs);
+    [iN,iOUT,iT,iB,iPeak] = combine_clouds3t2(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
     end
   if wN > 2
-    [wN,wOUT,wT,wB,wPeak] = combine_clouds3t2(wN,wOUT,wT,wB,wPeak,plevs);
+    [wN,wOUT,wT,wB,wPeak] = combine_clouds3t2(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);
   end
 
   if ((iN == 1 & wN == 2) | (iN == 2 & wN == 1) | (iN == 2 & wN == 2))
     if iN == 2
-      [iN,iOUT,iT,iB,iPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs);
+      [iN,iOUT,iT,iB,iPeak] = combine_clouds2t1(iN,iOUT,iT,iB,iPeak,plevs,airslevels,airsheights);
     end
     if wN == 2
-      [wN,wOUT,wT,wB,wPeak] = combine_clouds2t1(wN,wOUT,wT,wB,wPeak,plevs);  
+      [wN,wOUT,wT,wB,wPeak] = combine_clouds2t1(wN,wOUT,wT,wB,wPeak,plevs,airslevels,airsheights);  
     end
   end
 
   [cT,cB,cOUT,cngwat,cTYPE,iFound] = combine_clouds(...
-              iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(xnlevs,ii));
+              iN,iOUT,iT,iB,iPeak,wN,wOUT,wT,wB,wPeak,plevs,profX.plevs(xnlevs,ii),airslevels,airsheights);
 
   prof = put_into_prof(prof,profX,ii,jj,plevs,ptemp,iLevsVers,...
-                       cT,cB,cOUT,cngwat,cTYPE,iFound);
+                       cT,cB,cOUT,cngwat,cTYPE,iFound,airslevels,airslayers,airsheights);
 
   if iPrint > 0
     print_ecmwfcld2sartacld

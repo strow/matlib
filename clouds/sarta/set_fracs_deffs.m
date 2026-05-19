@@ -13,7 +13,49 @@ prof = pin;
 nprof = length(prof.stemp);
 
 [cfracw, cfraci] = total_cfrac(profX.plevs,profX.cc,profX.clwc,profX.ciwc);
-tcc = profX.cfrac;
+
+oo = find(profX.cfrac < 0); 
+if length(oo) > 0 
+  profX.cfrac(oo) = 0; 
+  fprintf(1,'set_fracs_deffs : %5i profX.cfrac < 0 \n',length(oo))
+end
+oo = find(profX.cfrac > 1); 
+if length(oo) > 0 
+  profX.cfrac(oo) = 1;
+  fprintf(1,'set_fracs_deffs : %5i profX.cfrac > 1 \n',length(oo))
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% tcc = profX.cfrac;     %% bad, before Aug 2015
+%%%%%% tcc = profX.cfrac;     %% bad, before Aug 2015
+%%%%%% tcc = profX.cfrac;     %% bad, before Aug 2015
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if ~isfield(profX,'tcc')
+  error('looking for tcc from ERA/ECMWF/MERRA')
+end
+tcc = profX.tcc;              %% should be much better
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+oo = find(cfracw < 0); 
+if length(oo) > 0 
+  cfracw(oo) = 0;
+  fprintf(1,'set_fracs_deffs : %5i cfracw < 0 \n',length(oo))
+end
+oo = find(cfracw > 1); 
+if length(oo) > 0 
+  cfracw(oo) = 1;
+  fprintf(1,'set_fracs_deffs : %5i cfracw > 1 \n',length(oo))
+end
+oo = find(cfraci < 0); 
+if length(oo) > 0 
+  cfraci(oo) = 0;
+  fprintf(1,'set_fracs_deffs : %5i cfraci < 0 \n',length(oo))
+end
+oo = find(cfraci > 1); 
+if length(oo) > 0 
+  cfraci(oo) = 1;
+  fprintf(1,'set_fracs_deffs : %5i cfraci > 1 \n',length(oo))
+end
 
 [prof.cfrac, prof.cfrac2, prof.cfrac12] = fake_cfracs(tcc, cfracw, cfraci, prof.ctype, prof.ctype2);
 
@@ -21,35 +63,7 @@ prof.clwc = profX.clwc;
 prof.ciwc = profX.ciwc;
 prof.cc = profX.cc;
 
-% Compute cloud temperature
-pavg = 0.5*(prof.cprtop + prof.cprbot);
-ibad = find(prof.cfrac == 0);
-pavg(ibad) = 500; % safe dummy value
-tavg1 = rtp_t_at_p(pavg, head, prof);
-pavg = 0.5*(prof.cprtop2 + prof.cprbot2);
-ibad = find(prof.cfrac2 == 0);
-pavg(ibad) = 500; % safe dummy value
-tavg2 = rtp_t_at_p(pavg, head, prof);
-clear ibad
-
-%%%% >>>>>>>>>>>>>>>>>>>>>>>>> guts of cpsize setting >>>>>>>>>>>>>>>>>>>>>>>>>
-% Replace cpsize and cpsize2
-iceflag = zeros(1,nprof);
-ii = find(prof.ctype == 201);
-iceflag(ii) = 1;
-prof.cpsize  = fake_cpsize(tavg1, iceflag, randomCpsize);
-
-iceflag = zeros(1,nprof);
-ii = find(prof.ctype2 == 201);
-iceflag(ii) = 1;
-prof.cpsize2 = fake_cpsize(tavg2, iceflag, randomCpsize);
-clear iceflag tavg1 tavg2
-
-if (randomCpsize == -1) | (randomCpsize == +9999)
-  disp('>>>>>>> resetting water dme according to water climatology')
-  prof = modisL3_map_rtp(prof);
-end
-%%%% >>>>>>>>>>>>>>>>>>>>>>>>> guts of cpsize setting >>>>>>>>>>>>>>>>>>>>>>>>>
+prof = set_cpsize(head, prof,randomCpsize); %%% this looks new!! but really is script code that has now been put into a subroutine
 
 % Remove cloud fractions less than some minimum
 hcmin = 0.5*cmin;

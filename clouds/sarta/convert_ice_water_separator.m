@@ -1,11 +1,15 @@
 function p = convert_ice_water_separator(p,pSEPARATE)
 
+%% this function mimics PCRTM in that it converts everything ABOVE pSEPARATE to ice, and below to water
+
 p0 = p;
 
-%% this function mimics PCRTM in that it converts everything ABOVE psperate to ice, and below to water
+if length(pSEPARATE) == 1
+  pSEPARATE = pSEPARATE * ones(size(p.stemp));
+end
 
 iMethod = 1; %% this is simplest
-iMethod = 2; %% this is harder, uses PCRTM ideassimplest
+iMethod = 2; %% this is harder, uses PCRTM ideas simplest
 
 R = 287.05;
 g = 9.806;
@@ -20,10 +24,10 @@ if iMethod == 1
     xwater = p.clwc(:,ibox);
     xpress = p.plevs(:,ibox);
 
-    oo = find(xpress <= pSEPARATE);
+    oo = find(xpress <= pSEPARATE(ibox));
       p.ciwc(oo,ibox) = xice(oo) + xwater(oo);
       p.clwc(oo,ibox) = 0;
-    oo = find(xpress > pSEPARATE);
+    oo = find(xpress > pSEPARATE(ibox));
       p.clwc(oo,ibox) = xice(oo) + xwater(oo);
       p.ciwc(oo,ibox) = 0;
 
@@ -69,14 +73,14 @@ elseif iMethod == 2
 
     total_opt(:,ibox) = ice_opt + water_opt;
 
-    oo = find(Px > pSEPARATE);
+    oo = find(Px > pSEPARATE(ibox));
       %% make all this water
       qwx = zeros(size(xcc));
       qwx(oo) = total_opt(oo,ibox) .* cldde_water(oo) .* xcc(oo) /(3 * 1e3) ./laZ(oo);
       p.clwc(oo,ibox) = qwx(oo) .* TT(oo) * R ./ Px(oo) /1e3/100;
       p.ciwc(oo,ibox) = 0;
 
-    oo = find(Px <= pSEPARATE);
+    oo = find(Px <= pSEPARATE(ibox));
       %% make all this ice
       qix = zeros(size(xcc));
       qix(oo) = (total_opt(oo,ibox) - 0.003448) .* cldde_ice(oo) .* xcc(oo) /(2.431 * 1e3) ./laZ(oo);
@@ -98,7 +102,7 @@ elseif iMethod == 2
 
   end    %% loop over ibox
 
-boo = find(p.ciwc < 0 | isnan(p.ciwc)); p.ciwc(boo) = 0;
-boo = find(p.clwc < 0 | isnan(p.clwc)); p.clwc(boo) = 0;
+  boo = find(p.ciwc < 0 | isnan(p.ciwc)); p.ciwc(boo) = 0;
+  boo = find(p.clwc < 0 | isnan(p.clwc)); p.clwc(boo) = 0;
 
 end

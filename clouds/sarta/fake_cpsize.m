@@ -10,7 +10,7 @@ function [cpsize] = fake_cpsize(temp, iceflag, randomCpsize);
 %    temp    = [1 x n] temperature {K}
 %    iceflag = [1 x n] ice flag {1=true, 0=false(liquid water)}
 %    randomCpsize= [1 x 1] optional randomization switch 
-%        {1=on, 0=off(default), 20=fix water at 20 um, -1 = modis water dme climatology}
+%        {0=off, 1=on(default), 20=fix water at 20 um, -1 = modis water dme climatology}
 %
 % Output:
 %    cpsize  = [1 x n] particle size(diameter) {um}
@@ -23,6 +23,8 @@ function [cpsize] = fake_cpsize(temp, iceflag, randomCpsize);
 
 % Created: 05 Mar 2009, Scott Hannon
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%plot(temp); title('Tslab'); disp('ret to continue'); pause
 
 % Ice size vs temp lookup table
 icesize = [ 30,  90, 170];
@@ -60,6 +62,7 @@ if (nargin > 3)
 end
 if (nargin == 2)
    randomCpsize = 0;
+   randomCpsize = 1;
 end
 d = size(temp);
 if (length(d) ~= 2 | min(d) ~= 1)
@@ -133,9 +136,14 @@ end
 
 % Apply randomization (if desired)
 if (randomCpsize == 1)
-   randn('state',sum(100*clock));
-   junk = randn(1,n) .* cpstd;
-   cpsize = cpsize + junk;
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % Seed random number generater
+  % randn('state',sum(100*clock));   %% till Aug 31, 2015
+  % http://www.mathworks.com/help/matlab/ref/rng.html suggests calling 
+  % rng('shuffle') before you call this routine
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  junk = randn(1,n) .* cpstd;
+  cpsize = cpsize + junk;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -72,16 +72,73 @@ end
     namePrefix = TempDir;
     TempDir = dirname(TempDir);
     if strcmp(TempDir,'.')
-      TempDir = getenv('JOB_SCRATCH_DIR');
+      TempDir = getenv('TMPDIR');          %% orig code
+      TempDir = getenv('JOB_SCRATCH_DIR'); %% newer code      
+      if(isdir('/scratch'))                %%% new Jan 2026
+        [status, cmdout] = system('echo $SLURM_JOB_ID');
+        if ~isempty(cmdout) && cmdout(end) == char(10)
+          cmdout(end) = [];
+        end
+        TempDir = ['/scratch/' cmdout '/'];
+      end      
     end
   elseif(~ isdir(TempDir) && isempty(AlternateDir))
     disp(['Warning: ' TempDir ' does not exist, using alternate temporary directory'])
     AlternateDir = 1; % supress future error messages
   end
 
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%{
+ Hi Sergio, typically as part of the job submission, scratch directories are
+made automatically. See below:
+
+Last login: Fri Jul 11 19:38:46 2025 from 10.2.49.213
+[root@c24-52 ~]# cd /scratch/
+[root@c24-52 scratch]# ls
+234466 236800 236801 ebuild
+[root@c24-52 scratch]#
+
+[root@chip ~]# squeue | grep c24-52
+234466 pi_strow interact sergio R 2-20:02:34 1 c24-52
+
+Note that one of the directories has the same name as the job that's currently
+running.
+
+If I start a new job on the pi_strow a new directory will appear that
+corresponds to the job that I'm running.
+
+[sergio@chip ~]$ salloc --cluster=chip-cpu --account=pi_strow
+--partition=pi_strow --qos=pi_strow --time=5 --mem=5G
+salloc: Granted job allocation 236802
+salloc: Waiting for resource configuration
+salloc: Nodes c24-52 are ready for job
+
+[sergio@c24-52 ~]$ cd /scratch
+[sergio@c24-52 scratch]$ ls
+234466 236801 236802 ebuild
+[sergio@c24-52 scratch]$
+
+A new directory was created with the same name as my job number. This is where
+I can use the scratch storage. /tmp is a relatively small piece of storage in
+comparison to the /scratch directory, and filling it can have unexpected
+ramifications, so it's highly advised you not use it when possible. As part of
+the epilogue of job, your scratch directories will automatically be cleaned up
+when the job is cancelled or completed. In general though you can't create a
+new directory in /scratch on your own. Hope this helps!
+
+use      echo $SLURM_JOB_ID
+%}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
   % verify that the directory given is a valid location
   if(~ isdir(TempDir)) % if the directory does not exist, choose another
-    if(isdir('/tmp'))
+    if(isdir('/scratch'))    %%% new Jan 2026
+      [status, cmdout] = system('echo $SLURM_JOB_ID');
+      if ~isempty(cmdout) && cmdout(end) == char(10)
+        cmdout(end) = [];
+      end
+      TempDir = ['/scratch/' cmdout '/'];            
+    elseif(isdir('/tmp'))
       TempDir = '/tmp';
     elseif(isdir('/dev/shm'))
       TempDir = '/dev/shm';

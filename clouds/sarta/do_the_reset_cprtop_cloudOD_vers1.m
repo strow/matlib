@@ -12,6 +12,8 @@ if iDebug > 0
   [p1.cprtop(junky) p1.cprbot(junky) p1.cprtop2(junky) p1.cprbot2(junky)]
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 ice = find(p1.ctype == 201 & p1.ctype2 ~= 201 & pICE > 0 & p1.sarta_iceOD_warn < 0);
 for oo = 1 : length(ice)
   od = ODice(:,ice(oo)); 
@@ -60,6 +62,7 @@ if iDebug > 0
   [p1.cprtop(junky) p1.cprbot(junky) p1.cprtop2(junky) p1.cprbot2(junky)]
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% this is water
 
 water = find(p1.ctype == 101 & p1.ctype2 ~= 101 & pWATER > 0 & p1.sarta_waterOD_warn < 0);
@@ -146,4 +149,6 @@ water3 = find(p1.ctype == 101 & p1.ctype2 ~= 101 & p1.sarta_waterOD_warn == 1);
   p1.cfrac12(water3) = 0; 
 waterbad = length([water1 water2 water3]);
 
-fprintf(1,'  looking at coincidence of ciwc/cc and clwc/cc, reset %5i bad ice and %5i bad water profs \n',icebad,waterbad)
+if run_sarta.talk == 1
+  fprintf(1,'  looking at coincidence of ciwc/cc and clwc/cc, reset %5i bad ice and %5i bad water profs \n',icebad,waterbad)
+end

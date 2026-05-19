@@ -1,5 +1,5 @@
 function prof = put_into_prof(pin,profX,ii,jj,plevs,ptemp,iLevsVers,...
-                              cT,cB,cOUT,cngwat,cTYPE,iFound)
+                              cT,cB,cOUT,cngwat,cTYPE,iFound,airslevels,airslayers,airsheights)
 
 % When two clouds are present, the meaning of cfrac1 and cfrac2
 % are the total fraction of the FOV containing that cloud in
@@ -67,7 +67,7 @@ if length(cTYPE) == 1
 
   icefound   = -1;
   waterfound = -1;
-  cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp);
+  [cc cT cB] = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp,pin.spres(jj),airslevels,airslayers,airsheights);
 
   kk = 1;
 
@@ -109,7 +109,18 @@ if length(cTYPE) == 2
 
   icefound   = -1;
   waterfound = -1;
-  cc = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp);
+
+  [cc cT cB] = convert_gg_to_gm2(cT,cB,cngwat,plevs,ptemp,pin.spres(jj),airslevels,airslayers,airsheights);
+
+  if length(find(isnan(cc))) > 0
+    disp('length(find(isnan(cc))) > 0 in put_into_prof')
+    keyboard
+  end
+  
+  if length(find(isinf(cc))) > 0
+    disp('length(find(isinf(cc))) > 0 in put_into_prof')
+    keyboard
+  end
 
   kk = 1;
   prof.cngwat(jj)  = cc(kk);
@@ -130,7 +141,8 @@ if length(cTYPE) == 2
     prof.cpsize(jj) = water_dme;  %% typical water particles
     waterfound      = +1;
   end
-
+  %[111.0 prof.cngwat(jj) prof.cpsize(jj) prof.cfrac(jj) prof.ctype(jj) prof.cprtop(jj) prof.cprbot(jj)]
+  
   kk = 2;
   prof.udef(11,jj)  = cc(kk);
   if iLevsVers == 1
@@ -150,7 +162,8 @@ if length(cTYPE) == 2
     prof.udef(12,jj) = water_dme;  %% typical water particles
     waterfound       = +1;
   end
-
+  %[222.0 prof.udef(11,jj) prof.udef(12,jj) prof.udef(15,jj) prof.udef(17,jj) prof.udef(13,jj) prof.udef(14,jj)]
+  
   prof.udef(16,jj) = 0.9999*cfrac;  %%cfrac12
   if prof.cfrac(jj) < 0.9999
     prof.udef(16,jj) = 0.9999*min(prof.cfrac(jj),prof.udef(15,jj));  %%cfrac12
@@ -159,3 +172,8 @@ if length(cTYPE) == 2
   end
 end
 
+%  if jj == 7329 | jj == 1
+%    cc
+%    cT
+%    cB
+%  end

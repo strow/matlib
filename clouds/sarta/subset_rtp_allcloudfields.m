@@ -1,6 +1,8 @@
-function [head, prof]=subset_rtp_allcloudfields(headin, profin, glist, clist, plist);
+function [head, prof]=subset_rtp_allcloudfields(headin, profin, glist, clist, plist, iQuiet);
 
+% Ultimately, <<< [hx,px] = subset_rtp_allcloudfields(h,p,[],h.ichan(index_chan_subset),[]); >>>
 % function [head, prof]=subset_rtp(headin, profin, glist, clist, plist);
+% Ultimately, <<< [hx,px] = subset_rtp_allcloudfields(h,p,[],h.ichan(index_chan_subset),[]); >>>
 %
 % Subsets an RTP head & prof structure.
 %
@@ -23,7 +25,6 @@ function [head, prof]=subset_rtp_allcloudfields(headin, profin, glist, clist, pl
 % Copied from /asl/matlab/rtptools/subset_rtp.m
 % with ciwc, clwc, cc added in
 
-
 % Created: 13 September 2001, Scott Hannon
 % Last update: 1 February 2002, Scott Hannon - add new rtpV103 vars
 % Update: 25 June 2002, Scott Hannon - add new rtpV105 vars
@@ -37,6 +38,26 @@ function [head, prof]=subset_rtp_allcloudfields(headin, profin, glist, clist, pl
 % Update: SOmetime 2012 : S.Machado - add missing ciwc,clwc,cc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% if isfield(profin,'throughOEMsequentialsteps')
+%   profin = rmfield(profin,'throughOEMsequentialsteps');
+% end
+% if isfield(profin,'iaSaveCovFac')
+%   profin = rmfield(profin,'iaSaveCovFac');
+% end
+
+if length(clist) == 0 & length(glist) == 0 & length(plist) == 0
+  %% sent in empty list, so just send back empty list!!!!
+  %% this is different than what subset_rtp does, which sends back entire profile (with adjusts due to glist and/or clist);
+  head = headin;
+  prof = [];
+  disp(' >>>> subset_rtp_allcloudfields.m   glist,clist,plist all empty so returning null structure')
+  return
+end
+
+if length(nargin) < 6
+  iQuiet = +1;
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % Check headin & profin
@@ -129,7 +150,6 @@ else
    nprof=nprofin;
 end
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create output "head" structure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -190,7 +210,6 @@ end
 if (isfield(headin,'itype'))
    head.itype=headin.itype;
 end
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create output "prof" structure
@@ -431,10 +450,20 @@ if (isfield(profin,'robs1'))
    prof.robs1=profin.robs1(indc,indp);
 end
 if (isfield(profin,'calflag'))
-   prof.calflag=profin.calflag(indc,indp);
+   [mmjunk,nnjunk] = size(profin.calflag);
+   if mmjunk > 1
+     prof.calflag=profin.calflag(indc,indp);
+   else
+     prof.calflag=profin.calflag(indp);
+   end
 end
 if (isfield(profin,'robsqual'))
-   prof.robsqual=profin.robsqual(indp);
+   [mmjunk,nnjunk] = size(profin.robsqual);
+   if mmjunk > 1
+     prof.robsqual=profin.robsqual(indc,indp);
+   elseif mmjunk == 1
+     prof.robsqual=profin.robsqual(indp);
+   end
 end
 if (isfield(profin,'freqcal'))
    prof.freqcal=profin.freqcal(indp);
@@ -444,6 +473,21 @@ if (isfield(profin,'rcalc'))
    prof.rcalc=profin.rcalc(indc,indp);
 end
 
+%{
+if (isfield(profin,'rclr'))
+   prof.rcalc=profin.rclr(indc,indp);
+end
+if (isfield(profin,'rcld'))
+   prof.rcalc=profin.rcld(indc,indp);
+end
+if (isfield(profin,'sarta_rclearcalc'))
+   prof.rcalc=profin.sarta_rclearcalc(indc,indp);
+end
+%}
+
+%if (isfield(profin,'nedt'))
+%   prof.nedt=profin.nedt(indc,indp);
+%end
 
 % User Defined data
 if (isfield(profin,'pnote'))
@@ -466,7 +510,11 @@ end
 fieldsIN  = fieldnames(profin);
 fieldsOUT = fieldnames(prof);
 if length(fieldsIN) ~= length(fieldsOUT)
-  disp('oops Houston we have a problem')
+  junk = [length(fieldsIN) length(fieldsOUT)];
+  %fprintf(1,'oops Houston we have a problem : length(fieldsIN)=%3i length(fieldsOUT)=%3i\n',junk);
+  if (iQuiet < 0) 
+    fprintf(1,'oops Houston we have a problem : length(fieldsIN)=%3i length(fieldsOUT)=%3i\n',junk);
+  end
   if length(fieldsIN) > length(fieldsOUT)
     for ii = 1 : length(fieldsIN)
       finName = fieldsIN{ii};
@@ -480,22 +528,50 @@ if length(fieldsIN) ~= length(fieldsOUT)
     end
     bad = find(iaFound < 0);
     for ii = 1 : length(bad)
-      fprintf(1,' did not find field %s \n',fieldsIN{bad(ii)})
+      if (iQuiet < 0) 
+        fprintf(1,' did not find field %s \n',fieldsIN{bad(ii)})
+      end
       str = ['blah = profin.' fieldsIN{bad(ii)} ';'];
       eval(str);
-      [mm,nn] = size(blah);
-      if mm == 1
-        %% this is like eg p.stemp = 1 x N ---> 1 x M
-        str = ['prof.' fieldsIN{bad(ii)} ' = blah(indp);'];         
-        eval(str)
+      if ~isstruct(blah)
+        [mm,nn] = size(blah);
+        if mm == 1
+          %% this is like eg p.stemp = 1 x N ---> 1 x M
+          str = ['prof.' fieldsIN{bad(ii)} ' = blah(indp);'];
+          eval(str)
+        elseif mm <= 101
+          %% this is like eg p.gas_1 = L x N ---> L x M
+          str = ['prof.' fieldsIN{bad(ii)} ' = blah(:,indp);'];         
+          eval(str)
+        elseif mm == headin.nchan
+          %% this is like eg p.robs1 = L x N ---> L x M
+          str = ['prof.' fieldsIN{bad(ii)} ' = blah(indc,indp);'];
+          eval(str)
+        elseif mm > 101 & mm < headin.nchan
+          %% this is like eg p.rcalc_OEMinitialization and p.airs_noiseT = L x N ---> L x M
+          str = ['prof.' fieldsIN{bad(ii)} ' = blah(:,indp);'];
+          eval(str)
+        end
       else
-        %% this is like eg p.robs1 = L x N ---> L x M
-        str = ['prof.' fieldsIN{bad(ii)} ' = blah(:,indp);'];         
-        eval(str)
+        fprintf(1,'  >>> subset_rtp_allcloudfields.m : %s is a struct, not subsetting \n',fieldsIN{bad(ii)})
       end
     end
-    disp('more fieldnames in INPUT than in OUTPUT, fixed that ....');
+    if (iQuiet < 0)
+      fprintf(1,' ^^^ subset_rtp_allcloudfields.m : %2i more fieldnames in INPUT than in OUTPUT, fixed .... \n',length(bad));
+    end
   elseif length(fieldsIN) < length(fieldsOUT)
     error('WOW : more fieldnames in OUTPUT than in INPUT');
+  end
+end
+
+if isfield(profin,'nedt')
+  size1a = size(profin.nedt);
+  size1b = size(profin.robs1);
+  size2a = size(prof.nedt);
+  size2b = size(prof.robs1);
+  if size2a ~= size2b
+    fprintf(1,'size(nedt)  before %5ix%5i after %5ix%5i \n',size1a,size2a)
+    fprintf(1,'size(robs1) before %5ix%5i after %5ix%5i \n',size1b,size2b)
+    error('subset_rtp_allcloudfields.m nedt')
   end
 end
